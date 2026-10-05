@@ -6,9 +6,10 @@ import {
   type PocketJobStorage,
 } from "./job-store";
 import { POCKET_CONFIG, type PocketConfig } from "./config";
+import { executeGuardedTrade } from "./guards";
+import type { SwapPipeline } from "../types";
 import type {
   AgentTickResult,
-  GuardedSwapExecutor,
   Job,
   Pocket,
   PocketBalances,
@@ -20,20 +21,21 @@ import type {
 export interface RunAgentTickInput {
   pocket: Pocket;
   job: Job;
-  helper: GuardedSwapExecutor | null;
+  helper: SwapPipeline | null;
   mainAddress: string;
   signer: SessionSigner;
   storage: PocketJobStorage;
   locks: PocketJobLock;
   balances: PocketBalances;
-  amountUsdt: number;
+  amountUsdt: string;
+  canExecute?: () => boolean | Promise<boolean>;
   config?: PocketConfig;
 }
 
 export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickResult> {
   const { pocket, job, helper, mainAddress, signer, storage, locks, balances } = input;
   const config = input.config ?? POCKET_CONFIG;
-  if (!helper || !config.aaplXAddress || !config.approvalSpenderAddress) return { status: "rejected", reason: "not_configured" };
+  if (!helper) return { status: "rejected", reason: "not_configured" };
   if (!pocket.exported) return { status: "rejected", reason: "backup_not_verified" };
   if (job.status !== "active") return { status: "skipped", reason: "agent_stopped", job };
   if (mainAddress.toLowerCase() === pocket.address.toLowerCase()) {
@@ -42,9 +44,11 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
   if ((await signer.getAddress()).toLowerCase() !== pocket.address.toLowerCase()) {
     return { status: "rejected", reason: "signer_must_be_session" };
   }
-  if (!Number.isFinite(input.amountUsdt) || input.amountUsdt <= 0) {
+  if (!/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(input.amountUsdt) || !Number.isFinite(Number(input.amountUsdt)) || Number(input.amountUsdt) <= 0) {
     return { status: "rejected", reason: "invalid_trade_amount" };
   }
+  const amountUsdt = Number(input.amountUsdt);
+  if (amountUsdt > 5) return { status: "rejected", reason: "max_trade_exceeded" };
 
   const side: TradeSide = "buy";
   const utcDay = new Date().toISOString().slice(0, 10);
@@ -53,7 +57,7 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
 
   try {
     const availableUsdt = Number(balances.usdt);
-    const reserved = await reservePocketJobSpend(storage, locks, pocket.address, input.amountUsdt, availableUsdt, utcDay);
+    const reserved = await reservePocketJobSpend(storage, locks, pocket.address, amountUsdt, availableUsdt, utcDay);
     if (reserved.status === "inactive") return { status: "skipped", reason: "agent_stopped", job: reserved.job };
     if (reserved.status === "empty") return { status: "skipped", reason: "empty", job: reserved.job };
     if (reserved.status === "already_run") return { status: "skipped", reason: "already_run", job: reserved.job };
@@ -67,22 +71,26 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
       receiver: pocket.address,
       job: reserved.job,
       side,
-      tokenIn: side === "buy" ? config.usdtAddress : config.aaplXAddress,
-      tokenOut: side === "buy" ? config.aaplXAddress : config.usdtAddress,
+      tokenIn: side === "buy" ? "USDT" : "AAPLx",
+      tokenOut: side === "buy" ? "AAPLx" : "USDT",
       amountIn: input.amountUsdt,
-      amountUsdt: input.amountUsdt,
-      approvalAmount: input.amountUsdt,
+      amountUsdt,
     } as const;
-    const gasEstimate = await helper.estimateGasBnb(request, signer);
     const availableBnb = Number(balances.bnb);
-    if (!Number.isFinite(gasEstimate) || gasEstimate <= 0 || !Number.isFinite(availableBnb) || availableBnb < gasEstimate) {
+    if (!Number.isFinite(availableBnb) || availableBnb < 0.002) {
       const updatedJob = await releasePocketJobSpend(storage, locks, pocket.address, reserved);
       reservation = null;
       return { status: "skipped", reason: "insufficient_bnb_for_gas", job: updatedJob };
     }
 
     executionMayHaveStarted = true;
-    const result = await helper.executeTrade(request, signer);
+    const result = await executeGuardedTrade({
+      ...request,
+      sessionConfigured: true,
+      capUsdt: reserved.job.capUsdt,
+      spentUsdt: reserved.job.spentUsdt,
+      reservedUsdt: reserved.job.reservedUsdt,
+    }, helper, signer, config, input.canExecute);
     if (result.status === "executed") {
       const updatedJob = await commitPocketJobSpend(storage, locks, pocket.address, reserved);
       reservation = null;
@@ -90,7 +98,7 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
         jobId: updatedJob.id,
         side,
         token: "AAPLx",
-        amountUsdt: input.amountUsdt,
+        amountUsdt,
         txHash: result.txHash,
         timestamp: Date.now(),
         source: "agent-session",
@@ -99,14 +107,14 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
     }
     if (result.status === "execution_unknown") {
       reservation = null;
-      return { status: "execution_unknown", job: reserved.job };
+      return { status: "execution_unknown", job: reserved.job, ...(result.errorCode ? { errorCode: result.errorCode } : {}) };
     }
 
     const updatedJob = await releasePocketJobSpend(storage, locks, pocket.address, reserved);
     reservation = null;
     return result.status === "rejected"
-      ? { status: "rejected", reason: result.reason }
-      : { status: "failed", reason: result.reason, job: updatedJob };
+      ? { status: "rejected", reason: result.reason, ...(result.errorCode ? { errorCode: result.errorCode } : {}) }
+      : { status: "failed", reason: result.reason, job: updatedJob, ...(result.errorCode ? { errorCode: result.errorCode } : {}) };
   } catch (error) {
     if (reservation) {
       if (executionMayHaveStarted) return { status: "execution_unknown", job: reservation.job };

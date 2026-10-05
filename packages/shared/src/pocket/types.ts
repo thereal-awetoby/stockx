@@ -1,4 +1,5 @@
 import type { Signer, Wallet } from "ethers";
+import type { SwapPipeline } from "../types";
 
 export type SessionSigner = Wallet;
 export type MainSigner = Signer;
@@ -34,20 +35,6 @@ export interface SessionTradeRecord {
   source: "agent-session";
 }
 
-export interface SwapRequest {
-  tokenIn: string;
-  tokenOut: string;
-  amountIn: number;
-  spender: string;
-  receiver: string;
-}
-
-export interface SwapHelper {
-  quote(input: SwapRequest): Promise<unknown>;
-  simulate(quote: unknown): Promise<boolean | { ok: boolean }>;
-  execute(quote: unknown, receiver: string): Promise<{ hash?: string } | void>;
-}
-
 export interface PocketTradeRequest {
   mainAddress: string;
   sessionAddress: string;
@@ -57,29 +44,28 @@ export interface PocketTradeRequest {
   side: TradeSide;
   tokenIn: string;
   tokenOut: string;
-  amountIn: number;
+  amountIn: string;
   amountUsdt: number;
-  approvalAmount: number;
 }
 
 export type GuardedTradeStatus =
   | { status: "executed"; txHash: string }
-  | { status: "rejected"; reason: string }
-  | { status: "failed_before_execute"; reason: string }
-  | { status: "execution_unknown" };
+  | { status: "rejected"; reason: string; errorCode?: string }
+  | { status: "failed_before_execute"; reason: string; errorCode?: string }
+  | { status: "execution_unknown"; errorCode?: string };
 
-export interface GuardedSwapExecutor {
-  executeTrade(request: PocketTradeRequest, signer: SessionSigner): Promise<GuardedTradeStatus>;
-  estimateGasBnb(request: PocketTradeRequest, signer: SessionSigner): Promise<number>;
-}
-
-export type SwapHelperFactory = (signer: SessionSigner) => SwapHelper;
-export type ExactApproval = (tokenAddress: string, spender: string, amount: number, signer: SessionSigner) => Promise<void>;
-export type GasEstimator = (request: PocketTradeRequest, signer: SessionSigner) => Promise<number>;
+export type PocketSwapPipeline = SwapPipeline;
 
 export type AgentTickResult =
   | { status: "executed"; job: Job; record: SessionTradeRecord }
-  | { status: "rejected"; reason: string }
-  | { status: "skipped"; reason: string; job?: Job }
-  | { status: "failed"; reason: string; job?: Job }
-  | { status: "execution_unknown"; job: Job };
+  | { status: "rejected"; reason: string; errorCode?: string }
+  | { status: "skipped"; reason: string; job?: Job; errorCode?: string }
+  | { status: "failed"; reason: string; job?: Job; errorCode?: string }
+  | { status: "execution_unknown"; job: Job; errorCode?: string };
+
+export interface AgentRunLogEntry {
+  timestamp: number;
+  status: AgentTickResult["status"];
+  message: string;
+  errorCode?: string;
+}

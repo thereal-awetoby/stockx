@@ -1,5 +1,18 @@
 import { createConfig, http } from "wagmi";
-import { bsc } from "wagmi/chains";
+
+export const bsc = {
+  id: 56,
+  name: "BNB Smart Chain",
+  nativeCurrency: { decimals: 18, name: "BNB", symbol: "BNB" },
+  rpcUrls: {
+    default: {
+      http: [process.env.NEXT_PUBLIC_BSC_RPC_URL || "https://bsc-dataseed.binance.org"],
+    },
+  },
+  blockExplorers: {
+    default: { name: "BscScan", url: "https://bscscan.com" },
+  },
+} as const;
 
 /**
  * BSC mainnet only.

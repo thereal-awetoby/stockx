@@ -4,5 +4,4 @@ export * from "./types";
 export * from "./wallet";
 export * from "./job-store";
 export * from "./guards";
-export * from "./swap-adapter";
 export * from "./agent-runner";
