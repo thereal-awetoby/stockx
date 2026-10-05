@@ -5,7 +5,7 @@ import SwapSmokeTest from "../components/SwapSmokeTest";
 export default function Home() {
   return (
     <main>
-      <h1>stockX</h1>
+    
       <p className="sub">
         Swap tokenized stocks on BNB Chain. {FIRST_STOCK.token} first.
       </p>
