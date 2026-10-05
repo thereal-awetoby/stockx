@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { bsc } from "wagmi/chains";
 import {
   useAccount,
   useConnect,
@@ -8,6 +7,7 @@ import {
   useDisconnect,
   useSwitchChain,
 } from "wagmi";
+import { bsc } from "../lib/wagmi";
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 

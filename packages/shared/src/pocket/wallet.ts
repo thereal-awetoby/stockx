@@ -3,6 +3,7 @@ import { POCKET_CONFIG } from "./config";
 import type { PocketBalances, SessionSigner } from "./types";
 
 export const POCKET_STORAGE_KEY = "stockx.session-pocket.v1";
+export const MAX_POCKET_FUND_USDT = POCKET_CONFIG.systemJobCapUsdt;
 const EXPORTED_STORAGE_KEY = "stockx.session-pocket.exported.v1";
 const CREATE_LOCK = "stockx.session-pocket-create.v1";
 const TOKEN_ABI = [
@@ -161,6 +162,7 @@ export async function fundPocket(
   if (!addressPattern.test(sessionAddress) || !Number.isFinite(amountUsdt) || amountUsdt <= 0) {
     throw new Error("Invalid pocket funding request.");
   }
+  if (amountUsdt > MAX_POCKET_FUND_USDT) throw new Error("Pocket funding exceeds the system limit.");
   if (!pocketBackupVerified(storage, sessionAddress)) throw new Error("Verify the pocket key backup before funding.");
   const network = await mainSigner.provider?.getNetwork();
   if (!network || network.chainId !== BigInt(POCKET_CONFIG.chainId)) throw new Error("Main signer must be connected to BNB Smart Chain.");

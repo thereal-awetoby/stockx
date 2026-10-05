@@ -1,7 +1,11 @@
 import { POCKET_CONFIG, type PocketConfig } from "./config";
-import type { GuardedTradeStatus, PocketTradeRequest, SessionSigner, SwapHelper, ExactApproval } from "./types";
+import { SwapError } from "../errors";
+import type { Quote, SwapPipeline } from "../types";
+import type { GuardedTradeStatus, PocketTradeRequest, SessionSigner } from "./types";
 
 const ADDRESS_PATTERN = /^0x[0-9a-fA-F]{40}$/;
+const DECIMAL_AMOUNT = /^(?:0|[1-9]\d*)(?:\.\d+)?$/;
+export const MAX_AGENT_TRADE_USDT = 5;
 
 export interface PocketGuardInput extends PocketTradeRequest {
   sessionConfigured: boolean;
@@ -15,26 +19,13 @@ export interface PocketGuardResult {
   reason?: string;
 }
 
-export interface GuardedQuote {
-  tokenIn: string;
-  tokenOut: string;
-  amountIn: number;
-  spender: string;
-  receiver: string;
-  approvalSpender: string;
-  createdAt: number;
-}
-
 export function isSupportedStockRoute(
   side: "buy" | "sell",
   tokenIn: string,
   tokenOut: string,
-  config: PocketConfig = POCKET_CONFIG,
 ): boolean {
-  if (!config.aaplXAddress || !ADDRESS_PATTERN.test(config.aaplXAddress)) return false;
-  const usdt = config.usdtAddress;
-  if (side === "buy") return tokenIn.toLowerCase() === usdt.toLowerCase() && tokenOut.toLowerCase() === config.aaplXAddress.toLowerCase();
-  return tokenIn.toLowerCase() === config.aaplXAddress.toLowerCase() && tokenOut.toLowerCase() === usdt.toLowerCase();
+  if (side === "buy") return tokenIn === "USDT" && tokenOut === "AAPLx";
+  return tokenIn === "AAPLx" && tokenOut === "USDT";
 }
 
 function sameAddress(left: string, right: string): boolean {
@@ -43,20 +34,17 @@ function sameAddress(left: string, right: string): boolean {
 
 export function evaluatePocketAction(input: PocketGuardInput, config: PocketConfig = POCKET_CONFIG): PocketGuardResult {
   if (input == null || typeof input !== "object") return { allowed: false, reason: "invalid_guard_input" };
-  if (!input.sessionConfigured || !config.aaplXAddress || !config.approvalSpenderAddress || config.aaplXDecimals === null) {
-    return { allowed: false, reason: "not_configured" };
-  }
+  if (!input.sessionConfigured) return { allowed: false, reason: "not_configured" };
   if (!ADDRESS_PATTERN.test(input.mainAddress) || !ADDRESS_PATTERN.test(input.sessionAddress)) return { allowed: false, reason: "invalid_address" };
   if (sameAddress(input.mainAddress, input.sessionAddress)) return { allowed: false, reason: "session_must_differ_from_main" };
   if (!sameAddress(input.spender, input.sessionAddress)) return { allowed: false, reason: "spender_must_be_session" };
   if (!sameAddress(input.receiver, input.sessionAddress)) return { allowed: false, reason: "receiver_must_be_session" };
-  if (!isSupportedStockRoute(input.side, input.tokenIn, input.tokenOut, config)) return { allowed: false, reason: "unsupported_token_route" };
-  if (!Number.isFinite(input.amountIn) || input.amountIn <= 0 || !Number.isFinite(input.amountUsdt) || input.amountUsdt <= 0) {
+  if (!isSupportedStockRoute(input.side, input.tokenIn, input.tokenOut)) return { allowed: false, reason: "unsupported_token_route" };
+  if (!DECIMAL_AMOUNT.test(input.amountIn) || !Number.isFinite(Number(input.amountIn)) || Number(input.amountIn) <= 0 ||
+    !Number.isFinite(input.amountUsdt) || input.amountUsdt <= 0 || Number(input.amountIn) !== input.amountUsdt) {
     return { allowed: false, reason: "invalid_trade_amount" };
   }
-  if (!Number.isFinite(input.approvalAmount) || input.approvalAmount < 0) return { allowed: false, reason: "invalid_approval_amount" };
-  if (input.approvalAmount > input.amountIn) return { allowed: false, reason: "approval_above_notional" };
-  if (input.approvalAmount !== input.amountIn) return { allowed: false, reason: "approval_must_match_trade_amount" };
+  if (input.amountUsdt > MAX_AGENT_TRADE_USDT) return { allowed: false, reason: "max_trade_exceeded" };
   if (!Number.isFinite(input.capUsdt) || input.capUsdt <= 0 || input.capUsdt > config.systemJobCapUsdt) {
     return { allowed: false, reason: "invalid_job_cap" };
   }
@@ -69,57 +57,73 @@ export function evaluatePocketAction(input: PocketGuardInput, config: PocketConf
   return { allowed: true };
 }
 
-function isValidQuote(quote: unknown, input: PocketTradeRequest, config: PocketConfig, now: number): quote is GuardedQuote {
-  if (quote == null || typeof quote !== "object") return false;
-  const candidate = quote as Partial<GuardedQuote>;
-  return candidate.tokenIn === input.tokenIn &&
-    candidate.tokenOut === input.tokenOut &&
-    candidate.amountIn === input.amountIn &&
-    sameAddress(candidate.spender ?? "", input.sessionAddress) &&
-    sameAddress(candidate.receiver ?? "", input.sessionAddress) &&
-    sameAddress(candidate.approvalSpender ?? "", config.approvalSpenderAddress ?? "") &&
-    Number.isFinite(candidate.createdAt) &&
-    (candidate.createdAt as number) <= now &&
-    now - (candidate.createdAt as number) <= config.quoteTtlMs;
+function isValidQuote(quote: Quote, input: PocketTradeRequest): boolean {
+  return quote.request.tokenIn === input.tokenIn &&
+    quote.request.tokenOut === input.tokenOut &&
+    quote.request.amountIn === input.amountIn &&
+    quote.request.spender === "session" &&
+    quote.request.receiver === "session";
+}
+
+function swapErrorCode(error: unknown): string | undefined {
+  return error instanceof SwapError ? error.code : undefined;
 }
 
 export async function executeGuardedTrade(
   input: PocketGuardInput,
-  helper: SwapHelper | null,
+  helper: SwapPipeline | null,
   signer: SessionSigner,
-  approveExact: ExactApproval | null,
   config: PocketConfig = POCKET_CONFIG,
+  canExecute?: () => boolean | Promise<boolean>,
 ): Promise<GuardedTradeStatus> {
-  if (!helper || !approveExact) return { status: "rejected", reason: "not_configured" };
+  if (!helper) return { status: "rejected", reason: "not_configured" };
   const guard = evaluatePocketAction(input, config);
   if (!guard.allowed) return { status: "rejected", reason: guard.reason ?? "guard_rejected" };
-
-  let executionStarted = false;
   try {
-    const request = {
-      tokenIn: input.tokenIn,
-      tokenOut: input.tokenOut,
-      amountIn: input.amountIn,
-      spender: input.sessionAddress,
-      receiver: input.sessionAddress,
-    };
-    const quote = await helper.quote(request);
-    if (!isValidQuote(quote, input, config, Date.now())) return { status: "failed_before_execute", reason: "invalid_or_stale_quote" };
-
-    const simulated = await helper.simulate(quote);
-    if (simulated !== true && (typeof simulated !== "object" || simulated === null || simulated.ok !== true)) {
-      return { status: "failed_before_execute", reason: "simulation_failed" };
+    if ((await signer.getAddress()).toLowerCase() !== input.sessionAddress.toLowerCase()) {
+      return { status: "rejected", reason: "signer_must_be_session" };
     }
-    if (!isValidQuote(quote, input, config, Date.now())) return { status: "failed_before_execute", reason: "quote_changed_after_simulation" };
-    await approveExact(input.tokenIn, quote.approvalSpender, input.approvalAmount, signer);
-    if (!isValidQuote(quote, input, config, Date.now())) return { status: "failed_before_execute", reason: "quote_expired_after_approval" };
-    executionStarted = true;
-    const result = await helper.execute(quote, input.sessionAddress);
-    if (!result?.hash) return { status: "execution_unknown" };
-    return { status: "executed", txHash: result.hash };
   } catch (error) {
-    return executionStarted
-      ? { status: "execution_unknown" }
-      : { status: "failed_before_execute", reason: error instanceof Error ? error.message : "helper_error" };
+    return {
+      status: "failed_before_execute",
+      reason: error instanceof Error ? error.message : "session_signer_unavailable",
+      ...(swapErrorCode(error) ? { errorCode: swapErrorCode(error) } : {}),
+    };
   }
+
+  const request = {
+    tokenIn: input.tokenIn,
+    tokenOut: input.tokenOut,
+    amountIn: input.amountIn,
+    spender: "session" as const,
+    receiver: "session" as const,
+  };
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    let executionStarted = false;
+    try {
+      const quote = await helper.quote(request);
+      if (!isValidQuote(quote, input)) return { status: "failed_before_execute", reason: "invalid_quote" };
+      const simulation = await helper.simulate(quote);
+      if (!simulation.ok) {
+        return { status: "failed_before_execute", reason: simulation.error ?? "simulation_failed" };
+      }
+      if (canExecute && !(await canExecute())) return { status: "rejected", reason: "kill_switch_active" };
+      executionStarted = true;
+      const result = await helper.execute(quote, "session");
+      if (result.receiver !== "session") return { status: "execution_unknown", errorCode: "RECEIVER_MISMATCH" };
+      return { status: "executed", txHash: result.txHash };
+    } catch (error) {
+      const errorCode = swapErrorCode(error);
+      if (errorCode === "QUOTE_EXPIRED" && attempt < 2) continue;
+      if (executionStarted && !errorCode) return { status: "execution_unknown" };
+      return {
+        status: "failed_before_execute",
+        reason: error instanceof Error ? error.message : "swap_failed",
+        ...(errorCode ? { errorCode } : {}),
+      };
+    }
+  }
+
+  return { status: "failed_before_execute", reason: "quote_expired", errorCode: "QUOTE_EXPIRED" };
 }

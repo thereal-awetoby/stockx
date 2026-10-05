@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { SwapError } from "@stockx/shared";
 import {
   createPocket as createStoredPocket,
   exportPocketKey as decryptPocketKey,
@@ -17,20 +18,20 @@ import {
   unlockPocket,
   verifyPocketBackup,
   withdrawPocket as sendUsdtToMain,
-  isPocketConfigReady,
   type AgentTickResult,
-  type GuardedSwapExecutor,
+  type AgentRunLogEntry,
   type Job,
   type MainSigner,
   type Pocket,
   type PocketBalances,
+  type PocketSwapPipeline,
   type SessionTradeRecord,
 } from "@stockx/shared/pocket";
 
 export interface UsePocketOptions {
   mainAddress: string;
   getMainSigner: () => MainSigner | Promise<MainSigner>;
-  executor?: GuardedSwapExecutor | null;
+  pipeline?: PocketSwapPipeline | null;
 }
 
 export type PocketStatus = "loading" | "ready" | "not_configured" | "corrupt" | "error";
@@ -41,6 +42,8 @@ export interface UsePocketResult {
   balances: PocketBalances;
   job: Job | null;
   activity: SessionTradeRecord[];
+  runLog: AgentRunLogEntry[];
+  armed: boolean;
   status: PocketStatus;
   createPocket(password: string): Promise<Pocket | null>;
   exportKey(password: string): Promise<boolean>;
@@ -49,7 +52,7 @@ export interface UsePocketResult {
   withdraw(password: string, amountUsdt: number): Promise<string | null>;
   startAgent(): Promise<boolean>;
   stopAgent(): Promise<void>;
-  runOneTick(password: string, amountUsdt: number): Promise<AgentTickResult>;
+  runOneTick(password: string, amountUsdt: string): Promise<AgentTickResult>;
 }
 
 function browserJobLock() {
@@ -72,12 +75,26 @@ function downloadPrivateKey(privateKey: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
-export function usePocket({ mainAddress, getMainSigner, executor = null }: UsePocketOptions): UsePocketResult {
+function toRunLogEntry(result: AgentTickResult): AgentRunLogEntry {
+  const errorCode = "errorCode" in result ? result.errorCode : undefined;
+  const message = "reason" in result ? `${result.status}: ${result.reason}` : result.status;
+  return {
+    timestamp: Date.now(),
+    status: result.status,
+    message,
+    ...(errorCode ? { errorCode } : {}),
+  };
+}
+
+export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePocketOptions): UsePocketResult {
   const [stored, setStored] = useState<ReturnType<typeof readPocket>>(null);
   const [exported, setExported] = useState(false);
   const [balances, setBalances] = useState<PocketBalances>({ usdt: "0", bnb: "0" });
   const [job, setJob] = useState<Job | null>(null);
   const [activity, setActivity] = useState<SessionTradeRecord[]>([]);
+  const [runLog, setRunLog] = useState<AgentRunLogEntry[]>([]);
+  const [armed, setArmed] = useState(false);
+  const armedRef = useRef(false);
   const [status, setStatus] = useState<PocketStatus>("loading");
 
   const refresh = useCallback(async (current: NonNullable<typeof stored>) => {
@@ -92,14 +109,14 @@ export function usePocket({ mainAddress, getMainSigner, executor = null }: UsePo
   useEffect(() => {
     try {
       if (!pocketRecordExists(localStorage)) {
-        setStatus(isPocketConfigReady ? "ready" : "not_configured");
+        setStatus("ready");
         return;
       }
       const existing = readPocket(localStorage);
       if (!existing) throw new Error("Pocket record missing.");
       setStored(existing);
       setExported(pocketBackupVerified(localStorage, existing.address));
-      setStatus(isPocketConfigReady ? "ready" : "not_configured");
+      setStatus("ready");
       void refresh(existing).catch(() => setStatus("error"));
     } catch {
       setStatus("corrupt");
@@ -113,7 +130,7 @@ export function usePocket({ mainAddress, getMainSigner, executor = null }: UsePo
       setStored(created);
       setExported(false);
       await refresh(created);
-      setStatus(isPocketConfigReady ? "ready" : "not_configured");
+      setStatus("ready");
       return { address: created.address, exported: false };
     } catch {
       setStatus("error");
@@ -158,40 +175,59 @@ export function usePocket({ mainAddress, getMainSigner, executor = null }: UsePo
     return hash;
   }, [getMainSigner, mainAddress, refresh, stored]);
 
-  const runOneTick = useCallback(async (password: string, amountUsdt: number): Promise<AgentTickResult> => {
-    if (!stored || !job || !mainAddress) return { status: "rejected", reason: "pocket_or_main_missing" };
-    if (!executor) return { status: "rejected", reason: "not_configured" };
+  const runOneTick = useCallback(async (password: string, amountUsdt: string): Promise<AgentTickResult> => {
+    let result: AgentTickResult;
+    if (!armedRef.current) {
+      result = { status: "rejected", reason: "kill_switch_active" };
+    } else if (!stored || !job || !mainAddress) {
+      result = { status: "rejected", reason: "pocket_or_main_missing" };
+    } else if (!pipeline) {
+      result = { status: "rejected", reason: "not_configured" };
+    } else {
     try {
       const signer = await unlockPocket(stored, password);
-      const result = await runPocketAgentTick({
+      result = await runPocketAgentTick({
         pocket: { address: stored.address, exported },
         job,
-        helper: executor,
+        helper: pipeline,
         mainAddress,
         signer,
         storage: localStorage,
         locks: browserJobLock(),
         balances: await readPocketBalances(stored.address),
         amountUsdt,
+        canExecute: () => armedRef.current,
       });
-      if ("job" in result && result.job) setJob(result.job);
-      if (result.status === "executed") setActivity((records) => [result.record, ...records]);
-      return result;
     } catch (error) {
-      return { status: "failed", reason: error instanceof Error ? error.message : "agent_tick_failed" };
+      result = {
+        status: "failed",
+        reason: error instanceof Error ? error.message : "agent_tick_failed",
+        ...(error instanceof SwapError ? { errorCode: error.code } : {}),
+      };
     }
-  }, [executor, exported, job, mainAddress, stored]);
+    }
+    if ("job" in result && result.job) setJob(result.job);
+    if (result.status === "executed") setActivity((records) => [result.record, ...records]);
+    const entry = toRunLogEntry(result);
+    setRunLog((entries) => [entry, ...entries].slice(0, 50));
+    return result;
+  }, [exported, job, mainAddress, pipeline, stored]);
 
   const startAgent = useCallback(async () => {
-    if (!executor || !stored || !exported || !mainAddress || !isPocketConfigReady) {
+    if (!pipeline || !stored || !exported || !mainAddress || mainAddress.toLowerCase() === stored.address.toLowerCase()) {
       setStatus("not_configured");
       return false;
     }
-    setJob(await setPocketJobStatus(localStorage, browserJobLock(), stored.address, "active"));
+    const activeJob = await setPocketJobStatus(localStorage, browserJobLock(), stored.address, "active");
+    armedRef.current = true;
+    setArmed(true);
+    setJob(activeJob);
     return true;
-  }, [executor, exported, mainAddress, stored]);
+  }, [exported, mainAddress, pipeline, stored]);
 
   const stopAgent = useCallback(async () => {
+    armedRef.current = false;
+    setArmed(false);
     if (!stored) return;
     setJob(await setPocketJobStatus(localStorage, browserJobLock(), stored.address, "stopped"));
   }, [stored]);
@@ -202,6 +238,8 @@ export function usePocket({ mainAddress, getMainSigner, executor = null }: UsePo
     balances,
     job,
     activity,
+    runLog,
+    armed,
     status,
     createPocket: create,
     exportKey,

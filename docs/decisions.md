@@ -4,9 +4,13 @@
 
 Builder A owns the app shell, wallet context, market/stock data, token configuration, and swap implementation. Builder B owns plain pocket functions, encryption and backup checks, USDT transfer functions, session guards, job persistence, and the tick runner under `packages/shared/src/pocket`. The `/pocket` panel is optional semantic HTML only; A owns mounting and restyling.
 
+## Session key decision: app-held key
+
+Use the app-held session key, not Wallet Skills. The browser generates the key, encrypts it with the pocket passphrase, and stores the ciphertext in localStorage. Unlocking derives the ethers session signer used by pocket operations and the guarded agent adapter. A2 must bind `SwapPipeline.execute` to this session signer; the main-wallet signer remains limited to user-initiated funding.
+
 ## Signers and approvals
 
-Pocket functions receive A's connected `mainAddress` and `getMainSigner`; they do not connect a wallet. Main signer is accepted only by the user-initiated fund function. A session signer is derived from the pocket key and supplied to the adapter. The only agent execution surface is `executeGuardedTrade` through the guarded adapter. A helper binding must provide an exact approval callback; the guard rejects an approval amount that differs from the trade amount and requires the quoted approval spender. Never grant an unlimited allowance. No live helper or approval binding is present, so the default adapter is unavailable.
+Pocket functions receive A's connected `mainAddress` and `getMainSigner`; they do not connect a wallet. Main signer is accepted only by the user-initiated fund function. The agent unlocks the session signer and the guard verifies its address, but `SwapPipeline.execute(quote, receiver)` does not accept a signer. A2 must bind the real provider to the session signer, never main. Live approval is not implemented in the mock flow; A2 must use an exact session-token approval and never grant an unlimited allowance.
 
 ## Key and balance risks
 
@@ -22,4 +26,4 @@ Job cap, spent amount, reserved amount, and last UTC run day persist per pocket 
 
 ## Known unavailable integrations
 
-No A swap helper/signatures/quote shape, wallet context, AAPLx address, price source, or market-hours source exists in this repository. Railgun is not wired. Take-profit remains inactive until A supplies a price source. No main-wallet transfer path is reachable from the agent runner.
+No live provider, AAPLx address, approval spender, or approval binding is configured, so live agent trading is unavailable. Railgun is not wired. Take-profit remains inactive until A supplies a price source. No main-wallet transfer path is reachable from the agent runner.

@@ -1,18 +1,24 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { pocketCopy, railgunEnabled, type MainSigner, type GuardedSwapExecutor } from "@stockx/shared/pocket";
+import { createMockProvider, createSwapHelper, type SwapPipeline } from "@stockx/shared";
+import { pocketCopy, railgunEnabled, type MainSigner, type PocketSwapPipeline } from "@stockx/shared/pocket";
 import { useAgentClock } from "./useAgentClock";
 import { usePocket } from "./usePocket";
+
+const mockPipeline = createSwapHelper(createMockProvider(), { actor: "agent" });
 
 export interface PocketPanelProps {
   mainAddress: string;
   getMainSigner: () => MainSigner | Promise<MainSigner>;
-  executor?: GuardedSwapExecutor | null;
+  pipeline?: PocketSwapPipeline | null;
+  /** @deprecated Pass pipeline instead. */
+  executor?: SwapPipeline | null;
 }
 
-export function PocketPanel({ mainAddress, getMainSigner, executor = null }: PocketPanelProps) {
-  const pocket = usePocket({ mainAddress, getMainSigner, executor });
+export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: PocketPanelProps) {
+  const activePipeline = pipeline ?? executor ?? mockPipeline;
+  const pocket = usePocket({ mainAddress, getMainSigner, pipeline: activePipeline });
   const [password, setPassword] = useState("");
   const backupKey = useRef<HTMLInputElement>(null);
   const [fundAmount, setFundAmount] = useState("5");
@@ -20,9 +26,10 @@ export function PocketPanel({ mainAddress, getMainSigner, executor = null }: Poc
   const [buyAmount, setBuyAmount] = useState("5");
   const [message, setMessage] = useState("");
 
-  useAgentClock(pocket.job?.status === "active", () => {
-    void pocket.runOneTick(password, Number(buyAmount)).then((result) => {
-      setMessage(result.status);
+  useAgentClock(pocket.job?.status === "active" && pocket.armed, () => {
+    void pocket.runOneTick(password, buyAmount).then((result) => {
+      const errorCode = "errorCode" in result ? result.errorCode : undefined;
+      setMessage(errorCode ? `${result.status}: ${errorCode}` : result.status);
     });
   });
 
@@ -50,9 +57,10 @@ export function PocketPanel({ mainAddress, getMainSigner, executor = null }: Poc
   }
 
   async function runOneTick(): Promise<void> {
-    const result = await pocket.runOneTick(password, Number(buyAmount));
+    const result = await pocket.runOneTick(password, buyAmount);
     setPassword("");
-    setMessage(result.status);
+    const errorCode = "errorCode" in result ? result.errorCode : undefined;
+    setMessage(errorCode ? `${result.status}: ${errorCode}` : result.status);
   }
 
   return (
@@ -107,19 +115,26 @@ export function PocketPanel({ mainAddress, getMainSigner, executor = null }: Poc
         <h2>Agent</h2>
         <p>Job spend: {pocket.job?.spentUsdt ?? 0} / {pocket.job?.capUsdt ?? 25} USDT</p>
         <p>Take profit: not active in this build</p>
-        {!executor && <p>Swap helper not connected</p>}
+        <p>{pipeline || executor ? "Swap pipeline connected" : "Mock swap pipeline"}</p>
         <label htmlFor="pocket-agent-amount">Buy amount in USDT</label>
         <input id="pocket-agent-amount" inputMode="decimal" value={buyAmount} onChange={(event) => setBuyAmount(event.target.value)} />
         <label htmlFor="pocket-agent-password">Pocket passphrase</label>
         <input id="pocket-agent-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-        <button type="button" disabled={!executor || !pocket.exported} onClick={() => void pocket.startAgent()}>Start agent</button>
+        <button type="button" aria-pressed={pocket.armed} disabled={!pocket.exported} onClick={() => void pocket.startAgent()}>Arm agent</button>
         <button type="button" disabled={!pocket.job || pocket.job.status !== "active"} onClick={() => void pocket.stopAgent()}>Stop agent</button>
-        <button type="button" disabled={!executor || !pocket.exported} onClick={() => void runOneTick()}>Run one tick</button>
+        <button type="button" disabled={!pocket.exported || !pocket.armed} onClick={() => void runOneTick()}>Run one tick</button>
       </section>
 
       <section>
         <h2>Session activity</h2>
         <ul>{pocket.activity.map((trade, index) => <li key={`${trade.txHash}-${index}`}>{trade.side} {trade.amountUsdt} USDT · {trade.txHash}</li>)}</ul>
+      </section>
+
+      <section>
+        <h2>Agent run log</h2>
+        <ul>{pocket.runLog.map((entry, index) => <li key={`${entry.timestamp}-${index}`}>
+          {new Date(entry.timestamp).toLocaleTimeString()} {entry.message}{entry.errorCode ? ` · ${entry.errorCode}` : ""}
+        </li>)}</ul>
       </section>
 
       <section>
