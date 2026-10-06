@@ -13,7 +13,7 @@ export const TOKENS = {
       style: "swap",
       // BscScan: "Apple xStock (AAPLx)", BackedTokenProxy. Always use this PROXY address.
       address: "0x9d275685dc284c8eb1c79f6aba7a63dc75ec890a",
-      decimals: 18, // confirm with: node scripts/check-tokens.mjs
+      decimals: 18, // verified on-chain with scripts/check-tokens.mjs
     },
   } as const;
   
