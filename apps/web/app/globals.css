@@ -34,3 +34,18 @@ button.ghost { background: transparent; color: var(--text); border: 1px solid va
   font-weight: 600; text-align: left; }
 button.ghost:hover { border-color: var(--accent); }
 .err { color: var(--bad); font-size: 12px; padding: 6px 8px; }
+/* --- A1: markets + stock page --- */
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent); }
+.small { font-size: 13px; }
+.search { width: 100%; padding: 12px 14px; margin-bottom: 14px; border-radius: 10px;
+  background: var(--panel); color: var(--text); border: 1px solid var(--line); font-size: 15px; }
+.stock-row { display: flex; justify-content: space-between; align-items: center; }
+.stock-row:hover { border-color: var(--accent); }
+.stock-row.disabled { opacity: .55; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: rgba(240,185,11,.12); color: var(--accent); }
+.badge.soon { background: rgba(138,150,163,.15); color: var(--muted); }
+.pos { color: var(--good); } .neg { color: var(--bad); }
+.warn { color: var(--accent); margin: 8px 0 0; }
+button.tiny { padding: 2px 8px; font-size: 11px; }

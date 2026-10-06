@@ -9,3 +9,5 @@ export * from "./mock-provider";
 export * from "./premium";
 export * from "./market-hours";
 export * from "./tokens";
+export * from "./stocks";
+export * from "./prices";
