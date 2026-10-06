@@ -13,6 +13,8 @@ const abi = parseAbi([
 
 const tokens = {
   AAPLx: "0x9d275685dc284c8eb1c79f6aba7a63dc75ec890a",
+  AAPLB: "0x431a3bee82e2ca41e49895cbece5bb0f76a89b7a",
+  AAPLon: "0x390a684ef9cade28a7ad0dfa61ab1eb3842618c4",
   USDT: "0x55d398326f99059ff775485246999027b3197955",
 };
 
