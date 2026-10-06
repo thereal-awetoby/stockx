@@ -1,7 +1,7 @@
 import { RFQ_TTL_MS } from "./constants";
 import type { Quote, QuoteRequest, SwapProvider } from "./types";
 
-const MOCK_PRICE_USDT = 250; // 1 AAPLx = 250 USDT (fake)
+const MOCK_PRICE_USDT = 250; // 1 AAPLB = 250 USDT (fake)
 
 let counter = 0;
 const id = () => `mock_${Date.now()}_${++counter}`;
@@ -12,7 +12,7 @@ export function createMockProvider(): SwapProvider {
   return {
     async quote(req: QuoteRequest): Promise<Quote> {
       await sleep(150);
-      const style = req.tokenOut.endsWith("B") ? "rfq" : "swap"; // AAPLB => RFQ
+      const style = req.tokenOut.endsWith("on") ? "rfq" : "swap"; // Ondo tokens (AAPLon) => RFQ
       const issuedAt = Date.now();
       const out = Number(req.amountIn) / MOCK_PRICE_USDT;
       return {

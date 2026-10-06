@@ -10,29 +10,21 @@ export interface Stock {
   style: QuoteStyle;
   /** Undefined until the contract is verified. Never guess an address. */
   address?: string;
-  /** "live" = tradable in v1. "soon" = only after AAPLx buy/sell works. */
   status: "live" | "soon";
+  /** Shown on greyed-out rows. */
+  note?: string;
 }
 
 export const STOCKS: Stock[] = [
-  {
-    slug: "aaplx",
-    ticker: "AAPL",
-    name: "Apple Inc.",
-    token: "AAPLx",
-    issuer: "xStocks",
-    style: "swap",
-    address: TOKENS.AAPLx.address,
-    status: "live",
-  },
   {
     slug: "aaplb",
     ticker: "AAPL",
     name: "Apple Inc.",
     token: "AAPLB",
     issuer: "bStocks",
-    style: "rfq",
-    status: "soon",
+    style: "swap",
+    address: TOKENS.AAPLB.address,
+    status: "live",
   },
 ];
 

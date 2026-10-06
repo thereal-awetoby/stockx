@@ -11,7 +11,7 @@ export default function MarketsList() {
     <>
       <input
         className="search"
-        placeholder="Search ticker, company or token (e.g. AAPL, AAPLx)"
+        placeholder="Search ticker, company or token (e.g. AAPL, AAPLB)"
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
@@ -31,7 +31,7 @@ export default function MarketsList() {
               <strong>{s.ticker}</strong> <span className="muted">{s.name}</span>
               <div className="muted small">{s.token} · {s.issuer}</div>
             </div>
-            <span className="badge soon">After AAPLx works</span>
+            <span className="badge soon">Coming soon</span>
           </div>
         ),
       )}

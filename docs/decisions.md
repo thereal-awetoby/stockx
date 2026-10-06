@@ -1,5 +1,17 @@
 # Decisions
 
+## First token: AAPLB (bStocks)
+
+Switched from AAPLx on 2026-10-06. The Binance Web3 RWA Data API lists only the `bstock` and `ondo` platforms. For AAPLx, `rwa/price` returned no platform, a token price equal to its reference price, and a timestamp days old, so no premium can be computed. The AAPLx quote also required an RFQ request with a wallet address. For AAPLB, `rwa/price` returns a token price and a reference price (premium computable), and the quote came back with executionMode SWAP and 18 decimals. Contract on BSC: `0x431a3bee82e2ca41e49895cbece5bb0f76a89b7a` (from RWA search). This satisfies the hackathon rule (one of bStocks, Ondo, xStocks). Ondo and xStocks only if time allows.
+
+## Market data and swap source: Binance Web3 API
+
+Base URL `https://web3.binance.com/build`. Every request is signed with HMAC-SHA256 and sent with `X-OC-APIKEY`, `X-OC-TIMESTAMP` and `X-OC-SIGN`; the signed path must include `/build`. `OC_API_KEY` and `OC_SECRET_KEY` live in `apps/web/.env.local`, are server-only, and never get a `NEXT_PUBLIC_` prefix. The browser calls our own Next.js route handlers (`apps/web/app/api/...`), which sign and forward. Endpoints in use: `rwa/search`, `rwa/price` (parameter `tokenContractAddresses`), `rwa/underlying-market` (parameters `binanceChainId` and `tokenContractAddress`), `aggregator/quote`, `aggregator/swap`, `aggregator/approve-transaction`, `pre-transaction/simulate`, `pre-transaction/broadcast-transaction`. The API checks client IP and server location against a restricted-regions list, so the deployment region must be outside it.
+
+## Approval spender (A's proposal, B to confirm)
+
+The spender is read from the API (quote `approveTarget` or the `approve-transaction` response), not from an env var. This supersedes `NEXT_PUBLIC_SWAP_SPENDER_ADDRESS`. Approvals are for the exact amount, never unlimited.
+
 ## Ownership and module boundary
 
 Builder A owns the app shell, wallet context, market/stock data, token configuration, and swap implementation. Builder B owns plain pocket functions, encryption and backup checks, USDT transfer functions, session guards, job persistence, and the tick runner under `packages/shared/src/pocket`. The `/pocket` panel is optional semantic HTML only; A owns mounting and restyling.
@@ -10,7 +22,7 @@ Use the app-held session key, not Wallet Skills. The browser generates the key, 
 
 ## Signers and approvals
 
-Pocket functions receive A's connected `mainAddress` and `getMainSigner`; they do not connect a wallet. Main signer is accepted only by the user-initiated fund function. The agent unlocks the session signer and the guard verifies its address, but `SwapPipeline.execute(quote, receiver)` does not accept a signer. A2 must bind the real provider to the session signer, never main. Live approval is not implemented in the mock flow; A2 must use an exact session-token approval and never grant an unlimited allowance.
+Pocket functions receive A's connected `mainAddress` and `getMainSigner`; they do not connect a wallet. Main signer is accepted only by the user-initiated fund function. The agent unlocks the session signer and the guard verifies its address, but `SwapPipeline.execute(quote, receiver)` does not accept a signer. A2 binds the real provider to a signer when the provider is created: the DIY path uses the connected main wallet, the agent path uses the session signer, and the agent provider is never given main. Live approval is not implemented in the mock flow; A2 must use an exact session-token approval and never grant an unlimited allowance.
 
 ## Key and balance risks
 
@@ -18,7 +30,7 @@ The browser creates a random session key and encrypts it with AES-GCM and PBKDF2
 
 ## Shared network configuration
 
-Chain ID is 56, BSC RPC and USDT address are configured in `pocket/config.ts`, USDT uses 18 decimals, quote TTL is 30 seconds, and system buy cap is $25. AAPLx and the approval spender must be supplied through `NEXT_PUBLIC_AAPLX_ADDRESS` and `NEXT_PUBLIC_SWAP_SPENDER_ADDRESS`; neither is guessed. If either is absent, the adapter and agent remain unavailable.
+Chain ID is 56, BSC RPC and USDT address are configured in `pocket/config.ts`, USDT uses 18 decimals, quote TTL is 30 seconds, and system buy cap is $25. The AAPLB address is supplied through `NEXT_PUBLIC_AAPLB_ADDRESS` (the pocket config should read this instead of `NEXT_PUBLIC_AAPLX_ADDRESS`); it is not guessed. If it is absent, the adapter and agent remain unavailable.
 
 ## Agent accounting and clock
 
@@ -26,4 +38,4 @@ Job cap, spent amount, reserved amount, and last UTC run day persist per pocket 
 
 ## Known unavailable integrations
 
-No live provider, AAPLx address, approval spender, or approval binding is configured, so live agent trading is unavailable. Railgun is not wired. Take-profit remains inactive until A supplies a price source. No main-wallet transfer path is reachable from the agent runner.
+No live swap provider is wired yet (A2 in progress), so live agent trading is unavailable. Railgun is not wired. Take-profit remains inactive until A supplies a price source (A will expose the Binance RWA price). No main-wallet transfer path is reachable from the agent runner.

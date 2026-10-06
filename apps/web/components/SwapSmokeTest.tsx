@@ -14,10 +14,10 @@ export default function SwapSmokeTest() {
     setLog([]);
     try {
       const q = await helper.quote({
-        tokenIn: "USDT", tokenOut: "AAPLx", amountIn: "5",
+        tokenIn: "USDT", tokenOut: "AAPLB", amountIn: "5",
         spender: "main", receiver: "main",
       });
-      push(`quote ${q.id}: 5 USDT -> ${q.amountOut} AAPLx (${q.style})`);
+      push(`quote ${q.id}: 5 USDT -> ${q.amountOut} AAPLB (${q.style})`);
       const sim = await helper.simulate(q);
       push(`simulate: ${sim.ok ? "ok" : "FAILED " + sim.error}`);
       if (!sim.ok) return;
@@ -34,7 +34,7 @@ export default function SwapSmokeTest() {
     <div className="card">
       <div className="row">
         <strong>Swap helper smoke test (mock)</strong>
-        <button onClick={run} disabled={busy}>{busy ? "Running…" : "Buy 5 USDT of AAPLx"}</button>
+        <button onClick={run} disabled={busy}>{busy ? "Running…" : "Buy 5 USDT of AAPLB"}</button>
       </div>
       {log.length > 0 && <pre>{log.join("\n")}</pre>}
     </div>

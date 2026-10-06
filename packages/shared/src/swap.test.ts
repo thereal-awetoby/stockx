@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createMockProvider, createSwapHelper } from "./index";
 import type { QuoteRequest } from "./index";
 
-const diy: QuoteRequest = { tokenIn: "USDT", tokenOut: "AAPLx", amountIn: "5", spender: "main", receiver: "main" };
+const diy: QuoteRequest = { tokenIn: "USDT", tokenOut: "AAPLB", amountIn: "5", spender: "main", receiver: "main" };
 const agent: QuoteRequest = { ...diy, spender: "session", receiver: "session" };
 
 describe("swap helper", () => {
@@ -33,7 +33,7 @@ describe("swap helper", () => {
   it("never reuses an expired RFQ", async () => {
     let t = 1_000_000;
     const h = createSwapHelper(createMockProvider(), { actor: "user", now: () => t });
-    const q = { ...(await h.quote({ ...diy, tokenOut: "AAPLB" })), issuedAt: t, expiresAt: t + 30_000 };
+    const q = { ...(await h.quote({ ...diy, tokenOut: "AAPLon" })), issuedAt: t, expiresAt: t + 30_000 };
     t += 30_001;
     await expect(h.simulate(q)).rejects.toMatchObject({ code: "QUOTE_EXPIRED" });
   });
