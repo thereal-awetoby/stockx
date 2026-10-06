@@ -24,8 +24,8 @@ export function isSupportedStockRoute(
   tokenIn: string,
   tokenOut: string,
 ): boolean {
-  if (side === "buy") return tokenIn === "USDT" && tokenOut === "AAPLx";
-  return tokenIn === "AAPLx" && tokenOut === "USDT";
+  if (side === "buy") return tokenIn === "USDT" && tokenOut === "AAPLB";
+  return tokenIn === "AAPLB" && tokenOut === "USDT";
 }
 
 function sameAddress(left: string, right: string): boolean {

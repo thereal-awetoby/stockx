@@ -71,8 +71,8 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
       receiver: pocket.address,
       job: reserved.job,
       side,
-      tokenIn: side === "buy" ? "USDT" : "AAPLx",
-      tokenOut: side === "buy" ? "AAPLx" : "USDT",
+      tokenIn: side === "buy" ? "USDT" : "AAPLB",
+      tokenOut: side === "buy" ? "AAPLB" : "USDT",
       amountIn: input.amountUsdt,
       amountUsdt,
     } as const;
@@ -97,7 +97,7 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
       const record: SessionTradeRecord = {
         jobId: updatedJob.id,
         side,
-        token: "AAPLx",
+        token: "AAPLB",
         amountUsdt,
         txHash: result.txHash,
         timestamp: Date.now(),

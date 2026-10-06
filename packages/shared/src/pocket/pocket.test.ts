@@ -26,13 +26,11 @@ import type { Job, Pocket, PocketBalances } from "./types";
 const mainAddress = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const testSigner = new Wallet(`0x${"11".repeat(32)}`);
 const sessionAddress = testSigner.address;
-const aaplXAddress = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-const approvalSpender = "0xcccccccccccccccccccccccccccccccccccccccc";
+const aaplbAddress = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 const testConfig: PocketConfig = {
   ...POCKET_CONFIG,
-  aaplXAddress,
-  approvalSpenderAddress: approvalSpender,
-  aaplXDecimals: 18,
+  aaplbAddress,
+  aaplbDecimals: 18,
 };
 
 class TestMemoryStorage implements PocketJobStorage {
@@ -63,7 +61,7 @@ function testGuardInput(overrides: Partial<PocketGuardInput> = {}): PocketGuardI
     job: testJob(),
     side: "buy",
     tokenIn: "USDT",
-    tokenOut: "AAPLx",
+    tokenOut: "AAPLB",
     amountIn: "5",
     amountUsdt: 5,
     sessionConfigured: true,
@@ -117,7 +115,7 @@ test("unconfigured helper is rejected without reserving or spending", async () =
   const job = await activeTestJob(storage, locks);
   const result = await runAgentTick({
     pocket: testPocket(), job, helper: null, mainAddress, signer: testSigner,
-    storage, locks, balances: testBalances(), amountUsdt: 5,
+    storage, locks, balances: testBalances(), amountUsdt: "5",
     config: testConfig,
   });
   const persisted = await loadPocketJob(storage, locks, sessionAddress);
@@ -138,8 +136,8 @@ test("guard rejects main=session and malformed addresses", () => {
   });
 });
 
-test("sell route is allowed only for AAPLx to USDT with session addresses", () => {
-  const sell = testGuardInput({ side: "sell", tokenIn: "AAPLx", tokenOut: "USDT", amountIn: "2", amountUsdt: 2 });
+test("sell route is allowed only for AAPLB to USDT with session addresses", () => {
+  const sell = testGuardInput({ side: "sell", tokenIn: "AAPLB", tokenOut: "USDT", amountIn: "2", amountUsdt: 2 });
   assert.equal(evaluatePocketAction(sell, testConfig).allowed, true);
   assert.deepEqual(evaluatePocketAction({ ...sell, tokenIn: "AAPLB" }, testConfig), {
     allowed: false,
@@ -160,8 +158,8 @@ test("rejects trades above the per-trade risk limit", () => {
 
 test("wrong quote spender, receiver, token, or amount is rejected before execute", async () => {
   const invalidQuotes = [
-    { spender: mainAddress },
-    { receiver: mainAddress },
+    { spender: "main" },
+    { receiver: "main" },
     { tokenOut: "AAPLB" },
     { amountIn: "6" },
   ];

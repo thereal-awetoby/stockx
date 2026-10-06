@@ -6,8 +6,8 @@
 | Quote object shape | READY | Pocket validates the shared quote request and requires `spender` and `receiver` to be `session`; helper owns expiry and simulate-before-execute checks. |
 | Session signer binding | OPEN FOR A2 | The runner unlocks and validates the app-held session signer, but `SwapPipeline.execute(quote, receiver)` has no signer parameter. A2 must agree how the real provider is bound to that signer; never sign with main. |
 | Approval handling | OPEN FOR A2 | The mock requires no approval. The legacy approval adapter was removed during pipeline migration. A2 must provide exact session-token approval and never grant unlimited allowance. |
-| AAPLx address | BLOCKED | Supply and validate `NEXT_PUBLIC_AAPLX_ADDRESS`; no address is stored or guessed here. |
-| Approval spender address | BLOCKED | Supply `NEXT_PUBLIC_SWAP_SPENDER_ADDRESS` from the actual helper/router configuration. |
+| AAPLB address | BLOCKED | Supply and validate `NEXT_PUBLIC_AAPLB_ADDRESS`; no address is stored or guessed here. |
+| Approval spender | OPEN FOR A2 | The spender comes from the quote's `approveTarget` and the approval response, not a config env var. |
 | Price source and market-hours source | BLOCKED / OPEN | No price source exists, so take-profit is inactive. Market-hours behavior remains OPEN until A provides its source and rules. |
 | Web wallet dependencies | READY | `wagmi@^2`, `viem`, and `@tanstack/react-query` are declared in `apps/web/package.json`; root lockfile was updated. |
 | BSC chain export | FIXED IN APP | `wagmi/chains` could not resolve `bsc` from the incomplete local viem install. `apps/web/lib/wagmi.ts` now defines the BSC mainnet chain locally and `ConnectButton` imports that shared config value. |
@@ -22,7 +22,7 @@ Pocket pipeline proposal:
 - B's pocket and agent consume `SwapPipeline` directly. The legacy pocket `SwapHelper` type and adapter are removed; no adapter is needed.
 - The package-root `packages/shared/src/index.ts` exports are unchanged. Pocket exports remain scoped to `@stockx/shared/pocket`.
 - The mock pipeline is agent-restricted and is the default for the pocket panel until A2 supplies the real provider.
-- `readPocketBalances(address)` returns only `{ usdt, bnb }`. Before A3, agree whether A reads AAPLx balance separately or B later adds a `tokens[]` field.
+- `readPocketBalances(address)` returns only `{ usdt, bnb }`. Before A3, agree whether A reads AAPLB balance separately or B later adds a `tokens[]` field.
 - B's guarded flow validates the session signer but does not supply it to `SwapPipeline`; choose a signer-bound provider/factory approach before A2 goes live.
 - Agent guardrails include a $5 maximum trade, $25 job/funding caps, one trade per UTC day, a disarmed-by-default kill switch, and a run log that includes `SwapError.code`.
 

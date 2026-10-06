@@ -28,7 +28,7 @@ export interface Job {
 export interface SessionTradeRecord {
   jobId: string;
   side: TradeSide;
-  token: "AAPLx";
+  token: "AAPLB";
   amountUsdt: number;
   txHash: string;
   timestamp: number;
