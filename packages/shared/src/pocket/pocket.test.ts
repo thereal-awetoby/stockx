@@ -139,7 +139,7 @@ test("guard rejects main=session and malformed addresses", () => {
 test("sell route is allowed only for AAPLB to USDT with session addresses", () => {
   const sell = testGuardInput({ side: "sell", tokenIn: "AAPLB", tokenOut: "USDT", amountIn: "2", amountUsdt: 2 });
   assert.equal(evaluatePocketAction(sell, testConfig).allowed, true);
-  assert.deepEqual(evaluatePocketAction({ ...sell, tokenIn: "AAPLB" }, testConfig), {
+  assert.deepEqual(evaluatePocketAction({ ...sell, tokenOut: "AAPLB" }, testConfig), {
     allowed: false,
     reason: "unsupported_token_route",
   });
@@ -160,7 +160,7 @@ test("wrong quote spender, receiver, token, or amount is rejected before execute
   const invalidQuotes = [
     { spender: "main" },
     { receiver: "main" },
-    { tokenOut: "AAPLB" },
+    { tokenOut: "UNKNOWN" },
     { amountIn: "6" },
   ];
   for (const overrides of invalidQuotes) {

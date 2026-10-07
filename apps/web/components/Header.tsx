@@ -7,6 +7,7 @@ export default function Header() {
       <div style={{ display: "flex", gap: 20, alignItems: "baseline" }}>
         <Link href="/" className="logo">stockX</Link>
         <Link href="/markets" className="muted">Markets</Link>
+        <Link href="/pocket" className="muted">Pocket</Link>
       </div>
       <ConnectButton />
     </header>

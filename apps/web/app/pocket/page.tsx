@@ -1,17 +1,33 @@
 "use client";
 
+import { BrowserProvider } from "ethers";
+import { useAccount, useWalletClient } from "wagmi";
 import { PocketPanel } from "../../features/pocket/PocketPanel";
-import type { MainSigner } from "@stockx/shared/pocket";
+import { isPocketConfigReady, type MainSigner } from "@stockx/shared/pocket";
 
 export default function PocketPage() {
+  const { address = "" } = useAccount();
+  const { data: walletClient } = useWalletClient();
+
   const getMainSigner = async (): Promise<MainSigner> => {
-    throw new Error("TODO A: replace this with the shared wallet context.");
+    if (!walletClient) throw new Error("Connect the main wallet first.");
+
+    const provider = new BrowserProvider(walletClient.transport, {
+      chainId: walletClient.chain.id,
+      name: walletClient.chain.name,
+    });
+
+    return provider.getSigner(walletClient.account.address);
   };
 
   return (
     <>
-      <p>TODO A: replace this with the shared wallet context.</p>
-      <PocketPanel mainAddress="" getMainSigner={getMainSigner} executor={null} />
+      {!isPocketConfigReady && (
+        <p>
+          Set NEXT_PUBLIC_AAPLB_ADDRESS and NEXT_PUBLIC_AAPLB_DECIMALS in apps/web/.env.local before using live AAPLB execution.
+        </p>
+      )}
+      <PocketPanel mainAddress={address} getMainSigner={getMainSigner} />
     </>
   );
 }
