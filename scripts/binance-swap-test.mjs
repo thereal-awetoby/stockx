@@ -37,5 +37,5 @@ console.log(`\nquoteId=${best.quoteId} mode=${best.executionMode} out=${best.toT
 
 await get("/api/v1/dex/aggregator/swap", {
   binanceChainId: "56", fromTokenAddress: USDT, toTokenAddress: AAPLB, amount,
-  userWalletAddress: wallet, slippage: "0.5", quoteId: best.quoteId,
+  userWalletAddress: wallet, slippagePercent: "0.5", quoteId: best.quoteId,
 });

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import BuyPanel from "./BuyPanel";
 import { useEffect, useState } from "react";
 import {
   calcPremiumPct,
@@ -142,13 +143,7 @@ export default function StockView({ stock }: { stock: Stock }) {
         )}
       </div>
 
-      <div className="card">
-        <div className="row" style={{ gap: 8 }}>
-          <button disabled style={{ flex: 1 }}>Buy {stock.token}</button>
-          <button disabled className="ghost" style={{ flex: 1 }}>Sell {stock.token}</button>
-        </div>
-        <p className="muted small" style={{ margin: "8px 0 0" }}>Swapping goes live in the next step.</p>
-      </div>
+      <BuyPanel stock={stock} />
     </main>
   );
 }
