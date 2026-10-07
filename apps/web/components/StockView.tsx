@@ -3,38 +3,69 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   calcPremiumPct,
+  createApiPriceProvider,
   createMockPriceProvider,
+  getRwaMarket,
   getUsMarketStatus,
   RFQ_TTL_MS,
   type MarketStatus,
   type PriceSnapshot,
+  type RwaMarketState,
   type Stock,
 } from "@stockx/shared";
 
-const prices = createMockPriceProvider();
+// NEXT_PUBLIC_PRICE_PROVIDER=mock forces fake prices for UI work. Default is the real API.
+const prices = process.env.NEXT_PUBLIC_PRICE_PROVIDER === "mock" ? createMockPriceProvider() : createApiPriceProvider();
 const usd = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD" });
+
+/** The API may send epoch seconds, epoch ms, or an ISO string. Handle all three. */
+function toDate(v: string | number | null): Date | null {
+  if (v === null || v === "") return null;
+  const n = Number(v);
+  const d = Number.isFinite(n) ? new Date(n < 1e12 ? n * 1000 : n) : new Date(String(v));
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+const fmtTime = (d: Date) =>
+  d.toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
 
 export default function StockView({ stock }: { stock: Stock }) {
   const [snap, setSnap] = useState<PriceSnapshot | null>(null);
-  const [market, setMarket] = useState<MarketStatus | null>(null);
+  const [priceError, setPriceError] = useState<string | null>(null);
+  const [apiMarket, setApiMarket] = useState<RwaMarketState | null>(null);
+  const [localMarket, setLocalMarket] = useState<MarketStatus | null>(null);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     let alive = true;
-    const load = async () => {
-      const s = await prices.getPrices(stock.token);
-      if (alive) setSnap(s);
+    const loadPrices = async () => {
+      try {
+        const s = await prices.getPrices(stock.address ?? stock.token);
+        if (alive) { setSnap(s); setPriceError(null); }
+      } catch (e) {
+        if (alive) setPriceError((e as Error).message);
+      }
     };
-    load();
-    setMarket(getUsMarketStatus());
-    const a = setInterval(load, 15_000);
-    const b = setInterval(() => setMarket(getUsMarketStatus()), 30_000);
+    const loadMarket = async () => {
+      setLocalMarket(getUsMarketStatus()); // fallback estimate, always available
+      if (!stock.address) return;
+      try {
+        const m = await getRwaMarket(stock.address);
+        if (alive) setApiMarket(m);
+      } catch {
+        if (alive) setApiMarket(null);
+      }
+    };
+    loadPrices();
+    loadMarket();
+    const a = setInterval(loadPrices, 15_000);
+    const b = setInterval(loadMarket, 30_000);
     return () => { alive = false; clearInterval(a); clearInterval(b); };
-  }, [stock.token]);
+  }, [stock.token, stock.address]);
 
   const premium = snap ? calcPremiumPct(snap.onchain, snap.reference) : null;
-  const fmtTime = (d: Date) =>
-    d.toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+  const open = apiMarket ? apiMarket.open : localMarket?.open;
+  const nextOpen = apiMarket ? toDate(apiMarket.nextOpenTime) : localMarket && !localMarket.open ? localMarket.nextOpen : null;
+  const closes = apiMarket ? toDate(apiMarket.nextCloseTime) : localMarket?.open ? localMarket.closesAt ?? null : null;
 
   return (
     <main>
@@ -46,15 +77,23 @@ export default function StockView({ stock }: { stock: Stock }) {
       <div className="card">
         <div className="row">
           <span>US market</span>
-          {market ? <span className={`pill ${market.open ? "open" : "closed"}`}>{market.label}</span> : <span className="muted">…</span>}
+          {open === undefined ? <span className="muted">…</span> : (
+            <span className={`pill ${open ? "open" : "closed"}`}>{apiMarket ? (open ? "Trading" : "Closed") : (open ? "Open" : "Closed")}</span>
+          )}
         </div>
-        {market && (
-          <div className="row muted">
-            <span>{market.open ? "Closes" : "Next open"}</span>
-            <span>{fmtTime(market.open ? market.closesAt! : market.nextOpen)}</span>
-          </div>
+        {apiMarket?.reasonCode && (
+          <div className="row muted"><span>Status</span><span>{apiMarket.reasonCode}</span></div>
         )}
-        {market && !market.open && (
+        {open === false && nextOpen && (
+          <div className="row muted"><span>Next open</span><span>{fmtTime(nextOpen)}</span></div>
+        )}
+        {open === true && closes && (
+          <div className="row muted"><span>Closes</span><span>{fmtTime(closes)}</span></div>
+        )}
+        {!apiMarket && localMarket && (
+          <p className="muted small" style={{ margin: "8px 0 0" }}>Estimated from regular US hours (live status unavailable).</p>
+        )}
+        {open === false && (
           <p className="muted small" style={{ margin: "8px 0 0" }}>
             The real stock isn’t trading. The reference price is stale, so the premium can look large.
           </p>
@@ -71,6 +110,12 @@ export default function StockView({ stock }: { stock: Stock }) {
           </strong>
         </div>
         {snap?.source === "mock" && <p className="warn small">Mock prices for UI development. Not real.</p>}
+        {snap && snap.source !== "mock" && (
+          <p className="muted small" style={{ margin: "8px 0 0" }}>
+            Source: Binance Web3 RWA data · updated {new Date(snap.asOf).toLocaleTimeString()}
+          </p>
+        )}
+        {priceError && <p className="err">Live prices unavailable: {priceError}</p>}
       </div>
 
       <div className="card">
@@ -102,7 +147,7 @@ export default function StockView({ stock }: { stock: Stock }) {
           <button disabled style={{ flex: 1 }}>Buy {stock.token}</button>
           <button disabled className="ghost" style={{ flex: 1 }}>Sell {stock.token}</button>
         </div>
-        <p className="muted small" style={{ margin: "8px 0 0" }}>Swapping goes live in A2.</p>
+        <p className="muted small" style={{ margin: "8px 0 0" }}>Swapping goes live in the next step.</p>
       </div>
     </main>
   );

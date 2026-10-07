@@ -25,3 +25,14 @@ export interface PriceSnapshot {
       },
     };
   }
+  /** Real prices from the Binance RWA API, through our server route. `token` is the contract address. */
+  export function createApiPriceProvider(baseUrl = ""): PriceProvider {
+    return {
+      async getPrices(token) {
+        const res = await fetch(`${baseUrl}/api/rwa/price?token=${encodeURIComponent(token)}`, { cache: "no-store" });
+        if (!res.ok) throw new Error(`Prices unavailable (HTTP ${res.status})`);
+        const j = (await res.json()) as { tokenPrice: number; referencePrice: number; updatedAt: number };
+        return { onchain: j.tokenPrice, reference: j.referencePrice, asOf: j.updatedAt, source: "binance-rwa" };
+      },
+    };
+  }
