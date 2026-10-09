@@ -10,7 +10,7 @@ Base URL `https://web3.binance.com/build`. Every request is signed with HMAC-SHA
 
 ## Approval spender (A's proposal, B to confirm)
 
-The spender is read from the API (quote `approveTarget` or the `approve-transaction` response), not from an env var. This supersedes `NEXT_PUBLIC_SWAP_SPENDER_ADDRESS`. Approvals are for the exact amount, never unlimited.
+The spender is read from the API quote's `approveTarget`, not from an environment variable. Approvals are for the exact amount, never unlimited.
 
 ## Ownership and module boundary
 
@@ -30,7 +30,7 @@ The browser creates a random session key and encrypts it with AES-GCM and PBKDF2
 
 ## Shared network configuration
 
-Chain ID is 56, BSC RPC and USDT address are configured in `pocket/config.ts`, USDT uses 18 decimals, quote TTL is 30 seconds, and system buy cap is $25. The AAPLB address is supplied through `NEXT_PUBLIC_AAPLB_ADDRESS` (the pocket config should read this instead of `NEXT_PUBLIC_AAPLX_ADDRESS`); it is not guessed. If it is absent, the adapter and agent remain unavailable.
+Chain ID is 56, BSC RPC and USDT address are configured in `pocket/config.ts`, USDT uses 18 decimals, quote TTL is 30 seconds, and system buy cap is $25. The AAPLB address is supplied through `NEXT_PUBLIC_AAPLB_ADDRESS`; it is not guessed. If it is absent, live AAPLB execution remains unavailable.
 
 ## Agent accounting and clock
 

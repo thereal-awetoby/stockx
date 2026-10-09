@@ -18,6 +18,6 @@
 
 ## Scheduler
 
-The reference hook checks 15:00 UTC while the page is active. Browser background throttling can miss that minute; closing or reloading stops it. Move the clock to `apps/worker` before live automation.
+The v1 agent uses a browser clock and has no worker. Browser background throttling can miss the scheduled minute; closing or reloading stops it.
 
 No video recording is included. The panel is a semantic reference and not a finished app surface.
