@@ -36,7 +36,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   async function create(): Promise<void> {
     const created = await pocket.createPocket(password);
     setPassword("");
-    setMessage(created ? "Pocket created." : "Pocket creation failed or existing storage blocked it.");
+    setMessage(created ? "Pocket ready." : "");
   }
 
   async function exportKey(): Promise<void> {
@@ -68,8 +68,12 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
       <h2>Session pocket</h2>
       <p>Main wallet: {mainAddress || "Not connected"}</p>
       <p>{pocket.status}</p>
-      <p className="pocket-balance">USDT: {pocket.balances.usdt}</p>
-      <p className="pocket-balance">BNB: {pocket.balances.bnb}</p>
+      <p className="pocket-balance">
+        USDT: {pocket.balanceError ? `unavailable (${pocket.balanceError})` : pocket.balances.usdt}
+      </p>
+      <p className="pocket-balance">
+        BNB: {pocket.balanceError ? `unavailable (${pocket.balanceError})` : pocket.balances.bnb}
+      </p>
       <p className="pocket-balance">
         AAPLB: {pocket.aaplbBalanceError ? `unavailable (${pocket.aaplbBalanceError})` : pocket.aaplbBalance}
       </p>
@@ -147,7 +151,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
         <p>{pocketCopy.publicStockLeg}</p>
         <p>{pocketCopy.keyRisk}</p>
       </section>
-      <p role="status">{message}</p>
+      <p role="status">{message || pocket.operationError}</p>
     </section>
   );
 }

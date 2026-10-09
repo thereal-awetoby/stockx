@@ -41,8 +41,10 @@ export interface UsePocketResult {
   pocket: Pocket | null;
   exported: boolean;
   balances: PocketBalances;
+  balanceError: string | null;
   aaplbBalance: string;
   aaplbBalanceError: string | null;
+  operationError: string | null;
   job: Job | null;
   activity: SessionTradeRecord[];
   runLog: AgentRunLogEntry[];
@@ -93,8 +95,10 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
   const [stored, setStored] = useState<ReturnType<typeof readPocket>>(null);
   const [exported, setExported] = useState(false);
   const [balances, setBalances] = useState<PocketBalances>({ usdt: "0", bnb: "0" });
+  const [balanceError, setBalanceError] = useState<string | null>(null);
   const [aaplbBalance, setAaplbBalance] = useState("0");
   const [aaplbBalanceError, setAaplbBalanceError] = useState<string | null>(null);
+  const [operationError, setOperationError] = useState<string | null>(null);
   const [job, setJob] = useState<Job | null>(null);
   const [activity, setActivity] = useState<SessionTradeRecord[]>([]);
   const [runLog, setRunLog] = useState<AgentRunLogEntry[]>([]);
@@ -103,17 +107,23 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
   const [status, setStatus] = useState<PocketStatus>("loading");
 
   const refresh = useCallback(async (current: NonNullable<typeof stored>) => {
-    const [nextBalances, nextJob] = await Promise.all([
-      readPocketBalances(current.address),
-      loadPocketJob(localStorage, browserJobLock(), current.address),
-    ]);
-    setBalances(nextBalances);
+    const nextJob = await loadPocketJob(localStorage, browserJobLock(), current.address);
     setJob(nextJob);
-    try {
-      setAaplbBalance(await readPocketAaplbBalance(current.address));
+    const [nextBalances, nextAaplbBalance] = await Promise.allSettled([
+      readPocketBalances(current.address),
+      readPocketAaplbBalance(current.address),
+    ]);
+    if (nextBalances.status === "fulfilled") {
+      setBalances(nextBalances.value);
+      setBalanceError(null);
+    } else {
+      setBalanceError(nextBalances.reason instanceof Error ? nextBalances.reason.message : "Unable to read USDT and BNB balances.");
+    }
+    if (nextAaplbBalance.status === "fulfilled") {
+      setAaplbBalance(nextAaplbBalance.value);
       setAaplbBalanceError(null);
-    } catch (error) {
-      setAaplbBalanceError(error instanceof Error ? error.message : "Unable to read AAPLB balance.");
+    } else {
+      setAaplbBalanceError(nextAaplbBalance.reason instanceof Error ? nextAaplbBalance.reason.message : "Unable to read AAPLB balance.");
     }
   }, []);
 
@@ -128,23 +138,44 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
       setStored(existing);
       setExported(pocketBackupVerified(localStorage, existing.address));
       setStatus("ready");
-      void refresh(existing).catch(() => setStatus("error"));
+      void refresh(existing).catch((error) => {
+        setStatus("error");
+        setOperationError(error instanceof Error ? error.message : "Unable to load pocket state.");
+      });
     } catch {
       setStatus("corrupt");
     }
   }, [refresh]);
 
   const create = useCallback(async (password: string) => {
+    setOperationError(null);
     try {
-      if (pocketRecordExists(localStorage)) throw new Error("A pocket record already exists.");
+      const existing = readPocket(localStorage);
+      if (existing) {
+        setStored(existing);
+        setExported(pocketBackupVerified(localStorage, existing.address));
+        setStatus("ready");
+        setOperationError("A pocket already exists in this browser and was loaded instead of replaced.");
+        void refresh(existing).catch((error) => {
+          setOperationError(error instanceof Error ? error.message : "Unable to load pocket state.");
+        });
+        return { address: existing.address, exported: pocketBackupVerified(localStorage, existing.address) };
+      }
       const created = await createStoredPocket(password, localStorage, navigator.locks);
       setStored(created);
       setExported(false);
-      await refresh(created);
       setStatus("ready");
+      void refresh(created).catch((error) => {
+        setOperationError(error instanceof Error ? error.message : "Unable to load pocket state.");
+      });
       return { address: created.address, exported: false };
-    } catch {
-      setStatus("error");
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : "Unable to create the session pocket.");
+      try {
+        setStatus(pocketRecordExists(localStorage) ? "corrupt" : "ready");
+      } catch {
+        setStatus("error");
+      }
       return null;
     }
   }, [refresh]);
@@ -248,8 +279,10 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     pocket: stored ? { address: stored.address, exported } : null,
     exported,
     balances,
+    balanceError,
     aaplbBalance,
     aaplbBalanceError,
+    operationError,
     job,
     activity,
     runLog,
