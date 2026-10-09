@@ -1,6 +1,8 @@
 import {
   ADDRESS_RE,
+  assertMinReceive,
   assertSafeSwapTx,
+  extractSwapAmountOut,
   extractSwapTx,
   minAmountOutFor,
   parseUnitsStr,
@@ -74,8 +76,8 @@ export async function GET(req: Request) {
     if (BigInt(best.fromTokenAmount) !== amountIn) {
       return Response.json({ error: "Quote amount did not match the request" }, { status: 502 });
     }
-    const amountOut = BigInt(best.toTokenAmount);
-    if (amountOut <= 0n) return Response.json({ error: "Quote returned zero output" }, { status: 502 });
+    const quotedOut = BigInt(best.toTokenAmount);
+    if (quotedOut <= 0n) return Response.json({ error: "Quote returned zero output" }, { status: 502 });
 
     const swap = await binanceGet<unknown>("/api/v1/dex/aggregator/swap", {
       ...common,
@@ -85,6 +87,10 @@ export async function GET(req: Request) {
     });
     const tx = extractSwapTx(swap);
     assertSafeSwapTx(tx, { signer: wallet, tokenIn: pair.tokenIn.address, tokenOut: pair.tokenOut.address });
+    // The amount the swap tx itself was built for wins over the earlier quote (same quoteId, normally equal).
+    const swapOut = extractSwapAmountOut(swap);
+    const amountOut = swapOut !== undefined && swapOut > 0n ? swapOut : quotedOut;
+    assertMinReceive(tx, amountOut, slippageBps);
 
     const built: BuiltSwap = {
       side,

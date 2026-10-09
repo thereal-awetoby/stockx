@@ -38,13 +38,14 @@ New: `packages/shared/src/swap-build.ts` (units, approve encoding, response pars
 
 Flow: `/api/swap/build` asks the aggregator for a fresh quote, builds the swap from that quote id and validates it (no native value, not a token contract, not an approve/transfer, not the wallet). The browser re-validates, simulates (balance, chain, allowance, dry run), and on confirm sends an exact approval if needed, waits, **re-builds from a fresh quote**, refuses with `PRICE_MOVED` if the output fell below the confirmed amount minus slippage (default 0.5%, route max 1%), dry-runs, sends. Any quote older than 30s is refused. A double click cannot send twice. If a receipt is lost after broadcast you get `RECEIPT_UNKNOWN` with the hash; never auto-retry.
 
-### NOT verified against the live API (no keys in the build environment)
+### `/swap` response: verified 2026-10-09
 
-`extractSwapTx` looks for the transaction at `data[0].tx`, `data.tx`, then `data[0]`/`data`, and fails closed (`BAD_SWAP_RESPONSE`) if none validates. Before enabling live swaps:
+Captured from the live API with `scripts/binance-swap-test.mjs` (wallet address replaced in `packages/shared/src/fixtures/binance-swap-real.json`). Shape: `data = { executionMode, routerResult, tx, rfq }` and `tx = { from, to, data, value, gas, gasPrice, minReceiveAmount, slippagePercent, signatureData }`. `tx.to` equals the quote's `approveTarget` (the router). Our integer slippage floor reproduces Binance's `minReceiveAmount` exactly, and the build now also checks `tx.from`, uses `routerResult.toTokenAmount`, and refuses a swap whose own minimum is looser than the confirmed one. The 40001 error seen earlier came from a copy of the script that sent no slippage; the repo version sends `slippagePercent`.
 
-1. `node --env-file=apps/web/.env.local scripts/binance-swap-test.mjs 0xYOURWALLET 5` and compare the printed `/swap` JSON to the shapes above. If it differs, fix `extractSwapTx` only.
-2. `npm install && npm test && npm run typecheck && npm run build` (the A2 code was written where npm was blocked, so only the provider tests and a strict `tsc` over the shared files were run; the web files were syntax-checked only).
-3. Set `NEXT_PUBLIC_LIVE_SWAPS=1` locally, buy $1 of AAPLB from a throwaway wallet, check BscScan.
+Before enabling live swaps:
+
+1. `npm install && npm test && npm run typecheck && npm run build` (the A2 code was written where npm was blocked: provider tests and a strict `tsc` over the shared files ran, the web files were only syntax-checked).
+2. Set `NEXT_PUBLIC_LIVE_SWAPS=1` locally, buy $1 of AAPLB from a throwaway wallet, check BscScan.
 
 ### Still open
 

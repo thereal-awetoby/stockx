@@ -1,6 +1,7 @@
 import { CHAIN_ID, RFQ_TTL_MS } from "./constants";
 import { QuoteExpiredError, SwapError } from "./errors";
 import {
+  assertMinReceive,
   assertSafeSwapTx,
   decodeApprove,
   encodeApprove,
@@ -124,6 +125,7 @@ export function createBinanceProvider(opts: BinanceProviderOptions): SwapProvide
       throw new SwapError("BAD_SWAP_RESPONSE", "Server built a different swap than was requested");
     }
     assertSafeSwapTx(b.tx, { signer: executor.address, tokenIn: pair.tokenIn.address, tokenOut: pair.tokenOut.address });
+    assertMinReceive(b.tx, BigInt(b.amountOut), b.slippageBps);
   }
 
   return {

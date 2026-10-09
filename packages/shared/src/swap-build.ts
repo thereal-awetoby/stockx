@@ -57,6 +57,10 @@ export function decodeApprove(data: string): { spender: string; amount: bigint }
 // ---------- the swap transaction as our server returns it ----------
 
 export interface SwapTx {
+  /** Sender the API built this for. Must equal the signer when present. */
+  from?: string;
+  /** Binance's own minimum output (`minReceiveAmount`), base units. Cross-checked, never trusted alone. */
+  minReceive?: string;
   to: string;
   data: Hex;
   /** Wei, decimal string. Must be "0" for token<->token swaps. */
@@ -103,10 +107,10 @@ const intString = (v: unknown): string | undefined => {
 };
 
 /**
- * The aggregator/swap response shape is NOT verified against the live API (we have
- * no keys in CI). Look for the tx object in the places this family of APIs puts it
- * and fail closed with BAD_SWAP_RESPONSE if nothing valid is found.
- * Run scripts/binance-swap-test.mjs with real keys and confirm which branch matches.
+ * Verified 2026-10-09 against the live API: the response is `{ routerResult, tx, rfq }`
+ * with `tx = { from, to, data, value, gas, minReceiveAmount, slippagePercent, ... }`
+ * (see fixtures/binance-swap-real.json). The other branches are kept as fallbacks and
+ * everything still fails closed with BAD_SWAP_RESPONSE if nothing valid is found.
  */
 export function extractSwapTx(data: unknown): SwapTx {
   const first = Array.isArray(data) ? data[0] : data;
@@ -121,7 +125,9 @@ export function extractSwapTx(data: unknown): SwapTx {
     const value = intString(c.value ?? "0");
     if (value === undefined) continue;
     const gas = intString(c.gas ?? c.gasLimit);
-    return { to, data: calldata as Hex, value, ...(gas ? { gas } : {}) };
+    const from = typeof c.from === "string" && ADDRESS_RE.test(c.from) ? c.from : undefined;
+    const minReceive = intString(c.minReceiveAmount);
+    return { to, data: calldata as Hex, value, ...(gas ? { gas } : {}), ...(from ? { from } : {}), ...(minReceive ? { minReceive } : {}) };
   }
   throw new SwapError("BAD_SWAP_RESPONSE", "Swap response did not contain a usable transaction");
 }
@@ -139,9 +145,31 @@ export function assertSafeSwapTx(tx: SwapTx, ctx: { signer: string; tokenIn: str
   if (to === ctx.tokenIn.toLowerCase() || to === ctx.tokenOut.toLowerCase()) {
     throw bad("Swap targets a token contract directly instead of a router");
   }
+  if (tx.from && tx.from.toLowerCase() !== ctx.signer.toLowerCase()) throw bad("Swap was built for a different wallet");
   if (!HEX_RE.test(tx.data) || tx.data.length < 10) throw bad("Swap calldata is empty or malformed");
   if (FORBIDDEN_SWAP_SELECTORS.has(tx.data.slice(0, 10).toLowerCase())) {
     throw bad("Swap calldata is a token approve/transfer, not a swap");
+  }
+}
+
+/** The output amount the swap tx was actually built for (`routerResult.toTokenAmount`), if present. */
+export function extractSwapAmountOut(data: unknown): bigint | undefined {
+  const first = Array.isArray(data) ? data[0] : data;
+  if (!isObj(first) || !isObj(first.routerResult)) return undefined;
+  const v = intString(first.routerResult.toTokenAmount);
+  return v === undefined ? undefined : BigInt(v);
+}
+
+/**
+ * Binance puts its own slippage floor inside the tx (`minReceiveAmount`). It must not be
+ * looser than the floor we showed the user (1 bp of rounding tolerance), otherwise the
+ * confirmed "get at least X" would be a lie.
+ */
+export function assertMinReceive(tx: SwapTx, amountOut: bigint, slippageBps: number): void {
+  if (tx.minReceive === undefined) return;
+  const required = (amountOut * BigInt(Math.max(0, 10_000 - slippageBps - 1))) / 10_000n;
+  if (BigInt(tx.minReceive) < required) {
+    throw new SwapError("UNSAFE_TX", "The swap's own minimum output is looser than the slippage you confirmed");
   }
 }
 

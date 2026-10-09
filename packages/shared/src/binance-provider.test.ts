@@ -266,3 +266,39 @@ test("stale quote (>30s) is refused even for a plain swap, and a double click ca
   assert.equal([a, b].filter((r) => r.status === "fulfilled").length, 1);
   assert.equal(f.sent.length, 1);
 });
+
+// ---------- real captured Binance /swap response (2026-10-09, wallet address replaced) ----------
+
+import { readFileSync } from "node:fs";
+import { assertMinReceive, extractSwapAmountOut } from "./swap-build";
+
+const real = JSON.parse(readFileSync(new URL("./fixtures/binance-swap-real.json", import.meta.url), "utf8"));
+
+test("real /swap response: parser finds the tx, amounts and Binance's own minimum", () => {
+  const tx = extractSwapTx(real.data);
+  assert.equal(tx.to, "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5");
+  assert.equal(tx.from, USER);
+  assert.equal(tx.value, "0");
+  assert.equal(tx.gas, "250000");
+  assert.equal(tx.data.slice(0, 10), "0xad43f73d");
+  assert.equal(extractSwapAmountOut(real.data), 14823928166388643n);
+  // our integer slippage math reproduces Binance's minReceiveAmount exactly
+  assert.equal(minAmountOutFor(14823928166388643n, 50).toString(), tx.minReceive);
+  assert.doesNotThrow(() => assertMinReceive(tx, 14823928166388643n, 50));
+  assert.doesNotThrow(() =>
+    assertSafeSwapTx(tx, { signer: USER, tokenIn: TOKENS.USDT.address, tokenOut: TOKENS.AAPLB.address }),
+  );
+});
+
+test("real response is refused for a different signer or a looser Binance minimum", () => {
+  const tx = extractSwapTx(real.data);
+  const ctx = { tokenIn: TOKENS.USDT.address, tokenOut: TOKENS.AAPLB.address };
+  assert.throws(() => assertSafeSwapTx(tx, { ...ctx, signer: ROUTER }), { code: "UNSAFE_TX" });
+  assert.throws(() => assertMinReceive({ ...tx, minReceive: "1" }, 14823928166388643n, 50), { code: "UNSAFE_TX" });
+});
+
+test("provider refuses a built swap whose own minimum is looser than the confirmed slippage", async () => {
+  const f = fake();
+  const loose = built({ tx: { to: ROUTER, data: "0x12345678abcdef", value: "0", minReceive: "1" } });
+  await assert.rejects(helperFor(f, async () => loose).quote(buy), { code: "UNSAFE_TX" });
+});
