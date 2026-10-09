@@ -56,6 +56,14 @@ export type GuardedTradeStatus =
 
 export type PocketSwapPipeline = SwapPipeline;
 
+/**
+ * The session key only exists after the passphrase unlocks it, at tick time. A live pipeline
+ * is therefore a factory that binds a provider to that one signer. A plain pipeline (the mock)
+ * is still accepted.
+ */
+export type PocketPipelineFactory = (signer: SessionSigner) => PocketSwapPipeline;
+export type PocketPipelineSource = PocketSwapPipeline | PocketPipelineFactory;
+
 export type AgentTickResult =
   | { status: "executed"; job: Job; record: SessionTradeRecord }
   | { status: "rejected"; reason: string; errorCode?: string }

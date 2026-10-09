@@ -5,3 +5,4 @@ export * from "./wallet";
 export * from "./job-store";
 export * from "./guards";
 export * from "./agent-runner";
+export * from "./pipeline";

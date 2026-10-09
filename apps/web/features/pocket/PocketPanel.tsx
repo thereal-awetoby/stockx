@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createMockProvider, createSwapHelper, type SwapPipeline } from "@stockx/shared";
-import { pocketCopy, railgunEnabled, type MainSigner, type PocketSwapPipeline } from "@stockx/shared/pocket";
+import { isPipelineFactory, pocketCopy, railgunEnabled, type MainSigner, type PocketPipelineSource } from "@stockx/shared/pocket";
 import { useAgentClock } from "./useAgentClock";
 import { usePocket } from "./usePocket";
 
@@ -11,7 +11,7 @@ const mockPipeline = createSwapHelper(createMockProvider(), { actor: "agent" });
 export interface PocketPanelProps {
   mainAddress: string;
   getMainSigner: () => MainSigner | Promise<MainSigner>;
-  pipeline?: PocketSwapPipeline | null;
+  pipeline?: PocketPipelineSource | null;
   /** @deprecated Pass pipeline instead. */
   executor?: SwapPipeline | null;
 }
@@ -132,7 +132,11 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
         <h2>Agent</h2>
         <p>Job spend: {pocket.job?.spentUsdt ?? 0} / {pocket.job?.capUsdt ?? 25} USDT</p>
         <p>Take profit: not active in this build</p>
-        <p>{pipeline || executor ? "Swap pipeline connected" : "Mock swap pipeline"}</p>
+        <p>
+          {pipeline && isPipelineFactory(pipeline)
+            ? "Live session pipeline. Real funds. Buy-only, max $5 per trade."
+            : pipeline || executor ? "Swap pipeline connected" : "Mock swap pipeline"}
+        </p>
         <label htmlFor="pocket-agent-amount">Buy amount in USDT</label>
         <input id="pocket-agent-amount" inputMode="decimal" value={buyAmount} onChange={(event) => setBuyAmount(event.target.value)} />
         <label htmlFor="pocket-agent-password">Pocket passphrase</label>

@@ -14,6 +14,7 @@ import {
   readPocketBalances,
   releasePocketJobSpend,
   reservePocketJobSpend,
+  resolvePocketPipeline,
   runAgentTick as runPocketAgentTick,
   setPocketJobStatus,
   unlockPocket,
@@ -25,14 +26,14 @@ import {
   type MainSigner,
   type Pocket,
   type PocketBalances,
-  type PocketSwapPipeline,
+  type PocketPipelineSource,
   type SessionTradeRecord,
 } from "@stockx/shared/pocket";
 
 export interface UsePocketOptions {
   mainAddress: string;
   getMainSigner: () => MainSigner | Promise<MainSigner>;
-  pipeline?: PocketSwapPipeline | null;
+  pipeline?: PocketPipelineSource | null;
 }
 
 export type PocketStatus = "loading" | "ready" | "not_configured" | "corrupt" | "error";
@@ -231,7 +232,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
       result = await runPocketAgentTick({
         pocket: { address: stored.address, exported },
         job,
-        helper: pipeline,
+        helper: resolvePocketPipeline(pipeline, signer),
         mainAddress,
         signer,
         storage: localStorage,

@@ -37,6 +37,7 @@ pre { background: var(--sheet); border: 1px solid var(--line); border-radius: 12
   padding: 12px; overflow-x: auto; font-size: 12px; white-space: pre-wrap; }
 .pos { color: var(--up); } .neg { color: var(--down); }
 .warn { color: var(--down); margin: 8px 0 0; }
+main > .warn { margin: 0 0 14px; }
 .err { color: var(--down); font-size: 12px; padding: 6px 0; }
 .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 11px;
   border: 1px solid var(--line-strong); color: var(--muted); background: var(--sheet); }
