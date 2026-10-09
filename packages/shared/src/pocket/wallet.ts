@@ -1,6 +1,7 @@
 import { Contract, formatUnits, JsonRpcProvider, Wallet, parseUnits, type Signer } from "ethers";
 import { POCKET_CONFIG } from "./config";
 import type { PocketBalances, SessionSigner } from "./types";
+import { TOKENS } from "../tokens";
 
 export const POCKET_STORAGE_KEY = "stockx.session-pocket.v1";
 export const MAX_POCKET_FUND_USDT = POCKET_CONFIG.systemJobCapUsdt;
@@ -200,4 +201,12 @@ export async function readPocketBalances(address: string): Promise<PocketBalance
     usdt: formatUnits(usdt, POCKET_CONFIG.usdtDecimals),
     bnb: formatUnits(bnb, 18),
   };
+}
+
+export async function readPocketAaplbBalance(address: string): Promise<string> {
+  if (!addressPattern.test(address)) throw new Error("Invalid pocket address.");
+  const provider = new JsonRpcProvider(POCKET_CONFIG.rpcUrl, POCKET_CONFIG.chainId);
+  const token = new Contract(TOKENS.AAPLB.address, TOKEN_ABI, provider);
+  const balance = await token.balanceOf(address);
+  return formatUnits(balance, TOKENS.AAPLB.decimals);
 }

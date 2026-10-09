@@ -66,9 +66,13 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   return (
     <section className="pocket-panel">
       <h2>Session pocket</h2>
+      <p>Main wallet: {mainAddress || "Not connected"}</p>
       <p>{pocket.status}</p>
       <p className="pocket-balance">USDT: {pocket.balances.usdt}</p>
       <p className="pocket-balance">BNB: {pocket.balances.bnb}</p>
+      <p className="pocket-balance">
+        AAPLB: {pocket.aaplbBalanceError ? `unavailable (${pocket.aaplbBalanceError})` : pocket.aaplbBalance}
+      </p>
       {Number(pocket.balances.bnb) < 0.002 && <p>{pocketCopy.smallBalance}</p>}
 
       {!pocket.pocket && pocket.status !== "corrupt" && pocket.status !== "loading" && pocket.status !== "error" && (

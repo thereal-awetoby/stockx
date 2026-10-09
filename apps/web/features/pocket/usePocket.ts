@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SwapError } from "@stockx/shared";
+import { SwapError, TOKENS, getRwaMarket } from "@stockx/shared";
 import {
   createPocket as createStoredPocket,
   exportPocketKey as decryptPocketKey,
@@ -10,6 +10,7 @@ import {
   pocketBackupVerified,
   pocketRecordExists,
   readPocket,
+  readPocketAaplbBalance,
   readPocketBalances,
   releasePocketJobSpend,
   reservePocketJobSpend,
@@ -40,6 +41,8 @@ export interface UsePocketResult {
   pocket: Pocket | null;
   exported: boolean;
   balances: PocketBalances;
+  aaplbBalance: string;
+  aaplbBalanceError: string | null;
   job: Job | null;
   activity: SessionTradeRecord[];
   runLog: AgentRunLogEntry[];
@@ -90,6 +93,8 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
   const [stored, setStored] = useState<ReturnType<typeof readPocket>>(null);
   const [exported, setExported] = useState(false);
   const [balances, setBalances] = useState<PocketBalances>({ usdt: "0", bnb: "0" });
+  const [aaplbBalance, setAaplbBalance] = useState("0");
+  const [aaplbBalanceError, setAaplbBalanceError] = useState<string | null>(null);
   const [job, setJob] = useState<Job | null>(null);
   const [activity, setActivity] = useState<SessionTradeRecord[]>([]);
   const [runLog, setRunLog] = useState<AgentRunLogEntry[]>([]);
@@ -104,6 +109,12 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     ]);
     setBalances(nextBalances);
     setJob(nextJob);
+    try {
+      setAaplbBalance(await readPocketAaplbBalance(current.address));
+      setAaplbBalanceError(null);
+    } catch (error) {
+      setAaplbBalanceError(error instanceof Error ? error.message : "Unable to read AAPLB balance.");
+    }
   }, []);
 
   useEffect(() => {
@@ -196,6 +207,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
         locks: browserJobLock(),
         balances: await readPocketBalances(stored.address),
         amountUsdt,
+        isMarketOpen: async () => (await getRwaMarket(TOKENS.AAPLB.address)).open,
         canExecute: () => armedRef.current,
       });
     } catch (error) {
@@ -236,6 +248,8 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     pocket: stored ? { address: stored.address, exported } : null,
     exported,
     balances,
+    aaplbBalance,
+    aaplbBalanceError,
     job,
     activity,
     runLog,
