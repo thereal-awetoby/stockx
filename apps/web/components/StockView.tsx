@@ -143,7 +143,7 @@ export default function StockView({ stock }: { stock: Stock }) {
         )}
       </div>
 
-      <BuyPanel stock={stock} />
+      <BuyPanel stock={stock} marketOpen={open} />
     </main>
   );
 }

@@ -33,6 +33,8 @@ export interface SimulationResult {
   ok: boolean;
   error?: string;
   gasEstimate?: string;
+  /** Real provider only: the swap cannot be dry-run until an exact approval is mined. */
+  needsApproval?: boolean;
 }
 
 export interface ExecutionResult {

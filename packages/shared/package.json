@@ -8,10 +8,11 @@
     "./pocket": "./src/pocket/index.ts"
   },
   "scripts": {
-    "test": "npm run test:pocket && npm run test:core",
+    "test": "npm run test:pocket && npm run test:core && npm run test:provider",
     "test:pocket": "tsx --test src/pocket/*.test.ts",
     "test:core": "vitest run src/swap.test.ts src/market-hours.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:provider": "tsx --test src/binance-provider.test.ts"
   },
   "dependencies": {
     "ethers": "^6.17.0"
