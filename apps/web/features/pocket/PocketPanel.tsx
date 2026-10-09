@@ -46,14 +46,23 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   }
 
   async function fund(): Promise<void> {
-    const hash = await pocket.fund(Number(fundAmount));
-    setMessage(hash ? `Funding transaction: ${hash}` : "Funding is unavailable.");
+    try {
+      const hash = await pocket.fund(Number(fundAmount));
+      setMessage(hash ? `Funding transaction: ${hash}` : "Funding is unavailable.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Funding failed.");
+    }
   }
 
   async function withdraw(): Promise<void> {
-    const hash = await pocket.withdraw(password, Number(withdrawAmount));
-    setPassword("");
-    setMessage(hash ? `Withdrawal transaction: ${hash}` : "Withdrawal is unavailable.");
+    try {
+      const hash = await pocket.withdraw(password, Number(withdrawAmount));
+      setMessage(hash ? `Withdrawal transaction: ${hash}` : "Withdrawal is unavailable.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Withdrawal failed.");
+    } finally {
+      setPassword("");
+    }
   }
 
   async function runOneTick(): Promise<void> {
