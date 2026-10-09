@@ -327,3 +327,74 @@ test("mock pipeline executes an agent trade before A2 address bindings", async (
   assert.equal(persisted.spentUsdt, 5);
   assert.equal(persisted.reservedUsdt, 0);
 });
+
+test("agent skips a closed market before quoting or reserving spend", async () => {
+  const storage = new TestMemoryStorage();
+  const locks = new TestSerialLock();
+  const job = await activeTestJob(storage, locks);
+  let quoteCalls = 0;
+  const pipeline = testPipeline({ quote: async (input) => { quoteCalls += 1; return testQuote(input); } });
+
+  const result = await runAgentTick({
+    pocket: testPocket(), job, helper: pipeline, mainAddress, signer: testSigner,
+    storage, locks, balances: testBalances(), amountUsdt: "5",
+    isMarketOpen: async () => false, config: testConfig,
+  });
+  const persisted = await loadPocketJob(storage, locks, sessionAddress);
+
+  assert.deepEqual(result, { status: "skipped", reason: "market_closed", job });
+  assert.equal(quoteCalls, 0);
+  assert.equal(persisted.spentUsdt, 0);
+  assert.equal(persisted.reservedUsdt, 0);
+});
+
+test("mock agent skips when the pocket has no available USDT", async () => {
+  const storage = new TestMemoryStorage();
+  const locks = new TestSerialLock();
+  const job = await activeTestJob(storage, locks);
+  const result = await runAgentTick({
+    pocket: testPocket(), job, helper: createSwapHelper(createMockProvider(), { actor: "agent" }),
+    mainAddress, signer: testSigner, storage, locks,
+    balances: testBalances({ usdt: "0" }), amountUsdt: "5", config: testConfig,
+  });
+
+  assert.equal(result.status, "skipped");
+  if (result.status === "skipped") assert.equal(result.reason, "empty");
+});
+
+test("mock agent stops when the job spend cap would be exceeded", async () => {
+  const storage = new TestMemoryStorage();
+  const locks = new TestSerialLock();
+  const job = testJob({ capUsdt: 5, spentUsdt: 4 });
+  storage.setItem(`stockx.agent-job.v2.${sessionAddress.toLowerCase()}`, JSON.stringify(job));
+  const pipeline = createSwapHelper(createMockProvider(), { actor: "agent" });
+  const result = await runAgentTick({
+    pocket: testPocket(), job, helper: pipeline, mainAddress, signer: testSigner,
+    storage, locks, balances: testBalances(), amountUsdt: "2", config: testConfig,
+  });
+  const persisted = await loadPocketJob(storage, locks, sessionAddress);
+
+  assert.equal(result.status, "skipped");
+  if (result.status === "skipped") assert.equal(result.reason, "cap_reached");
+  assert.equal(persisted.status, "stopped");
+  assert.equal(persisted.spentUsdt, 4);
+});
+
+test("mock agent does not quote or execute after the job is stopped", async () => {
+  const storage = new TestMemoryStorage();
+  const locks = new TestSerialLock();
+  const job = await loadPocketJob(storage, locks, sessionAddress);
+  let quoteCalls = 0;
+  const pipeline = createSwapHelper(createMockProvider(), { actor: "agent" });
+  const result = await runAgentTick({
+    pocket: testPocket(), job, helper: {
+      ...pipeline,
+      quote: async () => { quoteCalls += 1; throw new Error("stopped job must not quote"); },
+    },
+    mainAddress, signer: testSigner, storage, locks,
+    balances: testBalances(), amountUsdt: "5", config: testConfig,
+  });
+
+  assert.deepEqual(result, { status: "skipped", reason: "agent_stopped", job });
+  assert.equal(quoteCalls, 0);
+});

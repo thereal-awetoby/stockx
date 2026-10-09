@@ -28,6 +28,7 @@ export interface RunAgentTickInput {
   locks: PocketJobLock;
   balances: PocketBalances;
   amountUsdt: string;
+  isMarketOpen?: () => boolean | Promise<boolean>;
   canExecute?: () => boolean | Promise<boolean>;
   config?: PocketConfig;
 }
@@ -56,6 +57,9 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
   let executionMayHaveStarted = false;
 
   try {
+    if (input.isMarketOpen && !(await input.isMarketOpen())) {
+      return { status: "skipped", reason: "market_closed", job };
+    }
     const availableUsdt = Number(balances.usdt);
     const reserved = await reservePocketJobSpend(storage, locks, pocket.address, amountUsdt, availableUsdt, utcDay);
     if (reserved.status === "inactive") return { status: "skipped", reason: "agent_stopped", job: reserved.job };
