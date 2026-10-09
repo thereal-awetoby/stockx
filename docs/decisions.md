@@ -39,3 +39,7 @@ Job cap, spent amount, reserved amount, and last UTC run day persist per pocket 
 ## Known unavailable integrations
 
 No live swap provider is wired yet (A2 in progress), so live agent trading is unavailable. Railgun is not wired. Take-profit remains inactive until A supplies a price source (A will expose the Binance RWA price). No main-wallet transfer path is reachable from the agent runner.
+
+## A2: swap execution (2026-10-09)
+
+One provider, bound to one signer. The tx is built server-side from a fresh quote on every build, validated twice (server and browser), and re-built right before sending. Approval is exact-amount, encoded locally rather than taken from the API's approve endpoint, so a wrong API response cannot widen it. Slippage default 50 bps; the confirmed output minus slippage is the floor for the re-quote. Live sending is behind `NEXT_PUBLIC_LIVE_SWAPS=1` until the dry run in `docs/builder-a-handoff.md` is done. The `/swap` response shape is unverified; the parser fails closed.
