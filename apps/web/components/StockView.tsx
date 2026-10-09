@@ -74,6 +74,8 @@ export default function StockView({ stock }: { stock: Stock }) {
       <h1 style={{ marginTop: 8 }}>{stock.ticker} <span className="muted" style={{ fontWeight: 400 }}>{stock.name}</span></h1>
       <p className="sub">{stock.token} · {stock.issuer}</p>
 
+      <div className="asset">
+      <div>
       {/* The closed-market line is the stock product. */}
       <div className="card">
         <div className="row">
@@ -143,7 +145,11 @@ export default function StockView({ stock }: { stock: Stock }) {
         )}
       </div>
 
-      <BuyPanel stock={stock} marketOpen={open} />
+      </div>
+      <aside className="ticket">
+        <BuyPanel stock={stock} marketOpen={open} />
+      </aside>
+      </div>
     </main>
   );
 }

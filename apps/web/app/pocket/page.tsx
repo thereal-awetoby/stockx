@@ -21,13 +21,17 @@ export default function PocketPage() {
   };
 
   return (
-    <>
+    <main>
+      <div className="lede">
+        <h1>Pocket</h1>
+        <p>Optional session wallet. The agent can spend only this wallet, never your main one.</p>
+      </div>
       {!isPocketConfigReady && (
-        <p>
+        <p className="warn">
           Set NEXT_PUBLIC_AAPLB_ADDRESS and NEXT_PUBLIC_AAPLB_DECIMALS in apps/web/.env.local before using live AAPLB execution.
         </p>
       )}
       <PocketPanel mainAddress={address} getMainSigner={getMainSigner} />
-    </>
+    </main>
   );
 }

@@ -1,18 +1,16 @@
-import Link from "next/link";
 import { FIRST_STOCK } from "@stockx/shared";
 import MarketBanner from "../components/MarketBanner";
-import SwapSmokeTest from "../components/SwapSmokeTest";
+import MarketsList from "../components/MarketsList";
 
 export default function Home() {
   return (
     <main>
-      <p className="sub">Swap tokenized stocks on BNB Chain. {FIRST_STOCK.token} first.</p>
+      <div className="lede">
+        <h1>Swap tokenized stocks</h1>
+        <p>On BNB Chain. {FIRST_STOCK.token} first. stockX only quotes and swaps. It does not mint or hold the share.</p>
+      </div>
       <MarketBanner />
-      <Link href="/markets" className="card stock-row">
-        <strong>Browse markets</strong>
-        <span className="muted">→</span>
-      </Link>
-      <SwapSmokeTest />
+      <MarketsList />
     </main>
   );
 }
