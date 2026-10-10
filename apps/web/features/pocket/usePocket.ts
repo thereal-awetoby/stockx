@@ -12,6 +12,7 @@ import {
   readPocket,
   readPocketAaplbBalance,
   readPocketBalances,
+  createTickGate,
   releasePocketJobSpend,
   reservePocketJobSpend,
   resolvePocketPipeline,
@@ -107,6 +108,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
   const [runLog, setRunLog] = useState<AgentRunLogEntry[]>([]);
   const [armed, setArmed] = useState(false);
   const armedRef = useRef(false);
+  const tickGate = useRef(createTickGate());
   const [status, setStatus] = useState<PocketStatus>("loading");
 
   const refresh = useCallback(async (current: NonNullable<typeof stored>) => {
@@ -231,6 +233,13 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
 
   const runOneTick = useCallback(async (password: string, amountUsdt: string): Promise<AgentTickResult> => {
     let result: AgentTickResult;
+    const gate = tickGate.current.begin();
+    if (!gate.ok) {
+      // Never overlap ticks, and never tick again after an unconfirmed result (double-buy risk).
+      const denied: AgentTickResult = { status: "rejected", reason: gate.reason };
+      setRunLog((entries) => [toRunLogEntry(denied), ...entries].slice(0, 50));
+      return denied;
+    }
     if (!armedRef.current) {
       result = { status: "rejected", reason: "kill_switch_active" };
     } else if (!stored || !job || !mainAddress) {
@@ -261,12 +270,19 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
       };
     }
     }
+    tickGate.current.end(result.status);
     if ("job" in result && result.job) setJob(result.job);
     if (result.status === "executed") setActivity((records) => [result.record, ...records]);
     const entry = toRunLogEntry(result);
     setRunLog((entries) => [entry, ...entries].slice(0, 50));
+    // Balances change on-chain during a tick. Refresh now, and once more shortly after because
+    // public BSC RPC nodes can lag a block behind.
+    if (stored && result.status !== "rejected") {
+      void refresh(stored).catch(() => undefined);
+      window.setTimeout(() => void refresh(stored).catch(() => undefined), 5_000);
+    }
     return result;
-  }, [exported, job, mainAddress, pipeline, stored]);
+  }, [exported, job, mainAddress, pipeline, refresh, stored]);
 
   const startAgent = useCallback(async () => {
     if (!pipeline || !stored || !exported || !mainAddress || mainAddress.toLowerCase() === stored.address.toLowerCase()) {
@@ -274,6 +290,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
       return false;
     }
     const activeJob = await setPocketJobStatus(localStorage, browserJobLock(), stored.address, "active");
+    tickGate.current.acknowledgeUnconfirmed(); // re-arming is the owner confirming they checked the explorer
     armedRef.current = true;
     setArmed(true);
     setJob(activeJob);
