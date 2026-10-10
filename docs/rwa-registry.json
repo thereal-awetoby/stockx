@@ -1,0 +1,4087 @@
+{
+  "generatedAt": "2026-10-10T11:32:01.776Z",
+  "chain": 56,
+  "quoteAmountUsdt": 1,
+  "tokens": [
+    {
+      "ticker": "AAPL",
+      "company": "Apple Inc.",
+      "symbol": "AAPLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x390a684ef9cade28a7ad0dfa61ab1eb3842618c4",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "AAPL",
+      "company": "Apple Inc.",
+      "symbol": "AAPLB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x431a3bee82e2ca41e49895cbece5bb0f76a89b7a",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "AAPLB",
+        "amountOutPerUsdt": "2969922958767507",
+        "priceUsd": "336.74323855069331645364000000",
+        "priceImpactPercent": "0.0005006122",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "MSFT",
+      "company": "Microsoft Corp",
+      "symbol": "MSFTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x6bfe75d1ad432050ea973c3a3dcd88f02e2444c3",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "MSFT",
+      "company": "Microsoft Corp",
+      "symbol": "MSFTB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x80106cb3ead06659a5ad19df39d9b4733863b9b0",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "MSFTB",
+        "amountOutPerUsdt": "1864613886373109",
+        "priceUsd": "535.55277409112625704825000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "NVDA",
+      "company": "Nvidia Corp",
+      "symbol": "NVDAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xa9ee28c80f960b889dfbd1902055218cba016f75",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "NVDA",
+      "company": "Nvidia Corp",
+      "symbol": "NVDAB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x02fca66c1d1afb4e2a7884261eb00f63598a7436",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "NVDAB",
+        "amountOutPerUsdt": "4336220711118287",
+        "priceUsd": "230.60932609935951633195000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Kipseli"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "GOOGL",
+      "company": "Alphabet Inc.",
+      "symbol": "GOOGLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x091fc7778e6932d4009b087b191d1ee3bac5729a",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "GOOGL",
+      "company": "Alphabet Inc.",
+      "symbol": "GOOGLB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x3f53de71c126bdabae20f9cd64848d317f6c3238",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "GOOGLB",
+        "amountOutPerUsdt": "2836976796348945",
+        "priceUsd": "352.35836759149968429909000000",
+        "priceImpactPercent": "0.0003933710",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V4"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "GOOG",
+      "company": null,
+      "symbol": "GOOGon",
+      "platform": "ondo",
+      "assetType": null,
+      "address": "0x817f1f6780f99bcaac394a59cb0261962df5da8b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 39m."
+    },
+    {
+      "ticker": "AMZN",
+      "company": "Amazon.Com Inc",
+      "symbol": "AMZNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4553cfe1c09f37f38b12dc509f676964e392f8fc",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "AMZN",
+      "company": "Amazon.Com Inc",
+      "symbol": "AMZNB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x1a4b499833a79a09ad7cf1d42d7dacf71e92eb00",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "AMZNB",
+        "amountOutPerUsdt": "3803427864266307",
+        "priceUsd": "262.66000000",
+        "priceImpactPercent": "0.0025002489",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Pancakeswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "META",
+      "company": "Meta Platforms, Inc.",
+      "symbol": "METAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd7df5863a3e742f0c767768cdfcb63f09e0422f6",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "META",
+      "company": "Meta Platforms, Inc.",
+      "symbol": "METAB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x7425889fe94f9d693e8daefe88bcced6acfef4c0",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "METAB",
+        "amountOutPerUsdt": "1388612793399079",
+        "priceUsd": "719.4442482198461562975000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "SCCO",
+      "company": "Southern Copper",
+      "symbol": "SCCOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf15b8f7465b92799f6ee440f86b3cab5a4dbc65a",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 39m."
+    },
+    {
+      "ticker": "TSLA",
+      "company": "Tesla, Inc.",
+      "symbol": "TSLAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x2494b603319d4d9f9715c9f4496d9e0364b59d93",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "TSLA",
+      "company": "Tesla, Inc.",
+      "symbol": "TSLAB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x5b1910eaad6450e50f816082aa078c41f10c292f",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "TSLAB",
+        "amountOutPerUsdt": "2611157312283274",
+        "priceUsd": "382.81000000000000000000000000",
+        "priceImpactPercent": "0.0005012544",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "NFLX",
+      "company": "NetFlix Inc",
+      "symbol": "NFLXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x7048f5227b032326cc8dbc53cf3fddd947a2c757",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 39m."
+    },
+    {
+      "ticker": "NFLX",
+      "company": "NetFlix Inc",
+      "symbol": "NFLXB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0xd6829ea836b6fa224d099d40e54b31262f874631",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "NFLXB",
+        "amountOutPerUsdt": "14219250691056865",
+        "priceUsd": "70.21000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "AMD",
+      "company": "Advanced Micro Devices",
+      "symbol": "AMDon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x9f16e46c73b43bdb70861247d537bee4ea18f639",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "AMD",
+      "company": "Advanced Micro Devices",
+      "symbol": "AMDB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x75fd4cf6f8392e41e70391d60c90c0d5211603a1",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "AMDB",
+        "amountOutPerUsdt": "1639779129378355",
+        "priceUsd": "609.00000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "INTC",
+      "company": "Intel Corp",
+      "symbol": "INTCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xa528caaa2f96090e379d43f90834c75df54d6e74",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "INTC",
+      "company": "Intel Corp",
+      "symbol": "INTCB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xe614e2fc6c787035ff51f452e8e826bfd32d5283",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "INTCB",
+        "amountOutPerUsdt": "9518216450712111",
+        "priceUsd": "104.93000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "AVGO",
+      "company": "Broadcom Inc.",
+      "symbol": "AVGOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x0ed2e3180edf393e6bf8db124bd15ddd54de150a",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "AVGO",
+      "company": "Broadcom Inc.",
+      "symbol": "AVGOB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x76682c454467b3a1150ad8b6a92fc5ee2c21d7ed",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "AVGOB",
+        "amountOutPerUsdt": "2747523689144583",
+        "priceUsd": "363.41065926545613537990000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "QCOM",
+      "company": "Qualcomm Inc",
+      "symbol": "QCOMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xfbd4d681c92ead6af0e49950c8b2e47eeacbb2db",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 39m."
+    },
+    {
+      "ticker": "QCOM",
+      "company": "Qualcomm Inc",
+      "symbol": "QCOMB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x5f7a56e877b9130608bf8be962621011182fefe1",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "QCOMB",
+        "amountOutPerUsdt": "5644408970885395",
+        "priceUsd": "176.77997936289587904271000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "TXN",
+      "company": "Texas Instruments Incorporated",
+      "symbol": "TXNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xca3a5c955f1f01f20aacf9501b03e4aa235e478b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 35m."
+    },
+    {
+      "ticker": "MU",
+      "company": "Micron Technology, Inc.",
+      "symbol": "MUon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8b6acf6041a81567f012ff6a4c6d96d5818d74bf",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "MU",
+      "company": "Micron Technology, Inc.",
+      "symbol": "MUB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xcdf2f3e0fa43c47a6662a91c9e4a7c5f69762699",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "MUB",
+        "amountOutPerUsdt": "966928502787458",
+        "priceUsd": "1033.41109273734682957990000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "TMUS",
+      "company": "T-Mobile US, Inc.",
+      "symbol": "TMUSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x2588f20bad92da8dcce7fac8311b5f8ab4690e43",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 35m."
+    },
+    {
+      "ticker": "MUU",
+      "company": "Daily 2X Long Micron ETF - Direxion",
+      "symbol": "MUUB",
+      "platform": "bstock",
+      "assetType": 3,
+      "address": "0x0bb3fa77e0809f42948e435f04883c25415e8263",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "MUUB",
+        "amountOutPerUsdt": "29241511324618559",
+        "priceUsd": "34.14440643401402953943000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "FLQL",
+      "company": "Franklin U.S. Large Cap Multifactor Index ETF",
+      "symbol": "FLQLon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x48187890d16aee64798e02c5bed510f4db5694a9",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 4m."
+    },
+    {
+      "ticker": "ORCL",
+      "company": "Oracle Corp",
+      "symbol": "ORCLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x03e4bd1ea53f1da84513da0319d1f03dd1bbcf93",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "ORCL",
+      "company": "Oracle Corp",
+      "symbol": "ORCLB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x4684d9887fc1c71cba7bab8e88835cec217eb598",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "ORCLB",
+        "amountOutPerUsdt": "7042181640108471",
+        "priceUsd": "141.90401645970913595022000000",
+        "priceImpactPercent": "0.0005586575",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Pancakeswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "CRM",
+      "company": "Salesforce, Inc.",
+      "symbol": "CRMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd04a2bb053277721a8321d7441eed5b42fdf7250",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "CRM",
+      "company": "Salesforce, Inc.",
+      "symbol": "CRMB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0x8c433eca1be0e2a357015602f63751c768f6f643",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "CRMB",
+        "amountOutPerUsdt": "4352183229410469",
+        "priceUsd": "229.49181584476860226476000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "ADBE",
+      "company": "Adobe",
+      "symbol": "ADBEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xcb22db0ecb6fe58b7b47db443dcfdfdfbf729cef",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "ADBE",
+      "company": "Adobe",
+      "symbol": "ADBEB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x65c0249d49e3231540fd0db0a1ae9259e6eaaf57",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "ADBEB",
+        "amountOutPerUsdt": "4137057432408928",
+        "priceUsd": "241.12000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "CSCO",
+      "company": "Cisco Systems, Inc.",
+      "symbol": "CSCOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x34304f2f7cc487eb4186e6d69f5905a613474aa2",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "IBM",
+      "company": "International Business Machines Corporation",
+      "symbol": "IBMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xe8ff70859ce4cbd72e4352b4fb45f5bf39d07464",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "IBM",
+      "company": "International Business Machines Corporation",
+      "symbol": "IBMB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xfa273b076feb8c0fb34e554ae341082323d016a3",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "IBMB",
+        "amountOutPerUsdt": "4377947986166703",
+        "priceUsd": "227.78456493789249045240000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "PLTR",
+      "company": "Palantir Technologies Inc.",
+      "symbol": "PLTRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x9351abd19f42101dd36025e495b98e910b255d78",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "PLTR",
+      "company": "Palantir Technologies Inc.",
+      "symbol": "PLTRB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x0ca5d51d0277bd006fd9607d3e560785ebad8222",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "PLTRB",
+        "amountOutPerUsdt": "4769989474450480",
+        "priceUsd": "209.12000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "SNOW",
+      "company": "Snowflake Inc.",
+      "symbol": "SNOWon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x138ed6833ff4e8811e1fea0d005e13726c8886f9",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "UBER",
+      "company": "Uber Technologies, Inc.",
+      "symbol": "UBERon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xde9d6036fca870f7efc5a82722ae694c371ac909",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "ABNB",
+      "company": "Airbnb, Inc.",
+      "symbol": "ABNBon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xef80743f78d98fc2b47a2253b293152ce8b879ba",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "SHOP",
+      "company": "Shopify Inc.",
+      "symbol": "SHOPon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x43d0b380c33cd004a6a69abd61843881a2de4113",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "SQQQ",
+      "company": "ProShares UltraPro Short QQQ",
+      "symbol": "SQQQon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x17515b68378d86c38f394c666e79907da05dcba9",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 34m."
+    },
+    {
+      "ticker": "SQQQ",
+      "company": "ProShares UltraPro Short QQQ",
+      "symbol": "SQQQB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x25e572b466d152604d9e6c3e53b432b978825342",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "SQQQB",
+        "amountOutPerUsdt": "29972369435801695",
+        "priceUsd": "33.29445830551741193307000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "XYZ",
+      "company": "Block, Inc.",
+      "symbol": "XYZon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xe778a2e5d953c82eb9475cf3b87654226a867344",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "PSQ",
+      "company": "ProShares Short QQQ",
+      "symbol": "PSQon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x3802dc739ef9e226f36421a9c15efa519153bbbe",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "PYPL",
+      "company": "PayPal Holdings, Inc.",
+      "symbol": "PYPLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x374d03a6c0d5bd4be0a5117ebe1b49d52ac8a53f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "PYPL",
+      "company": "PayPal Holdings, Inc.",
+      "symbol": "PYPLB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x2806a561fc1f9259b2d54a281796bde0d92762ae",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "PYPLB",
+        "amountOutPerUsdt": "17964453028427692",
+        "priceUsd": "55.51819198181447646278000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "COIN",
+      "company": "Coinbase Global, Inc.",
+      "symbol": "COINon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf8589b526fdd65f7f301c605a6e04f0f1b4b3620",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "COIN",
+      "company": "Coinbase Global, Inc.",
+      "symbol": "COINB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x585bde7c54abb5ccd7791f923d6c2187635f3952",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "COINB",
+        "amountOutPerUsdt": "5531711983982781",
+        "priceUsd": "180.88000000000000000000000000",
+        "priceImpactPercent": "0.0006912344",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Pancakeswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "MSTR",
+      "company": "Strategy Inc",
+      "symbol": "MSTRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x7313ea16493b2f55054df0131a3a14b043ec8992",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "MSTR",
+      "company": "Strategy Inc",
+      "symbol": "MSTRB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xe87afb3076aeb0f9b14e368de8145ae6a2826a14",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "MSTRB",
+        "amountOutPerUsdt": "6420014143312188",
+        "priceUsd": "155.61000000000000000000000000",
+        "priceImpactPercent": "0.0030992993",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 4,
+        "venues": [
+          "Genius",
+          "Pancakeswap V3",
+          "Topaz Cl",
+          "Pancakeswap V2"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "HOOD",
+      "company": "Robinhood Markets, Inc.",
+      "symbol": "HOODon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x19601179a60f55ff6636f5d1a8b6671053bd60a8",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "HOOD",
+      "company": "Robinhood Markets, Inc.",
+      "symbol": "HOODB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xa394dcea3fd3847fd793afbfd163e2e3858b7c65",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "HOODB",
+        "amountOutPerUsdt": "9139894659536657",
+        "priceUsd": "109.29000000000000000000000000",
+        "priceImpactPercent": "0.0006952269",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Pancakeswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "SOFI",
+      "company": "SoFi Technologies Inc",
+      "symbol": "SOFIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x71507068e98049cba81e9bbc8d901e4a2f4222eb",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "JPM",
+      "company": "JPMorgan Chase & Co.",
+      "symbol": "JPMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x317bf42b43a394860718266dec445dcc9fd9da49",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "JPM",
+      "company": "JPMorgan Chase & Co.",
+      "symbol": "JPMB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xbd49d695ba2cc46c8c603eb62afcd7fff4698281",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "JPMB",
+        "amountOutPerUsdt": "2986526430083634",
+        "priceUsd": "334.52000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "JAAA",
+      "company": "JPMorgan Active High Yield ETF",
+      "symbol": "JAAAon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x84719a1082ed487c7eeac7d69885e3cc2009ea78",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 34m."
+    },
+    {
+      "ticker": "BAC",
+      "company": "Bank of America Corporation",
+      "symbol": "BACon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd615468088b19fb9d4f03cb3ce9e33876ff3db99",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "GS",
+      "company": "Goldman Sachs Group Inc.",
+      "symbol": "GSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x0d4f9b25f81163fb4840ba4f434672543823000c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "GS",
+      "company": "Goldman Sachs Group Inc.",
+      "symbol": "GSB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x20cce6656e5f7f79f280e2d0f5db55b401bdbfce",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "GSB",
+        "amountOutPerUsdt": "1107151582559033",
+        "priceUsd": "898.93161708785157048232000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "EWZ",
+      "company": "iShares MSCI Brazil ETF",
+      "symbol": "EWZon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x9876f4b879cde9aa49ffd260034a0698b7b33a49",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 34m."
+    },
+    {
+      "ticker": "EWY",
+      "company": "iShares MSCI South Korea ETF",
+      "symbol": "EWYon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x12b7adc48416a103f63e7e6210f62c81dfb91fd0",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "EWY",
+      "company": "iShares MSCI South Korea ETF",
+      "symbol": "EWYB",
+      "platform": "bstock",
+      "assetType": 3,
+      "address": "0xbe82f76637dba2c114c41df856c2c51e522e2cb8",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "EWYB",
+        "amountOutPerUsdt": "5613659881117598",
+        "priceUsd": "177.94000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "HIMS",
+      "company": "Hims & Hers Health, Inc.",
+      "symbol": "HIMSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4693f6f5ef257381a28afd0673e64d8b32d5c6ad",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "HIMS",
+      "company": "Hims & Hers Health, Inc.",
+      "symbol": "HIMSB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0xee6f4bcc88c2c8583d5a65c7d0c877b464100711",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "HIMSB",
+        "amountOutPerUsdt": "32440844324809633",
+        "priceUsd": "30.73000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "EWJ",
+      "company": "iShares MSCI Japan ETF",
+      "symbol": "EWJon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x82715299f3f132fb85f3de1f7e8fafd3d79f3eb5",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "WFC",
+      "company": "Wells Fargo & Co.",
+      "symbol": "WFCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x629520dee1620def11596f84e85de9f1ff653012",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "MRVL",
+      "company": "Marvell Technology, Inc.",
+      "symbol": "MRVLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x1501ec83ffef405b4331cc4f73277a40fb0c627d",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "VZ",
+      "company": "Verizon Communications Inc.",
+      "symbol": "VZon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xa3b089c886e6d721f49def8e050f3b9d4362560b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "IVV",
+      "company": "iShares Core S&P 500 ETF",
+      "symbol": "IVVon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x1104eb7e85e25eb45f88e638b0c27a06c1a91cb2",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "CVX",
+      "company": "Chevron Corporation",
+      "symbol": "CVXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd3113a0ad20a46f6a662c63fe8e637f7713e59c7",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "VTI",
+      "company": "Vanguard Total Stock Market Index Fund ETF Shares",
+      "symbol": "VTIon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x158734153f354cb326ee690c3d55f810dcb0fc90",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 38m."
+    },
+    {
+      "ticker": "VRT",
+      "company": "Vertiv Holdings Co.",
+      "symbol": "VRTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x9cea8a7be1ab0320b709d368ad60d8500f55995f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "VRTX",
+      "company": "Vertex Pharmaceuticals",
+      "symbol": "VRTXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8c9979dc208f74a5602c38691aa920f121e2f863",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "SLV",
+      "company": "iShares Silver Trust",
+      "symbol": "SLVon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x8b872732b07be325a8803cdb480d9d20b6f8d11b",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "VNQ",
+      "company": "Vanguard Real Estate ETF",
+      "symbol": "VNQon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x10b58a3d9dcec59bb1c3bf6b9c9414eafce711c9",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "NVO",
+      "company": "Novo-Nordisk A/S",
+      "symbol": "NVOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x08a513779f46ffb7a34f16094a94016d010128a8",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "RIVN",
+      "company": "Rivian Automotive, Inc. Class A",
+      "symbol": "RIVNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x277e1fa8704c5511fed7e30bc691f922aa30101b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "VRSN",
+      "company": "VeriSign, Inc.",
+      "symbol": "VRSNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x37ff203ac221313b620d047eddd7bd6f68d656a6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 3m."
+    },
+    {
+      "ticker": "VDE",
+      "company": "Vanguard Energy Index Fund ETF Shares",
+      "symbol": "VDEon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x9e23662f540c6bc117adf91230730d9b2fdf5643",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 33m."
+    },
+    {
+      "ticker": "MRVL",
+      "company": "Marvell Technology, Inc.",
+      "symbol": "MRVLB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x16cd4fe7e8880ecc3ba222795229e20489fc2c76",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "MRVLB",
+        "amountOutPerUsdt": "3609908226569485",
+        "priceUsd": "276.79242153286621493550000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "AMAT",
+      "company": "Applied Materials, Inc.",
+      "symbol": "AMATon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x5ecc352c4640f1d26bd231dbbd171f40f7d0eec6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "AMAT",
+      "company": "Applied Materials, Inc.",
+      "symbol": "AMATB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xa304bd78e739c0f777202b3eb73ac3736d1df801",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "AMATB",
+        "amountOutPerUsdt": "1968917587547584",
+        "priceUsd": "507.23933424728152167006000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "MA",
+      "company": "Mastercard Incorporated",
+      "symbol": "MAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x25ffda07f585c39848db6573e533d7585679c52d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "MTSI",
+      "company": "MACOM Technology Solutions Holdings, Inc.",
+      "symbol": "MTSIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x1dcd320c5d7b84cd407437c58d56cbbdd0d9d8f3",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "MTZ",
+      "company": "Mastec, Inc.",
+      "symbol": "MTZon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf49046aae76eaeb7ffd3ef116ce0f7cd0f52d93e",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 3m."
+    },
+    {
+      "ticker": "MARA",
+      "company": "MARA Holdings, Inc.",
+      "symbol": "MARAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd226d8170ee38793430c7dec6903df4b818bb74c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "MXL",
+      "company": "MaxLinear, Inc.",
+      "symbol": "MXLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x5cb7671740877723c9ad55348a751d7b57052e07",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "MAG7X",
+      "company": "Ondo Magnificent 7 and Crypto Portfolio",
+      "symbol": "MAG7Xon",
+      "platform": "ondo",
+      "assetType": null,
+      "address": "0x50436ec45316a98e72b03ead5752e8543f11ec09",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 3m."
+    },
+    {
+      "ticker": "KO",
+      "company": "Coca-Cola Company",
+      "symbol": "KOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x405f38b90bebf1259062cf29da299f3398662bcb",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "CPNG",
+      "company": "Coupang, Inc.",
+      "symbol": "CPNGon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x19904bc04c09e5d29ed216ddd105bdf103a0ba2d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 33m."
+    },
+    {
+      "ticker": "KORU",
+      "company": "Daily MSCI South Korea Bull 3X ETF - Direxion",
+      "symbol": "KORUB",
+      "platform": "bstock",
+      "assetType": 3,
+      "address": "0x1ffad32d69c5fead99f88c25ca0191edc3757636",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "KORUB",
+        "amountOutPerUsdt": "55498520759386351",
+        "priceUsd": "18.02000000000000000000000000",
+        "priceImpactPercent": "0.0020740610",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V4"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "KOPN",
+      "company": "Kopin Corporation",
+      "symbol": "KOPNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xed5615c5280e897241b9e4f019562a581cd49390",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 3m."
+    },
+    {
+      "ticker": "PEP",
+      "company": "PepsiCo, Inc.",
+      "symbol": "PEPon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf99f8f3a95257d82006183bd524efa7aacc9ef7a",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "MCD",
+      "company": "McDonald's Corporation",
+      "symbol": "MCDon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x995add4ba29a628a57930a8a185c62ca044ec090",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "NKE",
+      "company": "Nike, Inc.",
+      "symbol": "NKEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x04b5e199f2ec84f78b111035f57b16bee448db6f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "DIS",
+      "company": "The Walt Disney Company",
+      "symbol": "DISon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xeee9eee593cb8f7946260b4066cba7907f40acfa",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "HIMX",
+      "company": "Himax Technologies, Inc.",
+      "symbol": "HIMXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x6cf3b84f0ba4d86d9f6987812a11db2c447d9483",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 3m."
+    },
+    {
+      "ticker": "SBUX",
+      "company": "Starbucks Corp",
+      "symbol": "SBUXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x94d7754541b829a87321d56121bc544167ac490d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "WMT",
+      "company": "Walmart Inc.",
+      "symbol": "WMTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xa7d1e886acf66ec0656df2decb4b7c893a3bab4c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "COST",
+      "company": "Costco Wholesale Corp",
+      "symbol": "COSTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x34375f826fd3dd4e15f883d4f4786bb45eb705ac",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "STX",
+      "company": "Seagate",
+      "symbol": "STXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x966ebcba3c51e81f5cf159a1eabefd2327ab5e8d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "STX",
+      "company": "Seagate",
+      "symbol": "STXB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x2e065f65f1699964f4092de1d39a8efe6c8d6f32",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "STXB",
+        "amountOutPerUsdt": "1272482788056352",
+        "priceUsd": "783.0676836192661990399000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "WDC",
+      "company": "Western Digital",
+      "symbol": "WDCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xceb29848d04ad3cb46e1fe8e45b82ffac39d797d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "WDC",
+      "company": "Western Digital",
+      "symbol": "WDCB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xebe29695f8047c13d36e7a790ca8c1b239ffad1c",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "WDCB",
+        "amountOutPerUsdt": "2502690524208654",
+        "priceUsd": "396.86926912366955986758000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "HD",
+      "company": "The Home Depot, Inc.",
+      "symbol": "HDon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x31dabf49e4bc1af1456c1819cb6a2562154e92f3",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 3m."
+    },
+    {
+      "ticker": "LOW",
+      "company": "Lowe's Companies, Inc.",
+      "symbol": "LOWon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x2ec46eed30c94caa5979e6a0395abe824138335f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 3m."
+    },
+    {
+      "ticker": "XOM",
+      "company": "Exxon Mobil Corporation",
+      "symbol": "XOMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4d209d275e3492ac08497a7a42915899c4dd5e86",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "PFE",
+      "company": "Pfizer Inc.",
+      "symbol": "PFEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8a83c31d6751833b4940b6e871c48d9a15a07b46",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "JNJ",
+      "company": "Johnson & Johnson",
+      "symbol": "JNJon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd1f799cb9f5d0a02951b0755beced6c43882712f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "MRK",
+      "company": "Merck & Co., Inc.",
+      "symbol": "MRKon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x869027261075c3c239d6a26842579b93802606f4",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "LLY",
+      "company": "Eli Lilly & Co.",
+      "symbol": "LLYon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x341d31b2be1fee9c00e395a62ba41837f4322eed",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "LLY",
+      "company": "Eli Lilly & Co.",
+      "symbol": "LLYB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x5407912f1aa4b9e05cbe6abeb9721547a643ec6b",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "LLYB",
+        "amountOutPerUsdt": "846383446156481",
+        "priceUsd": "1179.72000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "UNH",
+      "company": "UNITEDHEALTH GROUP INCORPORATED (Delaware)",
+      "symbol": "UNHon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x3385cb29cca0ac66f5d2354d13ef977b49a2510f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "ABBV",
+      "company": "AbbVie Inc. (ABBV)",
+      "symbol": "ABBVon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8677abad7b458bf16a0fb2676dfc7d3f55ac202a",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "BABA",
+      "company": "Alibaba Group Holding Limited",
+      "symbol": "BABAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd5964f3fcee8d649995ab88f04b8982539c282d2",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "BABA",
+      "company": "Alibaba Group Holding Limited",
+      "symbol": "BABAB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x4ef9d3062c7f6eba4aae4990c5036598c6eff4ec",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "BABAB",
+        "amountOutPerUsdt": "9014616652465581",
+        "priceUsd": "110.89000000",
+        "priceImpactPercent": "0.0005035572",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "BA",
+      "company": "Boeing Company",
+      "symbol": "BAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf21132a811ad1a878e21af60f64d4e690c9daa42",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "C",
+      "company": "Citigroup Inc.",
+      "symbol": "Con",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8ddb97556f6ae98b4d408c56b167139fe1cbe3e8",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "PBR",
+      "company": "PETROLEO BRASILEIRO S.A.-PETROBRAS",
+      "symbol": "PBRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x2b1d5cdecc356530a746c5754231efaeaca64022",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "BIDU",
+      "company": "Baidu, Inc.",
+      "symbol": "BIDUon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x467e59ce5d5fe01686d4a80dd1e1dae13549aa6c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 37m."
+    },
+    {
+      "ticker": "BAI",
+      "company": "iShares A.I. Innovation and Tech Active ETF",
+      "symbol": "BAIon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x2659dd96def34ced3679901e5500779be297fe5a",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 32m."
+    },
+    {
+      "ticker": "BBAI",
+      "company": "BigBear.ai Holdings, Inc.",
+      "symbol": "BBAIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x7ba995f1662a01f3be0dc299ce94bb7e9c7075f5",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 32m."
+    },
+    {
+      "ticker": "CAT",
+      "company": "Caterpillar Inc.",
+      "symbol": "CATon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x274b0cb6db9473245a31cdea9b789786f4108e4b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "GEV",
+      "company": "GE Vernova Inc.",
+      "symbol": "GEVon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x2aea1d415d45ccf3eabe565d45dcaf4ea2035b9c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "GE",
+      "company": "GE Aerospace",
+      "symbol": "GEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x5151a22421ed4277f1e4ca4785a07b035d548a36",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "GD",
+      "company": "General Dynamics Corporation",
+      "symbol": "GDon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x5d1a9d8aa362a6424b65fcb601e52fefce5b4efa",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 2m."
+    },
+    {
+      "ticker": "GNRC",
+      "company": "Generac Holdings Inc.",
+      "symbol": "GNRCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x237c9f794edaaa0071cdf64a41c25eb76771754b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 32m."
+    },
+    {
+      "ticker": "GEMI",
+      "company": "Gemini Space Station",
+      "symbol": "GEMIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x817942d5de16092656568e9f67f54ccb462f8989",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 2m."
+    },
+    {
+      "ticker": "IGEB",
+      "company": "iShares Investment Grade Systematic Bond ETF",
+      "symbol": "IGEBon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x9e609e96b688927aa49dcd9758e2081f0c48ccab",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 32m."
+    },
+    {
+      "ticker": "FXI",
+      "company": "iShares China Large-Cap ETF",
+      "symbol": "FXIon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x9b8e987e6fec8cf1380c4dca7071e2c7853aeea1",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "IEF",
+      "company": "iShares 7-10 Year Treasury Bond ETF",
+      "symbol": "IEFon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xa486a0a05250e8621ba3b26c3bbc517145eba619",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "FLEX",
+      "company": "Flex Ltd.",
+      "symbol": "FLEXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x102138be022f8d142bcb817f7264921d65209608",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 32m."
+    },
+    {
+      "ticker": "DYNF",
+      "company": "iShares U.S. Equity Factor Rotation Active ETF",
+      "symbol": "DYNFon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x96a1b43c8146e6d1f6e66b226a3c520cbe3d8a50",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "FORM",
+      "company": "FormFactor, Inc.",
+      "symbol": "FORMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd678f3f86436ee298d28a3c414c367adfed65337",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "FCEL",
+      "company": "FuelCell Energy, Inc.",
+      "symbol": "FCELon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x47bfe4921bd74c66c6b0c35c517abdfb5e3bafb3",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "FLNC",
+      "company": "Fluence Energy, Inc.",
+      "symbol": "FLNCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf1a96d4b591e446445600789d60c73dd636b357c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "FLNC",
+      "company": "Fluence Energy, Inc.",
+      "symbol": "FLNCB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x4af1d41cd9dd950dca43984b43aaa2a8702714ac",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "FLNCB",
+        "amountOutPerUsdt": "134714877049681852",
+        "priceUsd": "7.40000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "FWDI",
+      "company": "Forward Industries Inc",
+      "symbol": "FWDIB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x83f1a739fae6517c4672c5e10c8ea918925eb584",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "FWDIB",
+        "amountOutPerUsdt": "127577021751320311",
+        "priceUsd": "7.36000000",
+        "priceImpactPercent": "0.0513730278",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V4"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "FLHY",
+      "company": "Franklin High Yield Corporate ETF",
+      "symbol": "FLHYon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x240eb4859b4537d250cf784cc758c404da5fe4bd",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 2m."
+    },
+    {
+      "ticker": "FFOG",
+      "company": "Franklin Focused Growth ETF",
+      "symbol": "FFOGon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xea130432a9fee9ca1a7eda84028650d38bd0e232",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 2m."
+    },
+    {
+      "ticker": "GME",
+      "company": "GameStop Corp.",
+      "symbol": "GMEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xdabb9aff4cf02f26d2014e4ca9f94ac6fe6572a3",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "GME",
+      "company": "GameStop Corp.",
+      "symbol": "GMEB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0x46ceefda28dd7207059ed19b0acdc026955bb15c",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "GMEB",
+        "amountOutPerUsdt": "37640746360729375",
+        "priceUsd": "26.63000000",
+        "priceImpactPercent": "0.0033702928",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 3,
+        "venues": [
+          "Pancakeswap V3",
+          "Uniswap V3",
+          "Pancakeswap V2"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "LMT",
+      "company": "Lockheed Martin Corp.",
+      "symbol": "LMTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd09f7b75b9659b864c6f82bb00ff096f9d277998",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "RTX",
+      "company": "RTX Corporation",
+      "symbol": "RTXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x44fde2c6bc2c2b54962c69fcef57a2a50121dbd7",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 32m."
+    },
+    {
+      "ticker": "TSM",
+      "company": "Taiwan Semiconductor Manufacturing Co Ltd.",
+      "symbol": "TSMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xc37042a7a4fa510d8884a433762ab87257b91965",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "TQQQ",
+      "company": "ProShares UltraPro QQQ",
+      "symbol": "TQQQon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xe42cfb20e00912409b77a602b5bdcff3c7acc5f4",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "TLN",
+      "company": "Talen Energy Corporation",
+      "symbol": "TLNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xbbe4dfe7a349fb72aec6f52d5cd9bdd78ae8f313",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 2m."
+    },
+    {
+      "ticker": "TSEM",
+      "company": "Tower Semiconductor Ltd.",
+      "symbol": "TSEMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x343324170c91c4d8cf4d439b3e5a619f50621ae7",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "TTMI",
+      "company": "TTM Technologies, Inc.",
+      "symbol": "TTMIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf400b05ad5a791c65acc3f905e5ade5f1b653c8c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "TEN",
+      "company": "Tsakos Energy Navigation Limited",
+      "symbol": "TENon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x686f8264625fe4e51f520db856003a4dd52a49ff",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "SPY",
+      "company": "SPDR S&P 500 ETF Trust",
+      "symbol": "SPYon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x6a708ead771238919d85930b5a0f10454e1c331a",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "SPY",
+      "company": "SPDR S&P 500 ETF Trust",
+      "symbol": "SPYB",
+      "platform": "bstock",
+      "assetType": 3,
+      "address": "0x7138b48df7d98d7e3cc221bfe7192d0a178182d8",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "SPYB",
+        "amountOutPerUsdt": "1281043624519404",
+        "priceUsd": "780.79828640311122080295000000",
+        "priceImpactPercent": "0.0001000370",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Pancakeswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "QQQ",
+      "company": "Invesco QQQ Trust",
+      "symbol": "QQQB",
+      "platform": "bstock",
+      "assetType": 3,
+      "address": "0x205812cdbed920aff76c6580abd681a46d11efc7",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "QQQB",
+        "amountOutPerUsdt": "1329153554927235",
+        "priceUsd": "752.31491195760367901841000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Kipseli"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "QQQ",
+      "company": "Invesco QQQ Trust",
+      "symbol": "QQQon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x0cde6936d305d5b34667fc46425e852efd73559a",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "TQQQ",
+      "company": "ProShares UltraPro QQQ",
+      "symbol": "TQQQB",
+      "platform": "bstock",
+      "assetType": 3,
+      "address": "0x462b5f13b7c7748279358962925c5de83bb9e598",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "TQQQB",
+        "amountOutPerUsdt": "12276083952994693",
+        "priceUsd": "81.41957514959177272663000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "IWM",
+      "company": "iShares Russell 2000 ETF",
+      "symbol": "IWMon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x500eafc69b68acd6f27064f9b75f1c7d91cc4d9f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "POWI",
+      "company": "Power Integrations, Inc.",
+      "symbol": "POWIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x5417b7cfdb8a187004067297ebf1491c8d6d5c09",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 2m."
+    },
+    {
+      "ticker": "GLD",
+      "company": "SPDR Gold Shares",
+      "symbol": "GLDon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xfa9a1e901085e269f6d428f79cd5252d8b919344",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "TLT",
+      "company": "iShares 20+ Year Treasury Bond ETF",
+      "symbol": "TLTon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xf69e40069ac227c11459e3f4e8a446b3401616b6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "SMCI",
+      "company": "Super Micro Computer, Inc.",
+      "symbol": "SMCIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xc142ba8ccd36d80c3a001342fb83e4c3d218a873",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "SMCI",
+      "company": "Super Micro Computer, Inc.",
+      "symbol": "SMCIB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0x387dea1d2772d716d081a29116f3effa0ffe1f36",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "SMCIB",
+        "amountOutPerUsdt": "23930597554374551",
+        "priceUsd": "41.73000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "ARM",
+      "company": "Arm Holdings plc",
+      "symbol": "ARMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x527c6436e1eaa4f2065cde4090f798cb5d031dd6",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "ARM",
+      "company": "Arm Holdings plc",
+      "symbol": "ARMB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xd42a79ebb7f527f40faecd196ffb47ad5e8d6f8c",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "ARMB",
+        "amountOutPerUsdt": "3735178639090639",
+        "priceUsd": "267.45000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "TSM",
+      "company": "Taiwan Semiconductor Manufacturing Co Ltd.",
+      "symbol": "TSMB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xab78b89b5bb00236be0b4b20704cbfa04efc711c",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "TSMB",
+        "amountOutPerUsdt": "2194715830551427",
+        "priceUsd": "455.04834066180984087047000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "ASML",
+      "company": "ASML Holding NV",
+      "symbol": "ASMLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xb034f6cb52b7f2fd5a7eeeffca6b9adcd6b9a6f6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "ASML",
+      "company": "ASML Holding NV",
+      "symbol": "ASMLB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0xfbfb4f79cfb4c34dcd7c82bdee5a0fa199b2e7f9",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "ASMLB",
+        "amountOutPerUsdt": "558819167215388",
+        "priceUsd": "1787.10000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "NIO",
+      "company": "NIO Inc.",
+      "symbol": "NIOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xc6f9edbee6042a237d72493bbda3ee2c3c62f708",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 32m."
+    },
+    {
+      "ticker": "RIOT",
+      "company": "Riot Platforms, Inc.",
+      "symbol": "RIOTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xc4a88a72b848255fd24da3c1ad6755d980535fb1",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 36m."
+    },
+    {
+      "ticker": "CRWD",
+      "company": "CrowdStrike Holdings, Inc.",
+      "symbol": "CRWDon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xe6837794fbc6dd024733a1a31f86061296fa2752",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "CRWD",
+      "company": "CrowdStrike Holdings, Inc.",
+      "symbol": "CRWDB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x814981cf5df4a14d4d7328f9abf0d02e9ed54cd1",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "CRWDB",
+        "amountOutPerUsdt": "3621486304049008",
+        "priceUsd": "275.91000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "PANW",
+      "company": "Palo Alto Networks, Inc.",
+      "symbol": "PANWon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x0eaa1a75bd682a5669ab2371a559fbd039c6b9eb",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "NOW",
+      "company": "SERVICENOW, INC.",
+      "symbol": "NOWon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xeb19c13c54b1cd48afc62f6503375e92d5f1e856",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "NET",
+      "company": "Cloudflare, Inc.",
+      "symbol": "NETon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xfeb0793eea97585eb3a541f3fd53450d225b2b87",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "ANET",
+      "company": "Arista Networks, Inc.",
+      "symbol": "ANETon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x538e2838f9ebc9b891399df4a8dcc42890d9dc20",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "NTES",
+      "company": "NetEase, Inc.",
+      "symbol": "NTESon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x282973969118f9fe39bf2ff3d8dd1efee82ccb11",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 1m."
+    },
+    {
+      "ticker": "ZM",
+      "company": "Zoom Communications",
+      "symbol": "ZMB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xf4ddb292fe88e476eddd9869d386705e6bfab7a2",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "ZMB",
+        "amountOutPerUsdt": "10236736349162603",
+        "priceUsd": "97.54000000",
+        "priceImpactPercent": "0.0510678249",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V4"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "SPOT",
+      "company": "Spotify Technology S.A.",
+      "symbol": "SPOTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x50356167a4dbc38bea6779c045e24e25facedfdc",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "SNAP",
+      "company": "Snap, Inc. Class A",
+      "symbol": "SNAPon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf325884d9bcac457271fe7f7b6be1765348fcca2",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 1m."
+    },
+    {
+      "ticker": "PINS",
+      "company": "Pinterest, Inc.",
+      "symbol": "PINSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xcfd1f0df84300ea1a4e2ba5238043a2fa5a7237c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "AMC",
+      "company": "AMC Entertainment Holdings, Inc.",
+      "symbol": "AMCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x1d7b5e06fdbe4fd33f5c64c081e32b5d539751d0",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 1m."
+    },
+    {
+      "ticker": "AMC",
+      "company": "AMC Entertainment Holdings, Inc.",
+      "symbol": "AMCB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0x96e7d606e229448ef817a7f35fd7394c3e15d00c",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "AMCB",
+        "amountOutPerUsdt": "336965550653717263",
+        "priceUsd": "2.97000000",
+        "priceImpactPercent": "0.0025039149",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Pancakeswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "MRNA",
+      "company": "Moderna, Inc.",
+      "symbol": "MRNAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x01486675da0764ee780ea7cb65c33062e9b2d28c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "ASTS",
+      "company": "AST SpaceMobile, Inc.",
+      "symbol": "ASTSB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0x58b6f5feeb8436489f5bf4a56619092b1fa8e777",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "ASTSB",
+        "amountOutPerUsdt": "19635642272264573",
+        "priceUsd": "50.84000000",
+        "priceImpactPercent": "-0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "ALAB",
+      "company": "Astera Labs, Inc.",
+      "symbol": "ALABon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x573e11cc667a8e5be0c7af2410403371088d3d0d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "ALB",
+      "company": "Albemarle Corporation",
+      "symbol": "ALBon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x0b790abd6594918de1022233b7cc79badb84d92a",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "AME",
+      "company": "AMETEK, Inc.",
+      "symbol": "AMEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x7a5bd36047a9d15c90fa79b0654de8dd9d6ebbb1",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "AMKR",
+      "company": "Amkor Technology, Inc.",
+      "symbol": "AMKRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xb84e150a1d18380cfeeebcde8756368dd489a1a3",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "AIP",
+      "company": "Arteris, Inc.",
+      "symbol": "AIPon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xae922b6cc2371b6dce592a82fac15ef890a7d467",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 1m."
+    },
+    {
+      "ticker": "BE",
+      "company": "Bloom Energy Corporation",
+      "symbol": "BEB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x5519de00f5388c17d886b97cb5d2d43a812a82bc",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "BEB",
+        "amountOutPerUsdt": "3566480351345118",
+        "priceUsd": "280.09000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "BMNR",
+      "company": "Bitmine Immersion Technologies, Inc.",
+      "symbol": "BMNRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x52ad57a7ea642e99a892afc79e937b383f1b59e9",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "BLK",
+      "company": "Blackrock, Inc.",
+      "symbol": "BLKon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x24f5471183ea549987f245d6ce236b6108869c92",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "GRAB",
+      "company": "Grab Holdings Limited",
+      "symbol": "GRABon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xab2f74804c022c5249d52e743af4340e42f5f3b6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 1m."
+    },
+    {
+      "ticker": "QBTS",
+      "company": "D-Wave Quantum Inc.",
+      "symbol": "QBTSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8c7bf0ed6bc778bde1489de1592c1aad3e66371d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "BTDR",
+      "company": "Bitdeer Technologies Group",
+      "symbol": "BTDRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x3a562836afb1026f5d7a6b6da1125d27fdfee372",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "BILI",
+      "company": "Bilibili Inc.",
+      "symbol": "BILIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x91fc7371d6de682a1e8cfcb4eb7da693312a03a4",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "BTGO",
+      "company": "BitGo",
+      "symbol": "BTGOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x5fa699c0c1319b8d86489af77dfde4fa97b47df8",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "COHR",
+      "company": "Coherent Corp.",
+      "symbol": "COHRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x0585756aafb241b0f8a9df62db26c566091bde0b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "CRWV",
+      "company": "CoreWeave, Inc.",
+      "symbol": "CRWVB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x33e7317e17838fee56b10fe8d0b9ca6ca3090c95",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "CRWVB",
+        "amountOutPerUsdt": "12048425169343349",
+        "priceUsd": "82.88000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "LRCX",
+      "company": "Lam Research Corporation",
+      "symbol": "LRCXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x35895a1fa1aff7fb3204fb01257409fd75acb24c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "CRDO",
+      "company": "Credo Technology Group Holding Ltd",
+      "symbol": "CRDOB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0x6e7d451f9d30327d32020f116fa79c23b24e9c8d",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "CRDOB",
+        "amountOutPerUsdt": "4599217519491093",
+        "priceUsd": "217.39000000",
+        "priceImpactPercent": "-0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "CRCL",
+      "company": "Circle Internet Group, Inc.",
+      "symbol": "CRCLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x992879cd8ce0c312d98648875b5a8d6d042cbf34",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "ACN",
+      "company": "Accenture PLC",
+      "symbol": "ACNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x7af44d51d1fb88c5b74fc71d3cba649bb8099d14",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "COP",
+      "company": "ConocoPhillips",
+      "symbol": "COPon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x0d586b51a90dc999f9bb6a0506da7f034a1d3a2e",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "COPX",
+      "company": "Global X Copper Miners ETF",
+      "symbol": "COPXon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xec93fe7ff4b09ca3ccafbc4cc9615e62be412780",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "CCJ",
+      "company": "Cameco Corporation",
+      "symbol": "CCJon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xa75f08b9a91439daac9cc7072857cc0a98cf527a",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "TCOM",
+      "company": "Trip.com Group Limited",
+      "symbol": "TCOMon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x6459303f58244ff1e7a42b90aa3782dfb6ca6969",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "CAMT",
+      "company": "Camtek Ltd.",
+      "symbol": "CAMTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xc2f65e745fd13af1d00d5c81dd33f762fb81c264",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "DELL",
+      "company": "Dell Technologies Inc.",
+      "symbol": "DELLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf26518958935654878de15be7bc79a26971583ba",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "DELL",
+      "company": "Dell Technologies Inc.",
+      "symbol": "DELLB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x0e7a51966c66648999d506e1372efdea1b78cb0b",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "DELLB",
+        "amountOutPerUsdt": "1708890723557050",
+        "priceUsd": "584.57000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "DE",
+      "company": "Deere & Company",
+      "symbol": "DEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x90ccbb75d61cb65cd73a3abb5df04a75961612b7",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "PDD",
+      "company": "PDD Holdings Inc.",
+      "symbol": "PDDon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf3e82ea164cb344b2b11bad4c24b0ea4f7ba4714",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "DASH",
+      "company": "DoorDash, Inc.",
+      "symbol": "DASHon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x7567c2a46bce46373b454682f3d95e6535bde144",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "ONDS",
+      "company": "Ondas Holdings Inc.",
+      "symbol": "ONDSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd85d4ce29b4ca361ff72ef0e53d6236e334c5db6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "DNN",
+      "company": "Denison Mines Corp.",
+      "symbol": "DNNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x70bd780076e25d087ed9c35f4e4a540522abe8cf",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 1m."
+    },
+    {
+      "ticker": "DGXX",
+      "company": "Digi Power X Inc.",
+      "symbol": "DGXXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x09f5a6ee1b46787dd252827e40502c4980a0285d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 31m."
+    },
+    {
+      "ticker": "IREN",
+      "company": "Iris Energy Limited",
+      "symbol": "IRENon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8fd70ee385f470c8d6fda2d93a4e49c849bac6a6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "EEM",
+      "company": "iShares MSCI Emerging Markets ETF",
+      "symbol": "EEMon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x00c81d35eddf44c75d4db9e07bdcdc236eb0ebcf",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 35m."
+    },
+    {
+      "ticker": "ETN",
+      "company": "Eaton Corporation plc",
+      "symbol": "ETNon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4697b2a050f7b5a8e1ebc27c325f9d78d094f041",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "IEMG",
+      "company": "iShares Core MSCI Emerging Markets ETF",
+      "symbol": "IEMGon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x22092c94a91d019ad15536725598b0a6be0a73c0",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "EMR",
+      "company": "Emerson Electric Co.",
+      "symbol": "EMRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x60b273bdf00a9a52238ca706257f61efc55bdee0",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "EQIX",
+      "company": "Equinix, Inc.",
+      "symbol": "EQIXon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xe4e12c9cec3e8cae405202a97f66afa695075fa0",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "ENTG",
+      "company": "Entegris, Inc.",
+      "symbol": "ENTGon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xfb4a89a077b9020c7101b1af760beb708f37a416",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 30m."
+    },
+    {
+      "ticker": "EQT",
+      "company": "EQT Corporation",
+      "symbol": "EQTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x9a1c88ac479906a7f03e76605b15b72df10d8e51",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 30m."
+    },
+    {
+      "ticker": "ENPH",
+      "company": "Enphase Energy, Inc.",
+      "symbol": "ENPHon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x30938154e2697694f41592c2e48459287debe4bf",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "REMX",
+      "company": "VanEck Rare Earth and Strategic Metals ETF",
+      "symbol": "REMXon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xc16f47c4a7ed39372b9a0e3e2016cede9b4cb83a",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "EXTR",
+      "company": "Extreme Networks, Inc.",
+      "symbol": "EXTRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x1eada1306df72a5607827416c1a1307d7056dfff",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "EXOD",
+      "company": "Exodus Movement, Inc.",
+      "symbol": "EXODon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x92d504158a8dc69de989db5ede3230d958fb8630",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "GFS",
+      "company": "GLOBALFOUNDRIES Inc.",
+      "symbol": "GFSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xaff6b836d3ebd29aeb0c8b840add04ef79d79678",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "GLXY",
+      "company": "Galaxy Digital",
+      "symbol": "GLXYon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf98b89825233808cd37706a53d2b4ae3e359d442",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "GRND",
+      "company": "Grindr, Inc.",
+      "symbol": "GRNDon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x20cce48d767ed68cbba7727c4c504efe5bcb626c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "SKHY",
+      "company": "SK Hynix",
+      "symbol": "SKHYB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xca750ef65f295bbecd685abf54e82caf297bdb61",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "SKHYB",
+        "amountOutPerUsdt": "5856993059331773",
+        "priceUsd": "170.66000000000000000000000000",
+        "priceImpactPercent": "0.0011931960",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V4"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "HUT",
+      "company": "Hut 8 Corp.",
+      "symbol": "HUTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x3a82f1c847cc55e52e597fd81c63a812c6722541",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "HAL",
+      "company": "Halliburton Company",
+      "symbol": "HALon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x7a18bb5fd6ba6343180afdcf6dc406ef17f7fc04",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "HUBB",
+      "company": "Hubbell Incorporated",
+      "symbol": "HUBBon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x1c42c07257f936a7c4f84b8d756c95817e23631a",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "HII",
+      "company": "Huntington Ingalls Industries, Inc.",
+      "symbol": "HIIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4dc8dcee22a56feeca930dff45581aa9a14d5e05",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 30m."
+    },
+    {
+      "ticker": "CYPH",
+      "company": "Cypherpunk Technologies Inc.",
+      "symbol": "CYPHB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0x0393c28065c54e48b45bdb05eff5c401cf891da1",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "CYPHB",
+        "amountOutPerUsdt": "318617085931614995",
+        "priceUsd": "2.98000000",
+        "priceImpactPercent": "0.0509878153",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V4"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "HIVE",
+      "company": "HIVE Digital Technologies Ltd.",
+      "symbol": "HIVEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x3f19a16a401a6af05150479ccb76ef2fb57b0df3",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 30m."
+    },
+    {
+      "ticker": "HSAI",
+      "company": "Hesai Group",
+      "symbol": "HSAIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x847ef23a3f99af79a185ce033e1664165b846eea",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "IBIT",
+      "company": "iShares Bitcoin Trust ETF",
+      "symbol": "IBITon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x68b07cef227cea1b2b6683921c8c825cd5c69ec7",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "IAU",
+      "company": "iShares Gold Trust",
+      "symbol": "IAUon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xcb2a0f46f67dc4c58a316f1c008edef5c2311795",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "IALT",
+      "company": "iShares Systematic Alternatives Active ETF",
+      "symbol": "IALTon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x879fc0d8dfdb13b4af3513d9838f82c4df8f57e8",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "IYW",
+      "company": "iShares U.S. Technology ETF",
+      "symbol": "IYWon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xbeeef4361f6603edacef5205b343c6bb6473a099",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "JBL",
+      "company": "Jabil Inc.",
+      "symbol": "JBLon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8d941ebb4921f8d43cfa65233b14a547f96559fc",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "JD",
+      "company": "JD.com, Inc.",
+      "symbol": "JDon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xe92be960ae64f6a914ca77014cac9e56de7f36c1",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "DJT",
+      "company": "Trump Media & Technology Group",
+      "symbol": "DJTB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xf2ec508422174ee564de98187db9359d318afb6b",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "DJTB",
+        "amountOutPerUsdt": "123328744649440449",
+        "priceUsd": "8.09000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "IJS",
+      "company": "iShares S&P Small-Cap 600 Value ETF",
+      "symbol": "IJSon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x9609f804fd90440dd3f4afa1e0a4d57dfd580ce8",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "KLAC",
+      "company": "KLA Corporation",
+      "symbol": "KLACon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xfc263946439b0d802bf4c5a6fcd34e2885259f91",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "KWEB",
+      "company": "KraneShares CSI China Internet ETF",
+      "symbol": "KWEBon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x7437203800140ba7d9081dde8cef09ee40e3bf03",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "KEYS",
+      "company": "Keysight Technologies, Inc.",
+      "symbol": "KEYSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x3de956d959726c448649354c6fbca92b82dc5ed7",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "OKLO",
+      "company": "Oklo Inc.",
+      "symbol": "OKLOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xaf6c03acf72355ce98d0741302b78870b376428c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "KEEL",
+      "company": "Keel Infrastructure Corp.",
+      "symbol": "KEELon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x5e3ca19c533c8c0381eac5319624596557c279ed",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "BZ",
+      "company": "Kanzhun Limited",
+      "symbol": "BZon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xc2c7fcddc37f6737ca2481ebda6b81ee279fe20c",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "LITE",
+      "company": "Lumentum Holdings Inc.",
+      "symbol": "LITEB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x64748bea17b6d19e242adf20425de2440c656142",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "LITEB",
+        "amountOutPerUsdt": "922575013282378",
+        "priceUsd": "1081.53000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "LSCC",
+      "company": "Lattice Semiconductor Corporation",
+      "symbol": "LSCCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x80f03abcb2bd85237740dd69f87d2f5de3909012",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 30m."
+    },
+    {
+      "ticker": "LECO",
+      "company": "Lincoln Electric Holdings, Inc.",
+      "symbol": "LECOon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x43807bf4ce06f4fbb4fa8deac37bf274aea324da",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "LI",
+      "company": "Li Auto Inc.",
+      "symbol": "LIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x9810beac9af3c30d14cfb61cdd557e160f60fd50",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "MP",
+      "company": "MP Materials Corp.",
+      "symbol": "MPon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4baf4dc56cf6a525a0874e25cc6372a6a8915135",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "MKSI",
+      "company": "MKS Inc.",
+      "symbol": "MKSIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xd41699aa1bfc1c5f172c27f387372bd30717a5db",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 30m."
+    },
+    {
+      "ticker": "NBIS",
+      "company": "Nebius Group",
+      "symbol": "NBISB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xe256bc2a4f5297f8ba6f043f180a46300ecbcbb1",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "NBISB",
+        "amountOutPerUsdt": "4489547044300923",
+        "priceUsd": "222.72000000000000000000000000",
+        "priceImpactPercent": "0.0029158734",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Uniswap V4"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "NOK",
+      "company": "Nokia Oyj",
+      "symbol": "NOKon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xe9518cb0010c717db69001f1418eff9e97330137",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "NVT",
+      "company": "nVent Electric plc",
+      "symbol": "NVTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x484ce83bb55b50d70236c7d1e29e0ba7524f905b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 30m."
+    },
+    {
+      "ticker": "NVTS",
+      "company": "Navitas Semiconductor Corporation",
+      "symbol": "NVTSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xb56b7c2f9988448790b0f78697f405ab5e8597e6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 34m."
+    },
+    {
+      "ticker": "NAT",
+      "company": "Nordic American Tankers Limited",
+      "symbol": "NATon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x33f3df3cea2a8c4828e88f30be932850cf749739",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "NNE",
+      "company": "NANO Nuclear Energy Inc.",
+      "symbol": "NNEon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x3c276dd9f9eab5510f9eafd3a6ea54879b27ca3d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 30m."
+    },
+    {
+      "ticker": "ON",
+      "company": "onsemi",
+      "symbol": "ONon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xb35a9eab5d25282f4e668798b629a9294e9a47aa",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 2h 0m."
+    },
+    {
+      "ticker": "OSCR",
+      "company": "Oscar Health, Inc.",
+      "symbol": "OSCRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xb0752aa50b089ee6ea9acd51373207fa460e87bb",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "OII",
+      "company": "Oceaneering International, Inc.",
+      "symbol": "OIIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4321366277d4a6e170f1f28148c93e8c47636c14",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "OPRA",
+      "company": "Opera Limited",
+      "symbol": "OPRAon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x88672043905bdd272df55a5a7bb1b7e1e693cbc5",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "APP",
+      "company": "Applovin Corporation",
+      "symbol": "APPon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xedb3124e96c64c177eb709cbc64f9977db40ea74",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "PCG",
+      "company": "PG&E Corporation",
+      "symbol": "PCGon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x47b36ddb9dd12a8411f78226f55e8c3f0d65481f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "PENG",
+      "company": "Penguin Solutions, Inc.",
+      "symbol": "PENGon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x2144d620e3471441b12bf256e01a09eaa5ea7f12",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "PLUG",
+      "company": "Plug Power Inc.",
+      "symbol": "PLUGon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4752ae8f910b25e64e4406eaad50c1b4e8de7e6d",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 29m."
+    },
+    {
+      "ticker": "PALL",
+      "company": "abrdn Physical Palladium Shares ETF",
+      "symbol": "PALLon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x3fcd741646a9790635b938cdb69af5df356cbaab",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "IONQ",
+      "company": "IonQ",
+      "symbol": "IONQon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x40d8e1fbaf69173c47fa493feb50a84eec6b57ee",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "PWR",
+      "company": "Quanta Services, Inc.",
+      "symbol": "PWRon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x2418c2e1ae3b8d767594b3974d32610743f88155",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "QYLD",
+      "company": "Global X NASDAQ 100 Covered Call ETF",
+      "symbol": "QYLDon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x64e023411215c3b75b9f339b7b77f179cd04c527",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "QNT",
+      "company": "Quantinuum Inc.",
+      "symbol": "QNTB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xd721c192d612db77621df57a9fab38418033c02e",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "QNTB",
+        "amountOutPerUsdt": "489668032",
+        "priceUsd": "41.36000000000000000000000000",
+        "priceImpactPercent": "0.9999010001",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 2,
+        "venues": [
+          "Pancakeswap Pamm",
+          "Uniswap V4"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "QUBT",
+      "company": "Quantum Computing",
+      "symbol": "QUBTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x82e07c1017032cfd889b1ca81ebe722c4d4de825",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "QTUM",
+      "company": "Defiance Quantum ETF",
+      "symbol": "QTUMon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x467c7cf9af95765c1bd6542ffd516bf9603a19b9",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "QLTA",
+      "company": "iShares Aaa - A Rated Corporate Bond ETF",
+      "symbol": "QLTAon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xbc34d36b70e5a256f3d16f9ca9d3ca3838f6cc4f",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 29m."
+    },
+    {
+      "ticker": "RKLB",
+      "company": "Rocket Lab",
+      "symbol": "RKLBon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xb4d695569236273745b4cd54b539b1b9cc1513af",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "RKLB",
+      "company": "Rocket Lab",
+      "symbol": "RKLBB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xc8da12cbcce7c45180692a6420b0076e03a5179a",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "RKLBB",
+        "amountOutPerUsdt": "14636893995387121",
+        "priceUsd": "68.24000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "RDDT",
+      "company": "Reddit, Inc.",
+      "symbol": "RDDTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x4da12f47578ef89c76179b760c778e70b668f80b",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "RDDT",
+      "company": "Reddit, Inc.",
+      "symbol": "RDDTB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x41622a9125a22767df8c1dc79fc17299bac4bd0b",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "RDDTB",
+        "amountOutPerUsdt": "6248788739070418",
+        "priceUsd": "159.68000000",
+        "priceImpactPercent": "-0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "ROK",
+      "company": "Rockwell Automation, Inc.",
+      "symbol": "ROKon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x95f7423c51eab71cbd00ca855b0b2b2153f14184",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 29m."
+    },
+    {
+      "ticker": "RMBS",
+      "company": "Rambus Inc.",
+      "symbol": "RMBSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x49ccb157c77afe5f264c35f0e9178a98d77815ab",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "SPCX",
+      "company": "SpaceX",
+      "symbol": "SPCXB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xbe9d156892e55e7154bcd3cb0fea677f9d3103e1",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "SPCXB",
+        "amountOutPerUsdt": "6121141071668368",
+        "priceUsd": "163.32000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Kipseli"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "SPGI",
+      "company": "S&P Global Inc.",
+      "symbol": "SPGIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x55b370b704240a914f42b5bbb3195431c031f9f8",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "USO",
+      "company": "United States Oil Fund, LP",
+      "symbol": "USOon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0x94174e3d1335db402dd03a092f7aa7ac2cb32be4",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "SEDG",
+      "company": "SolarEdge Technologies",
+      "symbol": "SEDGon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x8755c5c39b1aa9053a83ac731242a2cf4d04b0fe",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "UNP",
+      "company": "Union Pacific Corporation",
+      "symbol": "UNPon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xfe9aa194e3c4604f3872f220eb41c33a287fcd90",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "UNG",
+      "company": "US Natural Gas Fund",
+      "symbol": "UNGon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xa5351c9bf08055e03642b6b8649a0f7e895501bf",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "USAR",
+      "company": "USA Rare Earth, Inc.",
+      "symbol": "USARB",
+      "platform": "bstock",
+      "assetType": null,
+      "address": "0xcd345d4450e04cdef422a60b97d9265d24e0bcee",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "USARB",
+        "amountOutPerUsdt": "79229961848457666",
+        "priceUsd": "12.59000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "UMC",
+      "company": "United Microelectronics Corporation",
+      "symbol": "UMCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x318ddd4d03d84a40cf44772385a0cfb3d4394049",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "UAMY",
+      "company": "United States Antimony Corporation",
+      "symbol": "UAMYon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xf8919fe7d586b11d0a900e987c4a41bc6c3195f5",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 29m."
+    },
+    {
+      "ticker": "CRWV",
+      "company": "CoreWeave, Inc.",
+      "symbol": "CRWVon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x76e39171cb665a35981e744e2ceb7012f76caeac",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "GLW",
+      "company": "Corning Incorporated",
+      "symbol": "GLWon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x25a4dbae9a0cd8c75656d6b50ffdf4900cc20d8f",
+      "quote": null,
+      "quoteError": "Minimum order amount is 5 USD."
+    },
+    {
+      "ticker": "GLW",
+      "company": "Corning Incorporated",
+      "symbol": "GLWB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x740e075cbbea22a082b9d6679e65e82767875b6a",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "GLWB",
+        "amountOutPerUsdt": "6395317360093949",
+        "priceUsd": "156.2213078181463741378000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "WCC",
+      "company": "WESCO International, Inc.",
+      "symbol": "WCCon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x82436bae31ae373258ba567f32087eefc32189f2",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "INTW",
+      "company": "2x Long INTC Daily ETF - GraniteShares",
+      "symbol": "INTWB",
+      "platform": "bstock",
+      "assetType": 3,
+      "address": "0x0735d9904b7e34e6fe39b0f66e00c111b3f2b681",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "INTWB",
+        "amountOutPerUsdt": "42309419718907004",
+        "priceUsd": "23.60000000000000000000000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "RDW",
+      "company": "Redwire",
+      "symbol": "RDWon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x23e39d94807a8bb7e3f8294b4911d04ee26dce39",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "WEN",
+      "company": "Wendy's",
+      "symbol": "WENB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0xded1c5fb38c262beb9cff1e1116eff3c5bf278cd",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "WENB",
+        "amountOutPerUsdt": "160048687852987277",
+        "priceUsd": "6.26000000",
+        "priceImpactPercent": "0.0025021031",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Pancakeswap V3"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "WYFI",
+      "company": "WhiteFiber, Inc.",
+      "symbol": "WYFIon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0xce128edcf46b281b7df8880867b74e11b055e8e7",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 29m."
+    },
+    {
+      "ticker": "WS",
+      "company": "Worthington Steel, Inc.",
+      "symbol": "WSon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x50e66edb7d0b79ee988f098754a27afaa643b4f5",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "OXY",
+      "company": "Occidental Petroleum Corporation",
+      "symbol": "OXYon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x01b5a4ac600be98448dbefbb78bcdf38262552cc",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 20h 29m."
+    },
+    {
+      "ticker": "ABT",
+      "company": "Abbott Laboratories",
+      "symbol": "ABTon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x5a20886b575058dd7299785f0ea9b1172942a3e0",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "INOD",
+      "company": "Innodata Inc.",
+      "symbol": "INODon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x517a25e696421c88218b43cbb7ea0f873b6973a6",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "CORZ",
+      "company": "Core Scientific, Inc.",
+      "symbol": "CORZon",
+      "platform": "ondo",
+      "assetType": 1,
+      "address": "0x25ed86472cf3012607dc6576c58e6432968255c2",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "SHAZ",
+      "company": "SharonAI",
+      "symbol": "SHAZB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x0f31e21b7881f5583ea94ddbcb0bcaf22b1abeab",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "SHAZB",
+        "amountOutPerUsdt": "26272046484018596",
+        "priceUsd": "37.96000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    },
+    {
+      "ticker": "HTZ",
+      "company": null,
+      "symbol": "HTZon",
+      "platform": "ondo",
+      "assetType": null,
+      "address": "0xb18c6a83490dddbc9a83b011173b5b2fb5dc1272",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 2d 1h 59m."
+    },
+    {
+      "ticker": "BOTZ",
+      "company": "Global X Robotics & Artificial Intelligence ETF",
+      "symbol": "BOTZon",
+      "platform": "ondo",
+      "assetType": 3,
+      "address": "0xb42f5597eadd424de67b46fe5d1ec4b61367a4e5",
+      "quote": null,
+      "quoteError": "The stock market is currently closed. Expected to open in 1d 12h 33m."
+    },
+    {
+      "ticker": "SECZ",
+      "company": "Securitize",
+      "symbol": "SECZB",
+      "platform": "bstock",
+      "assetType": 1,
+      "address": "0x32c980f38907ace4fac643c3765d9b32842af60f",
+      "quote": {
+        "executionMode": "SWAP",
+        "decimals": "18",
+        "symbolFromQuote": "SECZB",
+        "amountOutPerUsdt": "73467614050142168",
+        "priceUsd": "13.56000000",
+        "priceImpactPercent": "0.0000000000",
+        "approveTarget": "0xB44446b0c8E56988c34f7Ff73Ae904982b5FdDA5",
+        "hops": 1,
+        "venues": [
+          "Rfq Neptunex"
+        ],
+        "honeyPot": false,
+        "taxRate": "0"
+      }
+    }
+  ]
+}
