@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createMockProvider, createSwapHelper, type SwapPipeline } from "@stockx/shared";
-import { agentLimitsOff, MIN_SESSION_BNB_GAS, isPipelineFactory, pocketCopy, railgunEnabled, type MainSigner, type PocketPipelineSource } from "@stockx/shared/pocket";
+import { agentLimitsOff, MIN_SESSION_BNB_GAS, isPipelineFactory, parseAgentInstruction, pocketCopy, railgunEnabled, type MainSigner, type ParseResult, type PocketPipelineSource } from "@stockx/shared/pocket";
 import { KeyBackupDialog } from "./KeyBackupDialog";
 import { useAgentClock } from "./useAgentClock";
 import { usePocket } from "./usePocket";
@@ -29,13 +29,53 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [keyError, setKeyError] = useState("");
   const [addressCopied, setAddressCopied] = useState(false);
+  const [instruction, setInstruction] = useState("");
+  const [proposal, setProposal] = useState<ParseResult | null>(null);
+  const [schedule, setSchedule] = useState({ hourUtc: 15, minuteUtc: 0 });
 
   useAgentClock(pocket.job?.status === "active" && pocket.armed, () => {
     void pocket.runOneTick(password, buyAmount).then((result) => {
       const errorCode = "errorCode" in result ? result.errorCode : undefined;
       setMessage(errorCode ? `${result.status}: ${errorCode}` : result.status);
     });
-  });
+  }, schedule.hourUtc, schedule.minuteUtc);
+
+  /** Step 1: read the sentence. Nothing runs yet. */
+  function understand(): void {
+    setProposal(parseAgentInstruction(instruction));
+    setMessage("");
+  }
+
+  /** Step 2: only after the user confirms the plain-English summary. */
+  async function confirmProposal(): Promise<void> {
+    if (!proposal || !proposal.ok) return;
+    const { intent } = proposal;
+    if (!pocket.exported) {
+      setMessage("Back up the pocket key first.");
+      return;
+    }
+    if (intent.when === "now" && !password) {
+      setMessage("Enter your pocket passphrase below, then confirm again.");
+      return;
+    }
+    setBuyAmount(intent.amountUsdt);
+    if (intent.when === "daily") setSchedule({ hourUtc: intent.hourUtc, minuteUtc: intent.minuteUtc });
+    const armed = await pocket.startAgent();
+    if (!armed) {
+      setMessage("Couldn't arm the agent. Check the pocket and the swap pipeline.");
+      return;
+    }
+    setProposal(null);
+    setInstruction("");
+    if (intent.when === "daily") {
+      setMessage("Agent armed. It will buy on schedule while this tab stays open. Press Stop agent to cancel.");
+      return;
+    }
+    const result = await pocket.runOneTick(password, intent.amountUsdt);
+    setPassword("");
+    const errorCode = "errorCode" in result ? result.errorCode : undefined;
+    setMessage(errorCode ? `${result.status}: ${errorCode}` : result.status);
+  }
 
   async function create(): Promise<void> {
     const created = await pocket.createPocket(password);
@@ -164,6 +204,27 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
             ? (agentLimitsOff() ? "Live session pipeline. Real funds. Buy-only. Spending limits are OFF." : "Live session pipeline. Real funds. Buy-only, max $5 per trade.")
             : pipeline || executor ? "Swap pipeline connected" : "Mock swap pipeline"}
         </p>
+        <label htmlFor="pocket-agent-instruction">Tell the agent what to do</label>
+        <input
+          id="pocket-agent-instruction"
+          value={instruction}
+          maxLength={300}
+          placeholder="buy $2 of AAPLB now, or buy $1 of AAPLB every day at 3pm UTC"
+          onChange={(event) => { setInstruction(event.target.value); setProposal(null); }}
+          onKeyDown={(event) => { if (event.key === "Enter") understand(); }}
+        />
+        <button type="button" disabled={!instruction.trim()} onClick={understand}>Understand</button>
+        {proposal && !proposal.ok && <p className="err">{proposal.reason}</p>}
+        {proposal && proposal.ok && (
+          <div role="group" aria-label="Agent instruction to confirm">
+            <p><strong>{proposal.summary}</strong></p>
+            {proposal.notes.map((note) => <p key={note} className="muted small">{note}</p>)}
+            <p className="muted small">Real funds, session pocket only, buy-only. Nothing happens until you confirm.</p>
+            <button type="button" onClick={() => void confirmProposal()}>Confirm</button>
+            <button type="button" onClick={() => setProposal(null)}>Cancel</button>
+          </div>
+        )}
+        <p className="muted small">Or set it by hand:</p>
         <label htmlFor="pocket-agent-amount">Buy amount in USDT</label>
         <input id="pocket-agent-amount" inputMode="decimal" value={buyAmount} onChange={(event) => setBuyAmount(event.target.value)} />
         <label htmlFor="pocket-agent-password">Pocket passphrase</label>

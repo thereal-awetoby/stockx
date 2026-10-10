@@ -6,3 +6,4 @@ export * from "./job-store";
 export * from "./guards";
 export * from "./agent-runner";
 export * from "./pipeline";export * from "./tick-gate";
+export * from "./instruction";
