@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { createMockProvider, createSwapHelper, type SwapPipeline } from "@stockx/shared";
-import { MIN_SESSION_BNB_GAS, isPipelineFactory, pocketCopy, railgunEnabled, type MainSigner, type PocketPipelineSource } from "@stockx/shared/pocket";
+import { AGENT_LIMITS_OFF, MIN_SESSION_BNB_GAS, isPipelineFactory, pocketCopy, railgunEnabled, type MainSigner, type PocketPipelineSource } from "@stockx/shared/pocket";
 import { KeyBackupDialog } from "./KeyBackupDialog";
 import { useAgentClock } from "./useAgentClock";
 import { usePocket } from "./usePocket";
@@ -157,11 +157,11 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
 
       <section className="pocket-agent">
         <h2>Agent</h2>
-        <p>Job spend: {pocket.job?.spentUsdt ?? 0} / {pocket.job?.capUsdt ?? 25} USDT</p>
+        <p>Job spend: {pocket.job?.spentUsdt ?? 0}{AGENT_LIMITS_OFF ? " USDT (no cap)" : ` / ${pocket.job?.capUsdt ?? 25} USDT`}</p>
         <p>Take profit: not active in this build</p>
         <p>
           {pipeline && isPipelineFactory(pipeline)
-            ? "Live session pipeline. Real funds. Buy-only, max $5 per trade."
+            ? (AGENT_LIMITS_OFF ? "Live session pipeline. Real funds. Buy-only. Spending limits are OFF." : "Live session pipeline. Real funds. Buy-only, max $5 per trade.")
             : pipeline || executor ? "Swap pipeline connected" : "Mock swap pipeline"}
         </p>
         <label htmlFor="pocket-agent-amount">Buy amount in USDT</label>

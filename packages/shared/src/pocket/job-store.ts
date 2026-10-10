@@ -1,4 +1,4 @@
-import { POCKET_CONFIG } from "./config";
+import { AGENT_LIMITS_OFF, POCKET_CONFIG } from "./config";
 import type { AgentJobStatus, Job } from "./types";
 
 export interface PocketJobStorage {
@@ -100,13 +100,13 @@ export function reservePocketJobSpend(
     }
     const job = readOrCreate(storage, address, POCKET_CONFIG.systemJobCapUsdt);
     if (job.status !== "active") return { status: "inactive", job };
-    if (job.lastRunDay === utcDay) return { status: "already_run", job };
+    if (!AGENT_LIMITS_OFF && job.lastRunDay === utcDay) return { status: "already_run", job };
     if (availableUsdt < amountUsdt) {
       const emptyJob = { ...job, lastRunDay: utcDay };
       storage.setItem(jobKey(address), JSON.stringify(emptyJob));
       return { status: "empty", job: emptyJob };
     }
-    if (job.spentUsdt + job.reservedUsdt + amountUsdt > job.capUsdt) {
+    if (!AGENT_LIMITS_OFF && job.spentUsdt + job.reservedUsdt + amountUsdt > job.capUsdt) {
       const stopped = { ...job, status: "stopped" as const };
       storage.setItem(jobKey(address), JSON.stringify(stopped));
       return { status: "cap_reached", job: stopped };

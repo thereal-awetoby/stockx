@@ -5,7 +5,7 @@ import {
   type PocketJobLock,
   type PocketJobStorage,
 } from "./job-store";
-import { MIN_SESSION_BNB_GAS, POCKET_CONFIG, type PocketConfig } from "./config";
+import { AGENT_LIMITS_OFF, MIN_SESSION_BNB_GAS, POCKET_CONFIG, type PocketConfig } from "./config";
 import { executeGuardedTrade } from "./guards";
 import type { SwapPipeline } from "../types";
 import type {
@@ -49,7 +49,7 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
     return { status: "rejected", reason: "invalid_trade_amount" };
   }
   const amountUsdt = Number(input.amountUsdt);
-  if (amountUsdt > 5) return { status: "rejected", reason: "max_trade_exceeded" };
+  if (!AGENT_LIMITS_OFF && amountUsdt > 5) return { status: "rejected", reason: "max_trade_exceeded" };
 
   const side: TradeSide = "buy";
   const utcDay = new Date().toISOString().slice(0, 10);

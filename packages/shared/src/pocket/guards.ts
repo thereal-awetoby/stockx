@@ -1,4 +1,4 @@
-import { POCKET_CONFIG, type PocketConfig } from "./config";
+import { AGENT_LIMITS_OFF, POCKET_CONFIG, type PocketConfig } from "./config";
 import { SwapError } from "../errors";
 import type { Quote, SwapPipeline } from "../types";
 import type { GuardedTradeStatus, PocketTradeRequest, SessionSigner } from "./types";
@@ -44,14 +44,14 @@ export function evaluatePocketAction(input: PocketGuardInput, config: PocketConf
     !Number.isFinite(input.amountUsdt) || input.amountUsdt <= 0 || Number(input.amountIn) !== input.amountUsdt) {
     return { allowed: false, reason: "invalid_trade_amount" };
   }
-  if (input.amountUsdt > MAX_AGENT_TRADE_USDT) return { allowed: false, reason: "max_trade_exceeded" };
-  if (!Number.isFinite(input.capUsdt) || input.capUsdt <= 0 || input.capUsdt > config.systemJobCapUsdt) {
+  if (!AGENT_LIMITS_OFF && input.amountUsdt > MAX_AGENT_TRADE_USDT) return { allowed: false, reason: "max_trade_exceeded" };
+  if (!AGENT_LIMITS_OFF && (!Number.isFinite(input.capUsdt) || input.capUsdt <= 0 || input.capUsdt > config.systemJobCapUsdt)) {
     return { allowed: false, reason: "invalid_job_cap" };
   }
   if (!Number.isFinite(input.spentUsdt) || input.spentUsdt < 0 || !Number.isFinite(input.reservedUsdt) || input.reservedUsdt < 0) {
     return { allowed: false, reason: "invalid_job_spend" };
   }
-  if (input.side === "buy" && input.spentUsdt + input.reservedUsdt + input.amountUsdt > input.capUsdt) {
+  if (!AGENT_LIMITS_OFF && input.side === "buy" && input.spentUsdt + input.reservedUsdt + input.amountUsdt > input.capUsdt) {
     return { allowed: false, reason: "job_cap_exceeded" };
   }
   return { allowed: true };

@@ -39,5 +39,14 @@ export const POCKET_CONFIG: Readonly<PocketConfig> = Object.freeze({
 export const isPocketConfigReady = POCKET_CONFIG.aaplbAddress !== null &&
   POCKET_CONFIG.aaplbDecimals !== null;
 
+/**
+ * Owner switch for local testing: NEXT_PUBLIC_AGENT_LIMITS=off lifts the one-run-per-UTC-day rule,
+ * the $5 per-trade max and the $25 job cap. Everything else stays: session wallet only, buy-only,
+ * kill switch, market-open check, BNB gas floor, and the swap provider's slippage checks.
+ * Leave it unset in any build other people use.
+ */
+export const AGENT_LIMITS_OFF =
+  typeof process !== "undefined" && process.env.NEXT_PUBLIC_AGENT_LIMITS?.trim() === "off";
+
 /** The agent skips a tick when the pocket holds less BNB than this. A swap costs about 0.00002 BNB. */
 export const MIN_SESSION_BNB_GAS = 0.0005;
