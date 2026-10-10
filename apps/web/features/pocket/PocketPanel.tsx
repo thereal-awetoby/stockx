@@ -35,7 +35,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
 
   async function create(): Promise<void> {
     const created = await pocket.createPocket(password);
-    setPassword("");
+    if (created) setPassword(""); // keep what was typed if creation failed, so the error is easy to fix
     setMessage(created ? "Pocket ready." : "");
   }
 
@@ -91,9 +91,10 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
       {!pocket.pocket && pocket.status !== "corrupt" && pocket.status !== "loading" && pocket.status !== "error" && (
         <section>
           <h2>Create pocket</h2>
-          <label htmlFor="pocket-create-password">Encryption passphrase</label>
+          <label htmlFor="pocket-create-password">Encryption passphrase (at least 10 characters)</label>
           <input id="pocket-create-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
           <button type="button" onClick={() => void create()}>Create</button>
+          {pocket.operationError && <p className="err">{pocket.operationError}</p>}
         </section>
       )}
 
