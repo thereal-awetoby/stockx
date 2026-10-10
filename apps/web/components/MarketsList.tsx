@@ -1,44 +1,50 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import {
-  calcPremiumPct,
-  createApiPriceProvider,
-  createMockPriceProvider,
-  searchStocks,
-  type PriceSnapshot,
-  type Stock,
-} from "@stockx/shared";
+import { useEffect, useRef, useState } from "react";
+import { calcPremiumPct, searchStocks, type PriceSnapshot, type Stock } from "@stockx/shared";
+import { getPriceCached } from "../lib/price-queue";
 
-const prices = process.env.NEXT_PUBLIC_PRICE_PROVIDER === "mock" ? createMockPriceProvider() : createApiPriceProvider();
+const PAGE = 20;
 const usd = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD" });
 
 function LiveRow({ s }: { s: Stock }) {
   const router = useRouter();
   const [snap, setSnap] = useState<PriceSnapshot | null>(null);
   const [failed, setFailed] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const row = useRef<HTMLTableRowElement>(null);
+
+  // Only rows on (or near) the screen load a price.
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { rootMargin: "200px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
+    if (!visible) return;
     let alive = true;
     const load = async () => {
       try {
-        const x = await prices.getPrices(s.address ?? s.token);
+        const x = await getPriceCached(s.address ?? s.token);
         if (alive) { setSnap(x); setFailed(false); }
       } catch {
         if (alive) setFailed(true);
       }
     };
-    load();
-    const t = setInterval(load, 30_000);
+    void load();
+    const t = setInterval(load, 60_000);
     return () => { alive = false; clearInterval(t); };
-  }, [s.address, s.token]);
+  }, [visible, s.address, s.token]);
 
   const premium = snap ? calcPremiumPct(snap.onchain, snap.reference) : null;
   const cell = (v: string | null) => (v ?? (failed ? "—" : "…"));
 
   return (
-    <tr className="click" onClick={() => router.push(`/stock/${s.slug}`)}>
+    <tr ref={row} className="click" onClick={() => router.push(`/stock/${s.slug}`)}>
       <td>
         <div className="name">
           <span className="avatar">{s.name.slice(0, 1)}</span>
@@ -64,6 +70,8 @@ export default function MarketsList() {
   const matches = searchStocks(q);
   // Searching looks through everything. Otherwise the default tab shows only what can be traded.
   const results = q.trim() || tab === "all" ? matches : matches.filter((s) => s.status === "live");
+  const [limit, setLimit] = useState(PAGE);
+  const shown = results.slice(0, limit);
 
   return (
     <>
@@ -86,7 +94,7 @@ export default function MarketsList() {
               <tr><th>Asset</th><th className="num">Token price</th><th className="num">Stock price</th><th className="num">Premium</th><th>Quote</th></tr>
             </thead>
             <tbody>
-              {results.map((s) =>
+              {shown.map((s) =>
                 s.status === "live" ? (
                   <LiveRow key={s.slug} s={s} />
                 ) : (
@@ -105,6 +113,11 @@ export default function MarketsList() {
             </tbody>
           </table>
         </section>
+      )}
+      {results.length > limit && (
+        <div style={{ textAlign: "center", marginTop: 14 }}>
+          <button type="button" className="ghost" onClick={() => setLimit((n) => n + PAGE)}>Show more ({results.length - limit} left)</button>
+        </div>
       )}
     </>
   );

@@ -32,7 +32,7 @@ export default function Header() {
     <header className="header">
       <div className="header-inner">
         <Link href="/" className="logo" aria-label="stockX home">
-          <Image src="/stockx-logo.png" alt="stockX" width={95} height={28} priority />
+          <Image src="/stockx-logo.png" alt="stockX" width={95} height={28} style={{ width: "auto", height: 28 }} priority />
         </Link>
         <nav className="nav">
           <Link href="/markets" className={exploreOn ? "on" : ""}>Explore</Link>
