@@ -23,6 +23,9 @@ import { fundPocket } from "./wallet";
 import { runAgentTick } from "./agent-runner";
 import type { Job, Pocket, PocketBalances } from "./types";
 
+// The limit tests below exercise the guards, which are off by default.
+process.env.NEXT_PUBLIC_AGENT_LIMITS = "on";
+
 const mainAddress = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const testSigner = new Wallet(`0x${"11".repeat(32)}`);
 const sessionAddress = testSigner.address;
