@@ -179,7 +179,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
             <div className="row">
               <span className="muted">Simulation</span>
               {sim.ok
-                ? <span className="pos small">Passed{sim.needsApproval ? " · needs a one-time exact USDT approval" : ""}</span>
+                ? <span className="pos small">Passed{sim.needsApproval ? ` · needs a one-time exact ${inSym === "AAPLB" ? stock.token : inSym} approval` : ""}</span>
                 : <span className="neg small">Failed: {sim.error}</span>}
             </div>
           )}

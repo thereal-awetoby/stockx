@@ -38,3 +38,6 @@ export const POCKET_CONFIG: Readonly<PocketConfig> = Object.freeze({
 
 export const isPocketConfigReady = POCKET_CONFIG.aaplbAddress !== null &&
   POCKET_CONFIG.aaplbDecimals !== null;
+
+/** The agent skips a tick when the pocket holds less BNB than this. A swap costs about 0.00002 BNB. */
+export const MIN_SESSION_BNB_GAS = 0.0005;

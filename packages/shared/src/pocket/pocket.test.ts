@@ -233,7 +233,7 @@ test("pre-execute helper failure and low BNB release the reservation", async () 
   const job = await activeTestJob(storage, locks);
   const result = await runAgentTick({
     pocket: testPocket(), job, helper: testPipeline(), mainAddress, signer: testSigner,
-    storage, locks, balances: testBalances({ bnb: "0.001" }), amountUsdt: "5", config: testConfig,
+    storage, locks, balances: testBalances({ bnb: "0.0004" }), amountUsdt: "5", config: testConfig,
   });
   const persisted = await loadPocketJob(storage, locks, sessionAddress);
   assert.deepEqual(result, { status: "skipped", reason: "insufficient_bnb_for_gas", job: persisted });

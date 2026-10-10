@@ -5,7 +5,7 @@ import {
   type PocketJobLock,
   type PocketJobStorage,
 } from "./job-store";
-import { POCKET_CONFIG, type PocketConfig } from "./config";
+import { MIN_SESSION_BNB_GAS, POCKET_CONFIG, type PocketConfig } from "./config";
 import { executeGuardedTrade } from "./guards";
 import type { SwapPipeline } from "../types";
 import type {
@@ -81,7 +81,7 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
       amountUsdt,
     } as const;
     const availableBnb = Number(balances.bnb);
-    if (!Number.isFinite(availableBnb) || availableBnb < 0.002) {
+    if (!Number.isFinite(availableBnb) || availableBnb < MIN_SESSION_BNB_GAS) {
       const updatedJob = await releasePocketJobSpend(storage, locks, pocket.address, reserved);
       reservation = null;
       return { status: "skipped", reason: "insufficient_bnb_for_gas", job: updatedJob };
