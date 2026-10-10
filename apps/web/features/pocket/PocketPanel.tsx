@@ -9,6 +9,29 @@ import { usePocket } from "./usePocket";
 
 const mockPipeline = createSwapHelper(createMockProvider(), { actor: "agent" });
 
+const SUGGESTIONS = ["Buy $2 of AAPLB now", "Buy $1 of AAPLB every day at 3pm UTC"];
+
+/** The address IS the control: click it to copy. No separate button. */
+function AddressChip({ label, address }: { label: string; address: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="addr-chip"
+      title="Click to copy"
+      onClick={() => {
+        void navigator.clipboard.writeText(address).then(
+          () => { setCopied(true); window.setTimeout(() => setCopied(false), 1_600); },
+          () => setCopied(false),
+        );
+      }}
+    >
+      <span className="addr-label">{label}</span>
+      <span className={`addr-value${copied ? " copied" : ""}`}>{copied ? "Copied to clipboard" : address}</span>
+    </button>
+  );
+}
+
 export interface PocketPanelProps {
   mainAddress: string;
   getMainSigner: () => MainSigner | Promise<MainSigner>;
@@ -28,7 +51,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   const [message, setMessage] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [keyError, setKeyError] = useState("");
-  const [addressCopied, setAddressCopied] = useState(false);
+  const [xfer, setXfer] = useState<"fund" | "withdraw">("fund");
   const [instruction, setInstruction] = useState("");
   const [proposal, setProposal] = useState<ParseResult | null>(null);
   const [schedule, setSchedule] = useState({ hourUtc: 15, minuteUtc: 0 });
@@ -117,142 +140,189 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
     setMessage(errorCode ? `${result.status}: ${errorCode}` : result.status);
   }
 
+  const armed = pocket.armed && pocket.job?.status === "active";
+  const hh = String(schedule.hourUtc).padStart(2, "0");
+  const mm = String(schedule.minuteUtc).padStart(2, "0");
+  const lowGas = Number(pocket.balances.bnb) < MIN_SESSION_BNB_GAS;
+  const pipelineLine = pipeline && isPipelineFactory(pipeline)
+    ? (agentLimitsOff() ? "Live · real funds · buy-only · limits off" : "Live · real funds · buy-only · max $5 per trade")
+    : pipeline || executor ? "Swap pipeline connected" : "Mock pipeline";
+  const feed = [
+    ...pocket.activity.map((t, i) => ({ k: `a-${t.txHash}-${i}`, time: t.timestamp, text: `${t.side === "buy" ? "Bought" : "Sold"} ${t.amountUsdt} USDT of ${t.token}`, hash: t.txHash, bad: false })),
+    ...pocket.runLog.map((e, i) => ({ k: `r-${e.timestamp}-${i}`, time: e.timestamp, text: `${e.message}${e.errorCode ? ` · ${e.errorCode}` : ""}`, hash: "", bad: Boolean(e.errorCode) })),
+  ].sort((x, y) => y.time - x.time);
+
   return (
-    <section className="pocket-panel">
-      <h2>Session pocket</h2>
-      <p>Main wallet: {mainAddress || "Not connected"}</p>
-      {pocket.pocket && (
-        <>
-          <p>
-            Pocket address: <span style={{ wordBreak: "break-all" }}>{pocket.pocket.address}</span>{" "}
-            <button
-              type="button"
-              className="ghost tiny"
-              onClick={() => {
-                void navigator.clipboard.writeText(pocket.pocket!.address).then(
-                  () => { setAddressCopied(true); window.setTimeout(() => setAddressCopied(false), 2_000); },
-                  () => setAddressCopied(false),
-                );
-              }}
-            >
-              {addressCopied ? "Copied" : "Copy"}
-            </button>
-          </p>
-          <p className="muted small">Send BNB to this address on BNB Smart Chain (BSC) only, for gas.</p>
-        </>
-      )}
-      <p>{pocket.status}</p>
-      <p className="pocket-balance">
-        USDT: {pocket.balanceError ? `unavailable (${pocket.balanceError})` : pocket.balances.usdt}
-      </p>
-      <p className="pocket-balance">
-        BNB: {pocket.balanceError ? `unavailable (${pocket.balanceError})` : pocket.balances.bnb}
-      </p>
-      <p className="pocket-balance">
-        AAPLB: {pocket.aaplbBalanceError ? `unavailable (${pocket.aaplbBalanceError})` : pocket.aaplbBalance}
-      </p>
-      {Number(pocket.balances.bnb) < MIN_SESSION_BNB_GAS && <p>{pocketCopy.smallBalance}</p>}
-
-      {!pocket.pocket && pocket.status !== "corrupt" && pocket.status !== "loading" && pocket.status !== "error" && (
-        <section>
-          <h2>Create pocket</h2>
-          <label htmlFor="pocket-create-password">Encryption passphrase (at least 10 characters)</label>
-          <input id="pocket-create-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-          <button type="button" onClick={() => void create()}>Create</button>
-          {pocket.operationError && <p className="err">{pocket.operationError}</p>}
-        </section>
-      )}
-
-      {pocket.pocket && !pocket.exported && (
-        <section>
-          <h2>Back up pocket key</h2>
-          <label htmlFor="pocket-password">Passphrase</label>
-          <input id="pocket-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-          <button type="button" onClick={() => void exportKey()}>Show key</button>
-          {keyError && <p className="err">{keyError}</p>}
-          <label htmlFor="pocket-backup-key">Paste key to verify backup</label>
-          <input id="pocket-backup-key" type="password" ref={backupKey} />
-          <button type="button" onClick={() => {
-            const pastedKey = backupKey.current?.value ?? "";
-            if (backupKey.current) backupKey.current.value = "";
-            const verified = pocket.verifyBackup(pastedKey);
-            setMessage(verified ? "Backup verified." : "Key does not match this pocket.");
-          }}>Verify backup</button>
-        </section>
-      )}
-
-      {pocket.pocket && pocket.exported && (
-        <section className="pocket-fund">
-          <h2>USDT transfers</h2>
-          <label htmlFor="pocket-fund-amount">Fund amount</label>
-          <input id="pocket-fund-amount" inputMode="decimal" value={fundAmount} onChange={(event) => setFundAmount(event.target.value)} />
-          <button type="button" disabled={!pocket.exported || !mainAddress} onClick={() => void fund()}>Fund</button>
-          <label htmlFor="pocket-withdraw-amount">Withdraw amount</label>
-          <input id="pocket-withdraw-amount" inputMode="decimal" value={withdrawAmount} onChange={(event) => setWithdrawAmount(event.target.value)} />
-          <label htmlFor="pocket-withdraw-password">Pocket passphrase</label>
-          <input id="pocket-withdraw-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-          <button type="button" disabled={!mainAddress} onClick={() => void withdraw()}>Withdraw to connected wallet</button>
-        </section>
-      )}
-
-      <section className="pocket-agent">
-        <h2>Agent</h2>
-        <p>Job spend: {pocket.job?.spentUsdt ?? 0}{agentLimitsOff() ? " USDT (no cap)" : ` / ${pocket.job?.capUsdt ?? 25} USDT`}</p>
-        <p>Take profit: not active in this build</p>
-        <p>
-          {pipeline && isPipelineFactory(pipeline)
-            ? (agentLimitsOff() ? "Live session pipeline. Real funds. Buy-only. Spending limits are OFF." : "Live session pipeline. Real funds. Buy-only, max $5 per trade.")
-            : pipeline || executor ? "Swap pipeline connected" : "Mock swap pipeline"}
-        </p>
-        <label htmlFor="pocket-agent-instruction">Tell the agent what to do</label>
-        <input
-          id="pocket-agent-instruction"
-          value={instruction}
-          maxLength={300}
-          placeholder="buy $2 of AAPLB now, or buy $1 of AAPLB every day at 3pm UTC"
-          onChange={(event) => { setInstruction(event.target.value); setProposal(null); }}
-          onKeyDown={(event) => { if (event.key === "Enter") understand(); }}
-        />
-        <button type="button" disabled={!instruction.trim()} onClick={understand}>Understand</button>
-        {proposal && !proposal.ok && <p className="err">{proposal.reason}</p>}
-        {proposal && proposal.ok && (
-          <div role="group" aria-label="Agent instruction to confirm">
-            <p><strong>{proposal.summary}</strong></p>
-            {proposal.notes.map((note) => <p key={note} className="muted small">{note}</p>)}
-            <p className="muted small">Real funds, session pocket only, buy-only. Nothing happens until you confirm.</p>
-            <button type="button" onClick={() => void confirmProposal()}>Confirm</button>
-            <button type="button" onClick={() => setProposal(null)}>Cancel</button>
+    <section className="agent">
+      <div className="agent-grid">
+        {/* left: the pocket */}
+        <div className="agent-col">
+          <div className="panel">
+            <div className="panel-head">
+              <h2>Session pocket</h2>
+              <span className="status-pill">{pocket.status}</span>
+            </div>
+            <AddressChip label="Main wallet" address={mainAddress || "Not connected"} />
+            {pocket.pocket && (
+              <>
+                <AddressChip label="Pocket address" address={pocket.pocket.address} />
+                <p className="muted small hint">Click an address to copy it. Send BNB to the pocket on BNB Smart Chain only, for gas.</p>
+              </>
+            )}
+            <div className="tiles">
+              <div className="tile"><span>USDT</span><strong>{pocket.balanceError ? "n/a" : pocket.balances.usdt}</strong></div>
+              <div className="tile"><span>BNB</span><strong>{pocket.balanceError ? "n/a" : pocket.balances.bnb}</strong></div>
+              <div className="tile"><span>AAPLB</span><strong>{pocket.aaplbBalanceError ? "n/a" : pocket.aaplbBalance}</strong></div>
+            </div>
+            {(pocket.balanceError || pocket.aaplbBalanceError) && <p className="err">Some balances are unavailable right now.</p>}
+            {lowGas && <p className="warn small" style={{ marginTop: 8 }}>{pocketCopy.smallBalance}</p>}
           </div>
-        )}
-        <p className="muted small">Or set it by hand:</p>
-        <label htmlFor="pocket-agent-amount">Buy amount in USDT</label>
-        <input id="pocket-agent-amount" inputMode="decimal" value={buyAmount} onChange={(event) => setBuyAmount(event.target.value)} />
-        <label htmlFor="pocket-agent-password">Pocket passphrase</label>
-        <input id="pocket-agent-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-        <button type="button" aria-pressed={pocket.armed} disabled={!pocket.exported} onClick={() => void pocket.startAgent()}>Arm agent</button>
-        <button type="button" disabled={!pocket.job || pocket.job.status !== "active"} onClick={() => void pocket.stopAgent()}>Stop agent</button>
-        <button type="button" disabled={!pocket.exported || !pocket.armed} onClick={() => void runOneTick()}>Run one tick</button>
-      </section>
 
-      <section>
-        <h2>Session activity</h2>
-        <ul>{pocket.activity.map((trade, index) => <li key={`${trade.txHash}-${index}`}>{trade.side} {trade.amountUsdt} USDT · {trade.txHash}</li>)}</ul>
-      </section>
+          {!pocket.pocket && pocket.status !== "corrupt" && pocket.status !== "loading" && pocket.status !== "error" && (
+            <div className="panel">
+              <h2>Create pocket</h2>
+              <label htmlFor="pocket-create-password">Encryption passphrase (at least 10 characters)</label>
+              <input id="pocket-create-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              <button type="button" onClick={() => void create()}>Create pocket</button>
+              {pocket.operationError && <p className="err">{pocket.operationError}</p>}
+            </div>
+          )}
 
-      <section>
-        <h2>Agent run log</h2>
-        <ul>{pocket.runLog.map((entry, index) => <li key={`${entry.timestamp}-${index}`}>
-          {new Date(entry.timestamp).toLocaleTimeString()} {entry.message}{entry.errorCode ? ` · ${entry.errorCode}` : ""}
-        </li>)}</ul>
-      </section>
+          {pocket.pocket && !pocket.exported && (
+            <div className="panel">
+              <h2>Back up your key first</h2>
+              <p className="muted small">Anyone with this key can move the pocket's funds. Keep it offline.</p>
+              <label htmlFor="pocket-password">Passphrase</label>
+              <input id="pocket-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              <button type="button" onClick={() => void exportKey()}>Show key</button>
+              {keyError && <p className="err">{keyError}</p>}
+              <label htmlFor="pocket-backup-key">Paste key to verify backup</label>
+              <input id="pocket-backup-key" type="password" ref={backupKey} />
+              <button type="button" className="ghost" onClick={() => {
+                const pastedKey = backupKey.current?.value ?? "";
+                if (backupKey.current) backupKey.current.value = "";
+                const verified = pocket.verifyBackup(pastedKey);
+                setMessage(verified ? "Backup verified." : "Key does not match this pocket.");
+              }}>Verify backup</button>
+            </div>
+          )}
 
-      <section>
+          {pocket.pocket && pocket.exported && (
+            <div className="panel">
+              <div className="seg" role="tablist" aria-label="Move USDT">
+                <button type="button" role="tab" aria-selected={xfer === "fund"} className={xfer === "fund" ? "on" : ""} onClick={() => setXfer("fund")}>Fund pocket</button>
+                <button type="button" role="tab" aria-selected={xfer === "withdraw"} className={xfer === "withdraw" ? "on" : ""} onClick={() => setXfer("withdraw")}>Withdraw</button>
+              </div>
+              {xfer === "fund" ? (
+                <>
+                  <label htmlFor="pocket-fund-amount">USDT to send from your main wallet</label>
+                  <input id="pocket-fund-amount" inputMode="decimal" value={fundAmount} onChange={(event) => setFundAmount(event.target.value)} />
+                  <button type="button" disabled={!pocket.exported || !mainAddress} onClick={() => void fund()}>Fund pocket</button>
+                </>
+              ) : (
+                <>
+                  <label htmlFor="pocket-withdraw-amount">USDT to send back to your main wallet</label>
+                  <input id="pocket-withdraw-amount" inputMode="decimal" value={withdrawAmount} onChange={(event) => setWithdrawAmount(event.target.value)} />
+                  <label htmlFor="pocket-withdraw-password">Pocket passphrase</label>
+                  <input id="pocket-withdraw-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+                  <button type="button" disabled={!mainAddress} onClick={() => void withdraw()}>Withdraw to connected wallet</button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* right: the agent console */}
+        <div className="agent-col">
+          <div className="console">
+            <div className="panel-head">
+              <h2>Agent</h2>
+              <span className={`status-pill ${armed ? "live" : ""}`}><i />{armed ? "Armed" : "Idle"}</span>
+            </div>
+            <p className="console-meta">{pipelineLine}</p>
+            <p className="console-meta">
+              Spent {pocket.job?.spentUsdt ?? 0}{agentLimitsOff() ? " USDT · no cap" : ` of ${pocket.job?.capUsdt ?? 25} USDT`}
+              {armed && <> · runs daily at {hh}:{mm} UTC while this tab is open</>}
+            </p>
+
+            <label htmlFor="pocket-agent-instruction" className="console-label">Tell the agent what to do</label>
+            <div className="prompt">
+              <input
+                id="pocket-agent-instruction"
+                value={instruction}
+                maxLength={300}
+                placeholder="e.g. buy $2 of AAPLB now"
+                autoComplete="off"
+                onChange={(event) => { setInstruction(event.target.value); setProposal(null); }}
+                onKeyDown={(event) => { if (event.key === "Enter") understand(); }}
+              />
+              <button type="button" disabled={!instruction.trim()} onClick={understand}>Understand</button>
+            </div>
+            <div className="chips">
+              {SUGGESTIONS.map((text) => (
+                <button key={text} type="button" className="chip-btn" onClick={() => { setInstruction(text); setProposal(parseAgentInstruction(text)); setMessage(""); }}>{text}</button>
+              ))}
+            </div>
+
+            {proposal && !proposal.ok && <p className="console-err">{proposal.reason}</p>}
+            {proposal && proposal.ok && (
+              <div className="proposal" role="group" aria-label="Agent instruction to confirm">
+                <strong>{proposal.summary}</strong>
+                {proposal.notes.map((note) => <span key={note} className="console-meta">{note}</span>)}
+                <span className="console-meta">Real funds · session pocket only · buy-only. Nothing happens until you confirm.</span>
+                <div className="proposal-actions">
+                  <button type="button" onClick={() => void confirmProposal()}>Confirm</button>
+                  <button type="button" className="ghost-dark" onClick={() => setProposal(null)}>Cancel</button>
+                </div>
+              </div>
+            )}
+
+            <label htmlFor="pocket-agent-password" className="console-label">Pocket passphrase</label>
+            <input id="pocket-agent-password" className="console-input" type="password" value={password} placeholder="needed to run a trade" onChange={(event) => setPassword(event.target.value)} />
+
+            <details className="manual">
+              <summary>Manual controls</summary>
+              <label htmlFor="pocket-agent-amount" className="console-label">Buy amount in USDT</label>
+              <input id="pocket-agent-amount" className="console-input" inputMode="decimal" value={buyAmount} onChange={(event) => setBuyAmount(event.target.value)} />
+              <div className="proposal-actions">
+                <button type="button" aria-pressed={pocket.armed} disabled={!pocket.exported} onClick={() => void pocket.startAgent()}>Arm agent</button>
+                <button type="button" className="ghost-dark" disabled={!pocket.job || pocket.job.status !== "active"} onClick={() => void pocket.stopAgent()}>Stop agent</button>
+                <button type="button" className="ghost-dark" disabled={!pocket.exported || !pocket.armed} onClick={() => void runOneTick()}>Run one tick</button>
+              </div>
+            </details>
+            {armed && (
+              <div className="proposal-actions">
+                <button type="button" className="ghost-dark" onClick={() => void pocket.stopAgent()}>Stop agent</button>
+              </div>
+            )}
+            {(message || pocket.operationError) && <p role="status" className="console-status">{message || pocket.operationError}</p>}
+          </div>
+
+          <div className="panel">
+            <h2>Activity</h2>
+            {feed.length === 0 ? (
+              <p className="muted small">Nothing yet. Trades and agent events show up here live.</p>
+            ) : (
+              <ul className="feed">
+                {feed.map((f) => (
+                  <li key={f.k} className={f.bad ? "bad" : ""}>
+                    <span className="feed-time">{new Date(f.time).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}</span>
+                    <span className="feed-text">{f.text}</span>
+                    {f.hash && <a href={`https://bscscan.com/tx/${f.hash}`} target="_blank" rel="noreferrer">View</a>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="agent-notes muted small">
         <p>{pocketCopy.fundedPocket}</p>
         {railgunEnabled && <p>{pocketCopy.railgunUsdt}</p>}
         <p>{pocketCopy.publicStockLeg}</p>
         <p>{pocketCopy.keyRisk}</p>
-      </section>
-      <p role="status">{message || pocket.operationError}</p>
+      </div>
       {revealedKey && pocket.pocket && (
         <KeyBackupDialog privateKey={revealedKey} address={pocket.pocket.address} onClose={() => setRevealedKey(null)} />
       )}

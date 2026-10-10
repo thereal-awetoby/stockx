@@ -28,7 +28,7 @@ export default function PocketPage() {
   };
 
   return (
-    <main>
+    <main className="agent-page">
       <div className="lede">
         <h1>Agent</h1>
         <p>Optional session wallet. The agent can spend only this wallet, never your main one.</p>

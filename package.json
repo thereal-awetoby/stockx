@@ -1,11 +1,14 @@
 {
   "name": "stockx",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "npm run dev -w @stockx/web",
     "build": "npm run build -w @stockx/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test -w @stockx/shared"
+    "test": "npm run test -w @stockx/shared && npm run test -w @stockx/web"
   }
 }

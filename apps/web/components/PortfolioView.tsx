@@ -1,68 +1,72 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { erc20Abi, formatUnits, type Address } from "viem";
-import { useAccount, useBalance, useReadContracts } from "wagmi";
-import { listLiveStockTokens, TOKENS } from "@stockx/shared";
+import { type Hex } from "viem";
+import { usePublicClient } from "wagmi";
+import { listStockTokens, TOKENS } from "@stockx/shared";
+import { readPocket } from "@stockx/shared/pocket";
 import Donut from "./Donut";
 import TokenLogo from "./TokenLogo";
-import { getPriceCached } from "../lib/price-queue";
 import { usd } from "../lib/format";
-import { readTrades, type TradeEntry } from "../lib/trade-log";
+import { importTradeFromHash } from "../lib/trade-import";
+import { readTradesFor, recordTrade, subscribeTrades, type TradeEntry } from "../lib/trade-log";
+import { usePortfolio } from "../lib/usePortfolio";
 
 const fmt = (n: number, dp = 6) => n.toLocaleString("en-US", { maximumFractionDigits: dp });
-const ZERO = "0x0000000000000000000000000000000000000000" as Address;
-
-interface Tracked { symbol: string; name: string; address: Address; decimals: number }
-const TRACKED: Tracked[] = [
-  { symbol: "USDT", name: "Tether", address: TOKENS.USDT.address, decimals: TOKENS.USDT.decimals },
-  ...listLiveStockTokens().map((t) => ({ symbol: t.symbol, name: t.name, address: t.address as Address, decimals: t.decimals })),
+const ALL_TOKENS = [
+  { symbol: "USDT", address: TOKENS.USDT.address as string, decimals: TOKENS.USDT.decimals },
+  ...listStockTokens().map((t) => ({ symbol: t.symbol, address: t.address as string, decimals: t.decimals })),
 ];
 
 export default function PortfolioView() {
-  const { address, isConnected } = useAccount();
-  const bnb = useBalance({ address, chainId: 56, query: { enabled: !!address, refetchInterval: 20_000 } });
-  // One multicall for every balance, instead of one request per token.
-  const balances = useReadContracts({
-    contracts: TRACKED.map((t) => ({ address: t.address, abi: erc20Abi, functionName: "balanceOf", args: [address ?? ZERO], chainId: 56 }) as const),
-    query: { enabled: !!address, refetchInterval: 20_000 },
-  });
-  const [stockPrice, setStockPrice] = useState<Record<string, number>>({});
+  const { address, isConnected, bnb, balances, cash, heldStocks, stockPrice, stocks, total } = usePortfolio();
+  const publicClient = usePublicClient({ chainId: 56 });
   const [trades, setTrades] = useState<TradeEntry[]>([]);
+  const [pocketAddr, setPocketAddr] = useState<string | null>(null);
+  const [hash, setHash] = useState("");
+  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
 
-  const rows = TRACKED.map((t, i) => {
-    const r = balances.data?.[i];
-    const qty = r && r.status === "success" ? Number(formatUnits(r.result as bigint, t.decimals)) : null;
-    return { ...t, qty };
-  });
-  const cash = rows.find((r) => r.symbol === "USDT")?.qty ?? 0;
-  const heldStocks = rows.filter((r) => r.symbol !== "USDT" && (r.qty ?? 0) > 0);
-  const heldKey = heldStocks.map((r) => r.address).join(",");
-
-  // Prices are only fetched for stock tokens the wallet actually holds.
   useEffect(() => {
-    if (!heldKey) { setStockPrice({}); return; }
-    let alive = true;
-    const load = async () => {
-      const out: Record<string, number> = {};
-      await Promise.all(heldKey.split(",").map(async (addr) => {
-        try { out[addr] = (await getPriceCached(addr)).onchain; } catch { /* price stays unknown */ }
-      }));
-      if (alive) setStockPrice(out);
-    };
-    void load();
-    const id = setInterval(load, 30_000);
-    return () => { alive = false; clearInterval(id); };
-  }, [heldKey]);
+    try { setPocketAddr(readPocket(localStorage)?.address ?? null); } catch { setPocketAddr(null); }
+  }, []);
 
-  useEffect(() => { if (address) setTrades(readTrades(address)); }, [address]);
+  // Recent transactions: this wallet's trades plus the agent pocket's, live-updated when a trade is recorded.
+  useEffect(() => {
+    if (!address) return;
+    const load = () => setTrades(readTradesFor(pocketAddr ? [address, pocketAddr] : [address]));
+    load();
+    return subscribeTrades(load);
+  }, [address, pocketAddr]);
+
+  async function importTx() {
+    const h = hash.trim();
+    if (!/^0x[0-9a-fA-F]{64}$/.test(h)) { setImportMsg("Paste the full transaction hash (0x followed by 64 characters)."); return; }
+    if (!publicClient || !address) return;
+    setImporting(true);
+    setImportMsg(null);
+    try {
+      const owners = pocketAddr ? [address, pocketAddr] : [address];
+      const found = await importTradeFromHash(publicClient, h as Hex, owners, ALL_TOKENS);
+      if (found === "failed") setImportMsg("That transaction failed on-chain, so there is no trade to add.");
+      else if (!found) setImportMsg("That doesn't look like a stock buy or sell for your wallet or agent pocket.");
+      else {
+        const viaAgent = pocketAddr !== null && found.owner.toLowerCase() === pocketAddr.toLowerCase();
+        recordTrade(found.owner, viaAgent ? { ...found.entry, via: "agent" } : found.entry);
+        setHash("");
+        setImportMsg("Added.");
+      }
+    } catch {
+      setImportMsg("Couldn't read that transaction. Check the hash and try again.");
+    } finally {
+      setImporting(false);
+    }
+  }
 
   if (!isConnected || !address) {
     return <div className="card muted">Connect your wallet to see your portfolio.</div>;
   }
 
-  const stocks = heldStocks.reduce((sum, r) => sum + (r.qty ?? 0) * (stockPrice[r.address] ?? 0), 0);
-  const total = cash + stocks;
   const pct = (v: number) => (total > 0 ? ((v / total) * 100).toFixed(1) : "0.0");
 
   return (
@@ -111,7 +115,7 @@ export default function PortfolioView() {
 
         <h2 className="section-title" style={{ marginTop: 20 }}>Recent transactions</h2>
         {trades.length === 0 ? (
-          <div className="card muted small">No trades from this browser yet. Trades made in stockX appear here.</div>
+          <div className="card muted small">No trades yet. Buys and sells from your wallet and the agent show up here as they happen.</div>
         ) : (
           <section className="sheet sheet-scroll">
             <table>
@@ -119,10 +123,13 @@ export default function PortfolioView() {
               <tbody>
                 {trades.map((x) => (
                   <tr key={x.txHash}>
-                    <td>{new Date(x.t).toLocaleString()}</td>
-                    <td><span className="badge">{x.side === "buy" ? "Buy" : "Sell"} {x.token}</span></td>
+                    <td>{new Date(x.t).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}</td>
+                    <td>
+                      <span className="badge">{x.side === "buy" ? "Buy" : "Sell"} {x.token}</span>
+                      {x.via === "agent" && <span className="badge" style={{ marginLeft: 6 }}>Agent</span>}
+                    </td>
                     <td className="num">{fmt(Number(x.amountIn))} {x.inSym}</td>
-                    <td className="num">{fmt(Number(x.amountOut))} {x.outSym}</td>
+                    <td className="num">{x.amountOut ? `${fmt(Number(x.amountOut))} ${x.outSym}` : "—"}</td>
                     <td className="num"><a href={`https://bscscan.com/tx/${x.txHash}`} target="_blank" rel="noreferrer">View</a></td>
                   </tr>
                 ))}
@@ -130,7 +137,18 @@ export default function PortfolioView() {
             </table>
           </section>
         )}
-        <p className="muted small" style={{ marginTop: 10 }}>Only trades made through stockX in this browser are listed. Agent activity is on the <Link href="/pocket"><u>Agent page</u></Link>.</p>
+        <div className="import-row">
+          <input
+            value={hash}
+            placeholder="Add an older trade: paste its transaction hash"
+            onChange={(e) => { setHash(e.target.value); setImportMsg(null); }}
+            onKeyDown={(e) => { if (e.key === "Enter") void importTx(); }}
+            spellCheck={false}
+          />
+          <button type="button" className="ghost" disabled={importing || !hash.trim()} onClick={() => void importTx()}>{importing ? "Reading…" : "Add"}</button>
+        </div>
+        {importMsg && <p className={`small ${importMsg === "Added." ? "pos" : "err"}`} style={{ margin: "6px 0 0" }}>{importMsg}</p>}
+        <p className="muted small" style={{ marginTop: 10 }}>Trades made through stockX in this browser appear automatically. For trades made elsewhere, paste the hash above and it is read from the chain.</p>
       </div>
 
       <aside>

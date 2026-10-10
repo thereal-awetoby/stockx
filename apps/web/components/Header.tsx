@@ -33,8 +33,7 @@ export default function Header() {
     <header className="header">
       <div className="header-inner">
         <Link href="/" className="logo" aria-label="stockX home">
-          {/* unoptimized: the optimizer re-encodes at lower quality, which softens thin serif strokes */}
-          <Image src="/stockx-logo.png" alt="stockX" width={103} height={30} unoptimized priority style={{ width: "auto", height: 30 }} />
+          <Image src="/stockx-mark.svg" alt="stockX" width={36} height={36} unoptimized priority />
         </Link>
         <nav className="nav">
           <Link href="/markets" className={exploreOn ? "on" : ""}>Explore</Link>

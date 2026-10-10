@@ -1,5 +1,6 @@
 "use client";
 
+import { recordTrade } from "../../lib/trade-log";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SwapError, TOKENS, getRwaMarket } from "@stockx/shared";
 import {
@@ -272,7 +273,16 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     }
     tickGate.current.end(result.status);
     if ("job" in result && result.job) setJob(result.job);
-    if (result.status === "executed") setActivity((records) => [result.record, ...records]);
+    if (result.status === "executed") {
+      setActivity((records) => [result.record, ...records]);
+      if (stored) {
+        recordTrade(stored.address, {
+          t: result.record.timestamp, side: result.record.side, token: result.record.token,
+          amountIn: String(result.record.amountUsdt), inSym: "USDT", amountOut: "", outSym: result.record.token,
+          txHash: result.record.txHash, via: "agent",
+        });
+      }
+    }
     const entry = toRunLogEntry(result);
     setRunLog((entries) => [entry, ...entries].slice(0, 50));
     // Balances change on-chain during a tick. Refresh now, and once more shortly after because

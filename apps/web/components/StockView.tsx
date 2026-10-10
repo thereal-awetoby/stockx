@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import BackButton from "./BackButton";
 import BuyPanel from "./BuyPanel";
 import PriceChart from "./PriceChart";
 import TokenLogo from "./TokenLogo";
@@ -73,7 +74,7 @@ export default function StockView({ stock }: { stock: Stock }) {
 
   return (
     <main>
-      <Link href="/markets" className="muted small">← Explore</Link>
+      <BackButton fallback="/markets" />
       <div className="asset-head">
         <TokenLogo symbol={stock.token} name={stock.name} size={44} />
         <div>
