@@ -1,6 +1,8 @@
 "use client";
 import Link from "next/link";
 import BuyPanel from "./BuyPanel";
+import PriceChart from "./PriceChart";
+import StockInfo from "./StockInfo";
 import { useEffect, useState } from "react";
 import {
   calcPremiumPct,
@@ -70,12 +72,20 @@ export default function StockView({ stock }: { stock: Stock }) {
 
   return (
     <main>
-      <Link href="/markets" className="muted small">← Markets</Link>
-      <h1 style={{ marginTop: 8 }}>{stock.ticker} <span className="muted" style={{ fontWeight: 400 }}>{stock.name}</span></h1>
-      <p className="sub">{stock.token} · {stock.issuer}</p>
+      <Link href="/markets" className="muted small">← Explore</Link>
+      <div className="asset-head">
+        <span className="avatar big">{stock.ticker.slice(0, 1)}</span>
+        <div>
+          <h1 style={{ margin: 0 }}>{stock.name} <span className="muted" style={{ fontWeight: 400 }}>{stock.token}</span></h1>
+          <p className="muted small" style={{ margin: "4px 0 0" }}>{stock.ticker} · {stock.issuer} · BNB Chain</p>
+        </div>
+        {open !== undefined && <span className={`pill ${open ? "open" : "closed"}`} style={{ marginLeft: "auto" }}>US market {open ? "open" : "closed"}</span>}
+      </div>
 
       <div className="asset">
       <div>
+      <div className="card chart-card"><PriceChart token={stock.token} /></div>
+      <StockInfo stock={stock} />
       {/* The closed-market line is the stock product. */}
       <div className="card">
         <div className="row">

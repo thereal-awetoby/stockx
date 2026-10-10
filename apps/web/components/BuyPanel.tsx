@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAccount, usePublicClient, useWalletClient } from "wagmi";
 import type { PublicClient, WalletClient } from "viem";
 import {
@@ -17,6 +17,7 @@ import {
   type Stock,
 } from "@stockx/shared";
 import { createViemExecutor } from "../lib/viem-executor";
+import { recordTrade } from "../lib/trade-log";
 
 const fmt = (s: string, dp = 6) => Number(s).toLocaleString(undefined, { maximumFractionDigits: dp });
 const LIVE = process.env.NEXT_PUBLIC_LIVE_SWAPS === "1";
@@ -86,24 +87,34 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
     reset();
   }
 
-  async function getQuote() {
+  const quoteSeq = useRef(0);
+
+  /** Quotes the amount on screen. A silent refresh keeps the old numbers until the new ones arrive. */
+  async function runQuote(silent: boolean) {
+    const id = ++quoteSeq.current;
     setLoading(true);
-    reset();
+    if (!silent) reset();
     try {
       if (helper) {
         const q = await helper.quote({ tokenIn: inSym, tokenOut: outSym, amountIn: amount.trim(), spender: "main", receiver: "main" });
-        setQuote(q);
-        setSim(await helper.simulate(q)); // never offer Buy without a passing simulation
+        const s = await helper.simulate(q); // never offer Buy without a passing simulation
+        if (id !== quoteSeq.current) return;
+        setView(null); setQuote(q); setSim(s);
       } else if (side === "sell") {
         throw new Error("Connect your wallet to get a sell quote.");
       } else {
-        setView(await fetchQuoteView(amount.trim(), isConnected ? address : undefined, stock.token));
+        const v = await fetchQuoteView(amount.trim(), isConnected ? address : undefined, stock.token);
+        if (id !== quoteSeq.current) return;
+        setQuote(null); setSim(null); setView(v);
       }
+      setError(null);
       setNow(Date.now());
     } catch (e) {
+      if (id !== quoteSeq.current) return;
+      setQuote(null); setSim(null); setView(null);
       setError((e as Error).message);
     } finally {
-      setLoading(false);
+      if (id === quoteSeq.current) setLoading(false);
     }
   }
 
@@ -115,6 +126,9 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
     try {
       const res = await helper.execute(quote, "main");
       setTxHash(res.txHash);
+      if (address && res.txHash) {
+        recordTrade(address, { t: Date.now(), side, token: stock.token, amountIn: amountIn ?? "", inSym, amountOut: amountOut ?? "", outSym, txHash: res.txHash });
+      }
       setStage("done");
       setProgress(null);
     } catch (e) {
@@ -138,33 +152,67 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
       ? side === "buy" ? Number(amountIn) / Number(amountOut) : Number(amountOut) / Number(amountIn)
       : null;
   const canBuy = !!helper && !!quote && sim?.ok === true && !expired && stage === "idle" && LIVE;
+  const amountValid = Number.isFinite(Number(amount)) && Number(amount) > 0;
+
+  // Quote automatically shortly after the amount, side or wallet changes.
+  useEffect(() => {
+    if (!amountValid || stage !== "idle") return;
+    if (side === "sell" && !helper) return;
+    const t = setTimeout(() => { void runQuote(false); }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amount, side, helper, stock.token]);
+
+  // Replace an expired quote with a fresh one, but never while the user is reviewing or sending.
+  useEffect(() => {
+    if (expired && stage === "idle" && !loading) void runQuote(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expired]);
+
+  const statusText = loading
+    ? "Getting the best price…"
+    : !amountValid ? "Enter an amount."
+    : side === "sell" && !helper ? "Connect your wallet to quote a sell."
+    : anyQuote ? "The quote updates automatically." : "";
 
   return (
-    <div className="card">
-      <div className="row"><strong>{side === "buy" ? "Buy" : "Sell"} {stock.token}</strong><span className="muted small">{side === "buy" ? "Pay with USDT" : `Receive USDT`}</span></div>
+    <div className="card ticket-card">
       <div className="seg">
         <button type="button" className={side === "buy" ? "on" : ""} onClick={() => switchSide("buy")} disabled={stage === "sending"}>Buy</button>
         <button type="button" className={side === "sell" ? "on" : ""} onClick={() => switchSide("sell")} disabled={stage === "sending"}>Sell</button>
       </div>
 
-      <div className="row" style={{ gap: 8 }}>
-        <input
-          className="search"
-          style={{ margin: 0 }}
-          inputMode="decimal"
-          value={amount}
-          disabled={stage === "sending"}
-          onChange={(e) => { setAmount(e.target.value); reset(); }}
-          placeholder={`${inSym} amount`}
-        />
-        <button onClick={getQuote} disabled={loading || stage === "sending"}>{loading ? "Quoting…" : anyQuote ? "Refresh" : "Get quote"}</button>
+      <div className="ticket-box">
+        <span className="muted small">{side === "buy" ? "Spend" : "Sell"}</span>
+        <div className="ticket-line">
+          <input
+            className="ticket-input"
+            inputMode="decimal"
+            value={amount}
+            disabled={stage === "sending"}
+            onChange={(e) => { setAmount(e.target.value); reset(); }}
+            placeholder="0"
+            aria-label={`${inSym} amount`}
+          />
+          <span className="chip">{inSym}</span>
+        </div>
       </div>
+      <div className="ticket-arrow" aria-hidden>↓</div>
+      <div className="ticket-box">
+        <span className="muted small">Receive</span>
+        <div className="ticket-line">
+          <span className="ticket-out">{amountOut ? fmt(amountOut) : "0"}</span>
+          <span className="chip">{outSym}</span>
+        </div>
+      </div>
+      <p className="muted small ticket-status" role="status">{statusText}</p>
       {error && <p className="err">{error}</p>}
+      {!anyQuote && !!error && amountValid && stage === "idle" && !loading && (
+        <button type="button" className="ghost" onClick={() => void runQuote(false)}>Try again</button>
+      )}
 
       {anyQuote && amountIn && amountOut && (
         <>
-          <div className="row"><span className="muted">You pay</span><strong>{fmt(amountIn, 6)} {inSym}</strong></div>
-          <div className="row"><span className="muted">You receive</span><strong>{fmt(amountOut)} {outSym}</strong></div>
           {minOut && <div className="row"><span className="muted">Minimum (after {(built!.slippageBps / 100).toFixed(1)}% slippage)</span><span>{fmt(minOut)} {outSym}</span></div>}
           {effective !== null && (
             <div className="row"><span className="muted">Effective price</span><span>{effective.toLocaleString(undefined, { style: "currency", currency: "USD" })}</span></div>
@@ -173,7 +221,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
           <div className="row"><span className="muted">Route</span><span className="small">{(built?.route ?? view?.route ?? []).join(" → ")}</span></div>
           <div className="row">
             <span className="muted">Quote</span>
-            <span className={expired ? "neg" : "muted"}>{expired ? "Expired. Refresh" : `fresh for ${secondsLeft}s`}</span>
+            <span className={expired ? "neg" : "muted"}>{expired ? "Refreshing…" : `refreshes in ${secondsLeft}s`}</span>
           </div>
           {sim && (
             <div className="row">
