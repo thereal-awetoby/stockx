@@ -16,7 +16,7 @@ function toDate(v: string | number | null): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 const fmt = (d: Date) =>
-  d.toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+  d.toLocaleString("en-US", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
 
 /** "The closed-market line is the stock product." Uses the live API status, falls back to a local estimate. */
 export default function MarketBanner() {

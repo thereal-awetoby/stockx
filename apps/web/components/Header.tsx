@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import ConnectButton from "./ConnectButton";
+import SearchMenu from "./SearchMenu";
 
 const TOOLS = [
   { href: "/tools/bridge", title: "Bridge", sub: "Move tokens across chains" },
@@ -32,7 +33,8 @@ export default function Header() {
     <header className="header">
       <div className="header-inner">
         <Link href="/" className="logo" aria-label="stockX home">
-          <Image src="/stockx-logo.png" alt="stockX" width={95} height={28} style={{ width: "auto", height: 28 }} priority />
+          {/* unoptimized: the optimizer re-encodes at lower quality, which softens thin serif strokes */}
+          <Image src="/stockx-logo.png" alt="stockX" width={103} height={30} unoptimized priority style={{ width: "auto", height: 30 }} />
         </Link>
         <nav className="nav">
           <Link href="/markets" className={exploreOn ? "on" : ""}>Explore</Link>
@@ -53,7 +55,10 @@ export default function Header() {
             )}
           </div>
         </nav>
-        <ConnectButton />
+        <div className="header-right">
+          <SearchMenu />
+          <ConnectButton />
+        </div>
       </div>
     </header>
   );

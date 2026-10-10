@@ -8,13 +8,14 @@
     "./pocket": "./src/pocket/index.ts"
   },
   "scripts": {
-    "test": "npm run test:pocket && npm run test:core && npm run test:provider && npm run test:registry && npm run test:kline",
+    "test": "npm run test:pocket && npm run test:core && npm run test:provider && npm run test:registry && npm run test:kline && npm run test:categories",
     "test:pocket": "tsx --test src/pocket/*.test.ts",
     "test:core": "vitest run src/swap.test.ts src/market-hours.test.ts",
     "typecheck": "tsc --noEmit",
     "test:provider": "tsx --test src/binance-provider.test.ts",
     "test:registry": "tsx --test src/token-registry.test.ts",
-    "test:kline": "tsx --test src/kline.test.ts"
+    "test:kline": "tsx --test src/kline.test.ts",
+    "test:categories": "tsx --test src/stock-categories.test.ts"
   },
   "dependencies": {
     "ethers": "^6.17.0"

@@ -2,7 +2,9 @@
 import Link from "next/link";
 import BuyPanel from "./BuyPanel";
 import PriceChart from "./PriceChart";
+import TokenLogo from "./TokenLogo";
 import StockInfo from "./StockInfo";
+import { usd } from "../lib/format";
 import { useEffect, useState } from "react";
 import {
   calcPremiumPct,
@@ -19,7 +21,6 @@ import {
 
 // NEXT_PUBLIC_PRICE_PROVIDER=mock forces fake prices for UI work. Default is the real API.
 const prices = process.env.NEXT_PUBLIC_PRICE_PROVIDER === "mock" ? createMockPriceProvider() : createApiPriceProvider();
-const usd = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD" });
 
 /** The API may send epoch seconds, epoch ms, or an ISO string. Handle all three. */
 function toDate(v: string | number | null): Date | null {
@@ -29,7 +30,7 @@ function toDate(v: string | number | null): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 const fmtTime = (d: Date) =>
-  d.toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+  d.toLocaleString("en-US", { weekday: "short", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
 
 export default function StockView({ stock }: { stock: Stock }) {
   const [snap, setSnap] = useState<PriceSnapshot | null>(null);
@@ -74,7 +75,7 @@ export default function StockView({ stock }: { stock: Stock }) {
     <main>
       <Link href="/markets" className="muted small">← Explore</Link>
       <div className="asset-head">
-        <span className="avatar big">{stock.ticker.slice(0, 1)}</span>
+        <TokenLogo symbol={stock.token} name={stock.name} size={44} />
         <div>
           <h1 style={{ margin: 0 }}>{stock.name} <span className="muted" style={{ fontWeight: 400 }}>{stock.token}</span></h1>
           <p className="muted small" style={{ margin: "4px 0 0" }}>{stock.ticker} · {stock.issuer} · BNB Chain</p>

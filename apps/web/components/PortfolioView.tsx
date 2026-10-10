@@ -5,11 +5,12 @@ import { erc20Abi, formatUnits, type Address } from "viem";
 import { useAccount, useBalance, useReadContracts } from "wagmi";
 import { listLiveStockTokens, TOKENS } from "@stockx/shared";
 import Donut from "./Donut";
+import TokenLogo from "./TokenLogo";
 import { getPriceCached } from "../lib/price-queue";
+import { usd } from "../lib/format";
 import { readTrades, type TradeEntry } from "../lib/trade-log";
 
-const usd = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD" });
-const fmt = (n: number, dp = 6) => n.toLocaleString(undefined, { maximumFractionDigits: dp });
+const fmt = (n: number, dp = 6) => n.toLocaleString("en-US", { maximumFractionDigits: dp });
 const ZERO = "0x0000000000000000000000000000000000000000" as Address;
 
 interface Tracked { symbol: string; name: string; address: Address; decimals: number }
@@ -87,7 +88,7 @@ export default function PortfolioView() {
                 const price = stockPrice[r.address];
                 return (
                   <tr key={r.symbol}>
-                    <td><div className="name"><span className="avatar">{r.symbol.slice(0, 1)}</span><div><strong>{r.symbol}</strong><div className="muted small">{r.name}</div></div></div></td>
+                    <td><div className="name"><TokenLogo symbol={r.symbol} name={r.name} /><div><strong>{r.symbol}</strong><div className="muted small">{r.name}</div></div></div></td>
                     <td className="num">{price === undefined ? "…" : usd(price)}</td>
                     <td className="num">{fmt(r.qty ?? 0)}</td>
                     <td className="num">{price === undefined ? "…" : usd((r.qty ?? 0) * price)}</td>

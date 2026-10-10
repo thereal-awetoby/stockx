@@ -1,15 +1,15 @@
 "use client";
 import { useEffect, useId, useRef, useState, type PointerEvent } from "react";
 import type { ChartSeries, KlineRange } from "@stockx/shared";
+import { usd } from "../lib/format";
 
 const RANGES: KlineRange[] = ["1D", "1W", "1M", "3M", "ALL"];
 const H = 240;
 const PAD = { t: 12, r: 64, b: 26, l: 0 };
-const usd = (n: number) => n.toLocaleString(undefined, { style: "currency", currency: "USD" });
 const fmtTime = (t: number, range: KlineRange) =>
   range === "1D" || range === "1W"
-    ? new Date(t).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
-    : new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+    ? new Date(t).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+    : new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 export default function PriceChart({ token }: { token: string }) {
   const gid = useId().replace(/:/g, "");

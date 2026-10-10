@@ -19,7 +19,7 @@ import {
 import { createViemExecutor } from "../lib/viem-executor";
 import { recordTrade } from "../lib/trade-log";
 
-const fmt = (s: string, dp = 6) => Number(s).toLocaleString(undefined, { maximumFractionDigits: dp });
+const fmt = (s: string, dp = 6) => Number(s).toLocaleString("en-US", { maximumFractionDigits: dp });
 const LIVE = process.env.NEXT_PUBLIC_LIVE_SWAPS === "1";
 
 const STEP_LABEL: Record<ProgressStep, string> = {
@@ -215,7 +215,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
         <>
           {minOut && <div className="row"><span className="muted">Minimum (after {(built!.slippageBps / 100).toFixed(1)}% slippage)</span><span>{fmt(minOut)} {outSym}</span></div>}
           {effective !== null && (
-            <div className="row"><span className="muted">Effective price</span><span>{effective.toLocaleString(undefined, { style: "currency", currency: "USD" })}</span></div>
+            <div className="row"><span className="muted">Effective price</span><span>{effective.toLocaleString("en-US", { style: "currency", currency: "USD" })}</span></div>
           )}
           <div className="row"><span className="muted">Price impact</span><span>{Number((built?.priceImpactPercent ?? view?.priceImpactPercent) ?? 0).toFixed(4)}%</span></div>
           <div className="row"><span className="muted">Route</span><span className="small">{(built?.route ?? view?.route ?? []).join(" → ")}</span></div>

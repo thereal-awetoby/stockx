@@ -9,9 +9,9 @@ interface Info {
 }
 
 const n = (v: string | null) => (v !== null && Number.isFinite(Number(v)) ? Number(v) : null);
-const compact = (v: string | null) => { const x = n(v); return x === null ? "—" : x.toLocaleString(undefined, { notation: "compact", maximumFractionDigits: 2 }); };
-const money = (v: string | null) => { const x = n(v); return x === null ? "—" : x.toLocaleString(undefined, { style: "currency", currency: "USD" }); };
-const plain = (v: string | null, dp = 2) => { const x = n(v); return x === null ? "—" : x.toLocaleString(undefined, { maximumFractionDigits: dp }); };
+const compact = (v: string | null) => { const x = n(v); return x === null ? "—" : x.toLocaleString("en-US", { notation: "compact", maximumFractionDigits: 2 }); };
+const money = (v: string | null) => { const x = n(v); return x === null ? "—" : x.toLocaleString("en-US", { style: "currency", currency: "USD" }); };
+const plain = (v: string | null, dp = 2) => { const x = n(v); return x === null ? "—" : x.toLocaleString("en-US", { maximumFractionDigits: dp }); };
 
 export default function StockInfo({ stock }: { stock: Stock }) {
   const [info, setInfo] = useState<Info | null>(null);
@@ -54,8 +54,10 @@ export default function StockInfo({ stock }: { stock: Stock }) {
           <div className="row">
             <span className="muted">Token</span>
             <span className="small">
-              <a href={`https://bscscan.com/token/${stock.address}`} target="_blank" rel="noreferrer">{stock.address.slice(0, 8)}…{stock.address.slice(-6)}</a>{" "}
-              <button className="ghost tiny" type="button" onClick={async () => { await navigator.clipboard.writeText(stock.address!); setCopied(true); setTimeout(() => setCopied(false), 1200); }}>{copied ? "Copied" : "Copy"}</button>
+              <button type="button" className="addr" title="Click to copy" onClick={async () => { await navigator.clipboard.writeText(stock.address!); setCopied(true); setTimeout(() => setCopied(false), 1200); }}>
+                {copied ? "Copied" : `${stock.address.slice(0, 8)}…${stock.address.slice(-6)}`}
+              </button>{" "}
+              <a href={`https://bscscan.com/token/${stock.address}`} target="_blank" rel="noreferrer" aria-label="View on explorer">↗</a>
             </span>
           </div>
         )}
