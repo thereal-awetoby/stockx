@@ -53,6 +53,8 @@ export interface UsePocketResult {
   status: PocketStatus;
   createPocket(password: string): Promise<Pocket | null>;
   exportKey(password: string): Promise<boolean>;
+  /** Decrypts the session key and returns it (for the backup dialog). null if the passphrase is wrong. */
+  revealKey(password: string): Promise<string | null>;
   verifyBackup(privateKey: string): boolean;
   fund(amountUsdt: number): Promise<string | null>;
   withdraw(password: string, amountUsdt: number): Promise<string | null>;
@@ -191,6 +193,15 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     }
   }, [stored]);
 
+  const revealKey = useCallback(async (password: string): Promise<string | null> => {
+    if (!stored) return null;
+    try {
+      return await decryptPocketKey(stored, password);
+    } catch {
+      return null;
+    }
+  }, [stored]);
+
   const verifyBackup = useCallback((privateKey: string) => {
     if (!stored || !verifyPocketBackup(stored.address, privateKey, localStorage)) return false;
     setExported(true);
@@ -291,6 +302,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     status,
     createPocket: create,
     exportKey,
+    revealKey,
     verifyBackup,
     fund,
     withdraw,

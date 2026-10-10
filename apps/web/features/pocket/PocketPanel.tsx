@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { createMockProvider, createSwapHelper, type SwapPipeline } from "@stockx/shared";
 import { MIN_SESSION_BNB_GAS, isPipelineFactory, pocketCopy, railgunEnabled, type MainSigner, type PocketPipelineSource } from "@stockx/shared/pocket";
+import { KeyBackupDialog } from "./KeyBackupDialog";
 import { useAgentClock } from "./useAgentClock";
 import { usePocket } from "./usePocket";
 
@@ -25,6 +26,8 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   const [withdrawAmount, setWithdrawAmount] = useState("5");
   const [buyAmount, setBuyAmount] = useState("5");
   const [message, setMessage] = useState("");
+  const [revealedKey, setRevealedKey] = useState<string | null>(null);
+  const [keyError, setKeyError] = useState("");
 
   useAgentClock(pocket.job?.status === "active" && pocket.armed, () => {
     void pocket.runOneTick(password, buyAmount).then((result) => {
@@ -40,9 +43,10 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   }
 
   async function exportKey(): Promise<void> {
-    const succeeded = await pocket.exportKey(password);
+    const key = await pocket.revealKey(password);
     setPassword("");
-    setMessage(succeeded ? "Export started. Paste the saved key below to verify it." : "Could not export the pocket key.");
+    setKeyError(key ? "" : "Could not unlock the pocket key. Check your passphrase.");
+    setRevealedKey(key);
   }
 
   async function fund(): Promise<void> {
@@ -103,7 +107,8 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
           <h2>Back up pocket key</h2>
           <label htmlFor="pocket-password">Passphrase</label>
           <input id="pocket-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-          <button type="button" onClick={() => void exportKey()}>Export key</button>
+          <button type="button" onClick={() => void exportKey()}>Show key</button>
+          {keyError && <p className="err">{keyError}</p>}
           <label htmlFor="pocket-backup-key">Paste key to verify backup</label>
           <input id="pocket-backup-key" type="password" ref={backupKey} />
           <button type="button" onClick={() => {
@@ -166,6 +171,9 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
         <p>{pocketCopy.keyRisk}</p>
       </section>
       <p role="status">{message || pocket.operationError}</p>
+      {revealedKey && pocket.pocket && (
+        <KeyBackupDialog privateKey={revealedKey} address={pocket.pocket.address} onClose={() => setRevealedKey(null)} />
+      )}
     </section>
   );
 }

@@ -104,3 +104,11 @@ main > .warn { margin: 0 0 14px; }
 .pocket-panel button { margin: 10px 8px 0 0; }
 .pocket-panel ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 12px; word-break: break-all; }
 .pocket-balance { font-variant-numeric: tabular-nums; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 50; background: rgba(28, 25, 21, .45);
+  display: grid; place-items: center; padding: 16px; }
+.modal { background: var(--sheet); border: 1px solid var(--line); border-radius: 20px; padding: 22px;
+  width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; }
+.modal h2 { font-family: var(--serif); font-weight: 400; font-size: 20px; }
+.modal input { width: 100%; margin: 8px 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+.modal-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 10px; }
+.modal p { margin: 6px 0; word-break: break-all; }
