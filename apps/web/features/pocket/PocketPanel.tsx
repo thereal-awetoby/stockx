@@ -28,6 +28,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   const [message, setMessage] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [keyError, setKeyError] = useState("");
+  const [addressCopied, setAddressCopied] = useState(false);
 
   useAgentClock(pocket.job?.status === "active" && pocket.armed, () => {
     void pocket.runOneTick(password, buyAmount).then((result) => {
@@ -80,6 +81,26 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
     <section className="pocket-panel">
       <h2>Session pocket</h2>
       <p>Main wallet: {mainAddress || "Not connected"}</p>
+      {pocket.pocket && (
+        <>
+          <p>
+            Pocket address: <span style={{ wordBreak: "break-all" }}>{pocket.pocket.address}</span>{" "}
+            <button
+              type="button"
+              className="ghost tiny"
+              onClick={() => {
+                void navigator.clipboard.writeText(pocket.pocket!.address).then(
+                  () => { setAddressCopied(true); window.setTimeout(() => setAddressCopied(false), 2_000); },
+                  () => setAddressCopied(false),
+                );
+              }}
+            >
+              {addressCopied ? "Copied" : "Copy"}
+            </button>
+          </p>
+          <p className="muted small">Send BNB to this address on BNB Smart Chain (BSC) only, for gas.</p>
+        </>
+      )}
       <p>{pocket.status}</p>
       <p className="pocket-balance">
         USDT: {pocket.balanceError ? `unavailable (${pocket.balanceError})` : pocket.balances.usdt}
