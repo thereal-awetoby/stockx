@@ -1,4 +1,4 @@
-import { TOKENS } from "./tokens";
+import { isLiveSymbol, listStockTokens } from "./token-registry";
 import type { QuoteStyle } from "./types";
 
 export interface Stock {
@@ -15,18 +15,23 @@ export interface Stock {
   note?: string;
 }
 
-export const STOCKS: Stock[] = [
-  {
-    slug: "aaplb",
-    ticker: "AAPL",
-    name: "Apple Inc.",
-    token: "AAPLB",
+const bySlug = (x: Stock, y: Stock) =>
+  Number(y.status === "live") - Number(x.status === "live") || x.ticker.localeCompare(y.ticker);
+
+/** Every registry token. "live" only if it is on the verified/live list; the rest show as "soon". */
+export const STOCKS: Stock[] = listStockTokens()
+  .map<Stock>((t) => ({
+    slug: t.symbol.toLowerCase(),
+    ticker: t.ticker,
+    name: t.name,
+    token: t.symbol,
     issuer: "bStocks",
     style: "swap",
-    address: TOKENS.AAPLB.address,
-    status: "live",
-  },
-];
+    address: t.address,
+    status: isLiveSymbol(t.symbol) ? "live" : "soon",
+    note: isLiveSymbol(t.symbol) ? undefined : "Quotes fine on Binance. Trading opens after a live test.",
+  }))
+  .sort(bySlug);
 
 export const getStock = (slug: string) => STOCKS.find((s) => s.slug === slug);
 

@@ -4,6 +4,7 @@ import {
   assertSafeSwapTx,
   extractSwapAmountOut,
   extractSwapTx,
+  isLiveSymbol,
   minAmountOutFor,
   parseUnitsStr,
   resolvePair,
@@ -15,7 +16,7 @@ import { binanceGet, errorResponse } from "../../../../lib/binance";
 
 export const dynamic = "force-dynamic";
 
-/** Demo safety caps. Buy is in USDT, sell is in AAPLB. */
+/** Demo safety caps. Buy is in USDT, sell is in the stock token. */
 const MAX_IN: Record<Side, number> = { buy: 50, sell: 1 };
 const DEFAULT_SLIPPAGE_BPS = 50; // 0.5%
 const MAX_SLIPPAGE_BPS = 100; // 1%: the route refuses anything looser
@@ -33,7 +34,7 @@ interface ApiQuote {
 }
 
 /**
- * GET /api/swap/build?side=buy&amount=5&wallet=0x...&slippageBps=50
+ * GET /api/swap/build?side=buy&token=AAPLB&amount=5&wallet=0x...&slippageBps=50
  *
  * Always asks the aggregator for a FRESH quote and builds the swap from that quote's
  * id, so the browser never signs a transaction built from a stale quote. Called once
@@ -43,11 +44,14 @@ interface ApiQuote {
 export async function GET(req: Request) {
   const sp = new URL(req.url).searchParams;
   const side = sp.get("side");
+  const token = (sp.get("token") ?? "AAPLB").toUpperCase(); // default keeps older clients working
   const amount = sp.get("amount") ?? "";
   const wallet = sp.get("wallet") ?? "";
   const slippageBps = sp.get("slippageBps") === null ? DEFAULT_SLIPPAGE_BPS : Number(sp.get("slippageBps"));
 
   if (side !== "buy" && side !== "sell") return Response.json({ error: "side must be buy or sell" }, { status: 400 });
+  // Server-side gate: only tokens on the live list can be built, whatever the client sends.
+  if (!isLiveSymbol(token)) return Response.json({ error: `${token} is not tradable yet`, code: "TOKEN_NOT_LIVE" }, { status: 400 });
   if (!ADDRESS_RE.test(wallet)) return Response.json({ error: "A valid wallet address is required" }, { status: 400 });
   if (!/^\d+(\.\d{1,6})?$/.test(amount) || Number(amount) <= 0 || Number(amount) > MAX_IN[side]) {
     return Response.json({ error: `Amount must be between 0 and ${MAX_IN[side]}` }, { status: 400 });
@@ -57,7 +61,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const pair = side === "buy" ? resolvePair("USDT", "AAPLB") : resolvePair("AAPLB", "USDT");
+    const pair = side === "buy" ? resolvePair("USDT", token) : resolvePair(token, "USDT");
     const amountIn = parseUnitsStr(amount, pair.tokenIn.decimals);
     const common = {
       binanceChainId: "56",

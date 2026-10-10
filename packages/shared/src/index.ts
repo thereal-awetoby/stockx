@@ -9,6 +9,7 @@ export * from "./mock-provider";
 export * from "./premium";
 export * from "./market-hours";
 export * from "./tokens";
+export * from "./token-registry";
 export * from "./stocks";
 export * from "./prices";
 export * from "./rwa-market";

@@ -41,11 +41,11 @@ export interface WalletExecutor {
   waitForReceipt(hash: string): Promise<{ status: "success" | "reverted" }>;
 }
 
-export type BuildFn = (p: { side: Side; amount: string; wallet: string; slippageBps: number }) => Promise<BuiltSwap>;
+export type BuildFn = (p: { side: Side; /** Stock token symbol, e.g. "AAPLB". The other leg is always USDT. */ token: string; amount: string; wallet: string; slippageBps: number }) => Promise<BuiltSwap>;
 
 /** Default builder: our own server route. */
-export const fetchBuiltSwap: BuildFn = async ({ side, amount, wallet, slippageBps }) => {
-  const qs = new URLSearchParams({ side, amount, wallet, slippageBps: String(slippageBps) });
+export const fetchBuiltSwap: BuildFn = async ({ side, token, amount, wallet, slippageBps }) => {
+  const qs = new URLSearchParams({ side, token, amount, wallet, slippageBps: String(slippageBps) });
   const res = await fetch(`/api/swap/build?${qs.toString()}`, { cache: "no-store" });
   const j = await res.json().catch(() => null);
   if (!res.ok) throw new SwapError(typeof j?.code === "string" ? j.code : "BUILD_FAILED", j?.error ?? `Swap build failed (HTTP ${res.status})`);
@@ -134,7 +134,7 @@ export function createBinanceProvider(opts: BinanceProviderOptions): SwapProvide
       const pair = resolvePair(req.tokenIn, req.tokenOut);
       const amountIn = parseUnitsStr(req.amountIn, pair.tokenIn.decimals);
       if (amountIn <= 0n) throw new SwapError("BAD_AMOUNT", "Amount must be greater than 0");
-      const built = await build({ side: pair.side, amount: req.amountIn, wallet: executor.address, slippageBps });
+      const built = await build({ side: pair.side, token: pair.stock.symbol, amount: req.amountIn, wallet: executor.address, slippageBps });
       checkBuilt(built, pair, amountIn);
       const issuedAt = now();
       const rfq = built.executionMode.toUpperCase().includes("RFQ");
@@ -212,7 +212,7 @@ export function createBinanceProvider(opts: BinanceProviderOptions): SwapProvide
         // 2. Re-quote and rebuild. The price may have moved while the approval confirmed
         //    (or while the user read the review screen). Never send the old transaction.
         progress("rebuilding");
-        const fresh = await build({ side: pair.side, amount: formatUnitsStr(amountIn, pair.tokenIn.decimals), wallet: executor.address, slippageBps: confirmed.slippageBps });
+        const fresh = await build({ side: pair.side, token: pair.stock.symbol, amount: formatUnitsStr(amountIn, pair.tokenIn.decimals), wallet: executor.address, slippageBps: confirmed.slippageBps });
         checkBuilt(fresh, pair, amountIn);
         if (fresh.approveTarget.toLowerCase() !== spender.toLowerCase()) {
           throw new SwapError("PRICE_MOVED", "Approval target changed after approval. Start again.");

@@ -15,8 +15,8 @@ export interface QuoteView {
     quotedAt: number;
   }
   
-  export async function fetchQuoteView(amount: string, wallet?: string): Promise<QuoteView> {
-    const qs = new URLSearchParams({ amount });
+  export async function fetchQuoteView(amount: string, wallet?: string, token = "AAPLB"): Promise<QuoteView> {
+    const qs = new URLSearchParams({ amount, token });
     if (wallet) qs.set("wallet", wallet);
     const res = await fetch(`/api/swap/quote?${qs.toString()}`, { cache: "no-store" });
     const j = await res.json().catch(() => null);

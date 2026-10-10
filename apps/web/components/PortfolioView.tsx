@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { erc20Abi, formatUnits, type Address } from "viem";
 import { useAccount, useBalance, useReadContract } from "wagmi";
-import { TOKENS } from "@stockx/shared";
+import { listLiveStockTokens, TOKENS } from "@stockx/shared";
 
 const fmt = (s: string, dp = 6) => Number(s).toLocaleString(undefined, { maximumFractionDigits: dp });
 
@@ -38,7 +38,9 @@ export default function PortfolioView() {
           <thead><tr><th>Wallet</th><th>Asset</th><th>Amount</th></tr></thead>
           <tbody>
             <Erc20Row symbol="USDT" address={TOKENS.USDT.address} decimals={TOKENS.USDT.decimals} owner={address} />
-            <Erc20Row symbol="AAPLB" address={TOKENS.AAPLB.address} decimals={TOKENS.AAPLB.decimals} owner={address} />
+            {listLiveStockTokens().map((t) => (
+              <Erc20Row key={t.symbol} symbol={t.symbol} address={t.address as Address} decimals={t.decimals} owner={address} />
+            ))}
             <tr>
               <td>Main</td>
               <td>BNB</td>

@@ -1,5 +1,6 @@
 import { agentLimitsOff, POCKET_CONFIG, type PocketConfig } from "./config";
 import { SwapError } from "../errors";
+import { isLiveSymbol } from "../token-registry";
 import type { Quote, SwapPipeline } from "../types";
 import type { GuardedTradeStatus, PocketTradeRequest, SessionSigner } from "./types";
 
@@ -24,8 +25,9 @@ export function isSupportedStockRoute(
   tokenIn: string,
   tokenOut: string,
 ): boolean {
-  if (side === "buy") return tokenIn === "USDT" && tokenOut === "AAPLB";
-  return tokenIn === "AAPLB" && tokenOut === "USDT";
+  // Only USDT <-> a registered, live stock token. Never anything the registry does not know.
+  if (side === "buy") return tokenIn === "USDT" && isLiveSymbol(tokenOut);
+  return tokenOut === "USDT" && isLiveSymbol(tokenIn);
 }
 
 function sameAddress(left: string, right: string): boolean {

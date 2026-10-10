@@ -43,3 +43,13 @@ No live swap provider is wired yet (A2 in progress), so live agent trading is un
 ## A2: swap execution (2026-10-09)
 
 One provider, bound to one signer. The tx is built server-side from a fresh quote on every build, validated twice (server and browser), and re-built right before sending. Approval is exact-amount, encoded locally rather than taken from the API's approve endpoint, so a wrong API response cannot widen it. Slippage default 50 bps; the confirmed output minus slippage is the floor for the re-quote. Live sending is behind `NEXT_PUBLIC_LIVE_SWAPS=1` until the dry run in `docs/builder-a-handoff.md` is done. The `/swap` response shape is unverified; the parser fails closed.
+
+## Token registry and the live list (2026-10-10)
+
+`scripts/discover-rwa.mjs` crawls Binance RWA search and dry-quotes 1 USDT of every bStock/Ondo token on BSC into `docs/rwa-registry.json` (sends nothing). `node scripts/build-token-registry.mjs` turns that into `packages/shared/src/token-registry.data.ts` (generated, committed): the 62 bStocks that quote as a normal `SWAP` with 18 decimals, no honeypot or tax flag, the same approve target as AAPLB, and at most 0.5% price impact. Dropped on purpose: all Ondo tokens (they quote only from $5 and the app has no RFQ flow), leveraged/inverse products (MUUB, SQQQB, KORUB, TQQQB, INTWB; README says no leverage), and QNTB (1% impact).
+
+**Listed is not tradable.** `VERIFIED_LIVE_SYMBOLS` in `token-registry.ts` is the only list of tradable tokens, and it starts as `["AAPLB"]`. Everything else shows as "Coming soon". The gate is enforced in `resolvePair` (so the provider and both swap routes refuse a non-live token) and in the agent's `isSupportedStockRoute`, not just hidden in the UI. Addresses always come from the registry, never from the client.
+
+To make a token live: set `NEXT_PUBLIC_EXTRA_LIVE=NVDAB` in `apps/web/.env.local` (comma separated; unknown symbols are ignored), restart `npm run dev`, buy about $1 through the app, check the transaction on BscScan, sell it back, then add the symbol to `VERIFIED_LIVE_SYMBOLS` and commit. The agent stays AAPLB-only (`agent-runner.ts`, `instruction.ts`); its guard would allow any live token but nothing asks for one yet.
+
+Caveats seen in the registry: 45 of the 62 route through the `Rfq Neptunex` venue (the API still reports mode `SWAP`), so a quote can be stale sooner than for AAPLB; the re-quote-before-send step and the 30 s freshness rule already cover that. Sells are capped at 1 token per swap regardless of token price.

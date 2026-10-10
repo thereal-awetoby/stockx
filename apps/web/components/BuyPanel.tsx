@@ -8,7 +8,7 @@ import {
   fetchQuoteView,
   formatUnitsStr,
   RFQ_TTL_MS,
-  TOKENS,
+  getTokenInfo,
   type BuiltSwap,
   type ProgressStep,
   type Quote,
@@ -39,8 +39,8 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
 
   const [side, setSide] = useState<Side>("buy");
   const [amount, setAmount] = useState("5");
-  const inSym = side === "buy" ? "USDT" : "AAPLB";
-  const outSym = side === "buy" ? "AAPLB" : "USDT";
+  const inSym = side === "buy" ? "USDT" : stock.token;
+  const outSym = side === "buy" ? stock.token : "USDT";
   const [view, setView] = useState<QuoteView | null>(null); // read-only quote (no wallet)
   const [quote, setQuote] = useState<Quote | null>(null); // wallet-bound quote
   const [sim, setSim] = useState<SimulationResult | null>(null);
@@ -97,7 +97,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
       } else if (side === "sell") {
         throw new Error("Connect your wallet to get a sell quote.");
       } else {
-        setView(await fetchQuoteView(amount.trim(), isConnected ? address : undefined));
+        setView(await fetchQuoteView(amount.trim(), isConnected ? address : undefined, stock.token));
       }
       setNow(Date.now());
     } catch (e) {
@@ -130,9 +130,9 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
   const issuedAt = quote?.issuedAt ?? view?.quotedAt;
   const secondsLeft = issuedAt ? Math.max(0, Math.ceil((issuedAt + RFQ_TTL_MS - now) / 1000)) : 0;
   const expired = !!anyQuote && secondsLeft === 0 && stage !== "sending" && stage !== "done";
-  const amountIn = built ? formatUnitsStr(BigInt(built.amountIn), TOKENS[inSym].decimals) : view?.amountIn;
+  const amountIn = built ? formatUnitsStr(BigInt(built.amountIn), getTokenInfo(inSym)!.decimals) : view?.amountIn;
   const amountOut = quote?.amountOut ?? view?.amountOut;
-  const minOut = built ? formatUnitsStr(BigInt(built.minAmountOut), TOKENS[outSym].decimals) : null;
+  const minOut = built ? formatUnitsStr(BigInt(built.minAmountOut), getTokenInfo(outSym)!.decimals) : null;
   const effective =
     amountIn && amountOut && Number(amountOut) > 0 && Number(amountIn) > 0
       ? side === "buy" ? Number(amountIn) / Number(amountOut) : Number(amountOut) / Number(amountIn)
@@ -163,9 +163,9 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
 
       {anyQuote && amountIn && amountOut && (
         <>
-          <div className="row"><span className="muted">You pay</span><strong>{fmt(amountIn, 6)} {inSym === "AAPLB" ? stock.token : inSym}</strong></div>
-          <div className="row"><span className="muted">You receive</span><strong>{fmt(amountOut)} {outSym === "AAPLB" ? stock.token : outSym}</strong></div>
-          {minOut && <div className="row"><span className="muted">Minimum (after {(built!.slippageBps / 100).toFixed(1)}% slippage)</span><span>{fmt(minOut)} {outSym === "AAPLB" ? stock.token : outSym}</span></div>}
+          <div className="row"><span className="muted">You pay</span><strong>{fmt(amountIn, 6)} {inSym}</strong></div>
+          <div className="row"><span className="muted">You receive</span><strong>{fmt(amountOut)} {outSym}</strong></div>
+          {minOut && <div className="row"><span className="muted">Minimum (after {(built!.slippageBps / 100).toFixed(1)}% slippage)</span><span>{fmt(minOut)} {outSym}</span></div>}
           {effective !== null && (
             <div className="row"><span className="muted">Effective price</span><span>{effective.toLocaleString(undefined, { style: "currency", currency: "USD" })}</span></div>
           )}
@@ -179,7 +179,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
             <div className="row">
               <span className="muted">Simulation</span>
               {sim.ok
-                ? <span className="pos small">Passed{sim.needsApproval ? ` · needs a one-time exact ${inSym === "AAPLB" ? stock.token : inSym} approval` : ""}</span>
+                ? <span className="pos small">Passed{sim.needsApproval ? ` · needs a one-time exact ${inSym} approval` : ""}</span>
                 : <span className="neg small">Failed: {sim.error}</span>}
             </div>
           )}
@@ -190,11 +190,11 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
         <div className="card" style={{ marginTop: 8 }}>
           <strong>Review</strong>
           <div className="row"><span className="muted">Receiver</span><span className="small">{address} (your wallet)</span></div>
-          <div className="row"><span className="muted">Pay</span><span>{fmt(amountIn!, 6)} {inSym === "AAPLB" ? stock.token : inSym}</span></div>
-          <div className="row"><span className="muted">Get at least</span><span>{fmt(minOut ?? "0")} {outSym === "AAPLB" ? stock.token : outSym}</span></div>
+          <div className="row"><span className="muted">Pay</span><span>{fmt(amountIn!, 6)} {inSym}</span></div>
+          <div className="row"><span className="muted">Get at least</span><span>{fmt(minOut ?? "0")} {outSym}</span></div>
           {sim?.needsApproval && (
             <p className="muted small" style={{ margin: "6px 0 0" }}>
-              Two wallet prompts: first approve exactly {fmt(amountIn!, 6)} {inSym === "AAPLB" ? stock.token : inSym} (never unlimited), then the swap. The price is re-checked in between.
+              Two wallet prompts: first approve exactly {fmt(amountIn!, 6)} {inSym} (never unlimited), then the swap. The price is re-checked in between.
             </p>
           )}
           {marketOpen === false && (

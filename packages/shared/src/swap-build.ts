@@ -1,5 +1,5 @@
 import { SwapError } from "./errors";
-import { TOKENS } from "./tokens";
+import { getTokenInfo, isLiveSymbol } from "./token-registry";
 
 /**
  * Dependency-free helpers shared by the /api/swap/build route (server) and the
@@ -173,17 +173,36 @@ export function assertMinReceive(tx: SwapTx, amountOut: bigint, slippageBps: num
   }
 }
 
-// ---------- the fixed pair ----------
+// ---------- the pair ----------
+
+export interface PairToken {
+  symbol: string;
+  address: string;
+  decimals: number;
+}
 
 export interface Pair {
   side: Side;
-  tokenIn: { symbol: "USDT" | "AAPLB"; address: string; decimals: number };
-  tokenOut: { symbol: "USDT" | "AAPLB"; address: string; decimals: number };
+  tokenIn: PairToken;
+  tokenOut: PairToken;
+  /** The stock-token leg (the one that is not USDT). */
+  stock: PairToken;
 }
 
-/** Only USDT <-> AAPLB exists in v1. Anything else is refused, never guessed. */
+/**
+ * USDT <-> a LIVE stock token. A token that is not on the live list (see token-registry.ts)
+ * is refused here, so the routes, the provider and the agent guard all share one gate.
+ * Anything else is refused, never guessed.
+ */
 export function resolvePair(tokenIn: string, tokenOut: string): Pair {
-  if (tokenIn === "USDT" && tokenOut === "AAPLB") return { side: "buy", tokenIn: TOKENS.USDT, tokenOut: TOKENS.AAPLB };
-  if (tokenIn === "AAPLB" && tokenOut === "USDT") return { side: "sell", tokenIn: TOKENS.AAPLB, tokenOut: TOKENS.USDT };
+  const usdt = getTokenInfo("USDT")!;
+  if (tokenIn === "USDT" && isLiveSymbol(tokenOut)) {
+    const stock = getTokenInfo(tokenOut)!;
+    return { side: "buy", tokenIn: usdt, tokenOut: stock, stock };
+  }
+  if (tokenOut === "USDT" && isLiveSymbol(tokenIn)) {
+    const stock = getTokenInfo(tokenIn)!;
+    return { side: "sell", tokenIn: stock, tokenOut: usdt, stock };
+  }
   throw new SwapError("UNSUPPORTED_ROUTE", `Unsupported route ${tokenIn} -> ${tokenOut}`);
 }
