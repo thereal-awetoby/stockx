@@ -10,6 +10,37 @@ interface RwaPriceRow {
   referencePrice: string;
   tokenPriceUpdatedAt: number;
 }
+interface PriceBody { tokenPrice: number; referencePrice: number | null; updatedAt: number; source: string }
+
+// Tiny per-server cache so 60 table rows do not hammer Binance.
+const cache = new Map<string, { at: number; body: PriceBody }>();
+const TTL_MS = 10_000;
+
+/** Public endpoint: no key, no region check on our side, works without any wallet. */
+async function fromPublic(token: string): Promise<PriceBody | null> {
+  const data = await binancePublic<unknown>(PUBLIC_PATHS.dynamic, { chainId: 56, contractAddress: token });
+  const p = priceFromDynamic(data);
+  return p ? { tokenPrice: p.tokenPrice, referencePrice: p.referencePrice, updatedAt: Date.now(), source: "binance-public" } : null;
+}
+
+/** Signed endpoint: may refuse (compliance/region) or return no row. Both count as "no answer". */
+async function fromSigned(token: string): Promise<PriceBody | null> {
+  const rows = await binanceGet<RwaPriceRow[]>("/api/v1/dex/market/rwa/price", {
+    binanceChainId: "56",
+    tokenContractAddresses: token,
+  });
+  const row = rows.find((r) => r.tokenContractAddress.toLowerCase() === token);
+  if (!row) return null;
+  const tokenPrice = Number(row.tokenPrice);
+  const ref = Number(row.referencePrice);
+  if (!Number.isFinite(tokenPrice) || tokenPrice <= 0) return null;
+  return {
+    tokenPrice,
+    referencePrice: Number.isFinite(ref) && ref > 0 ? ref : null,
+    updatedAt: row.tokenPriceUpdatedAt,
+    source: "binance-signed",
+  };
+}
 
 export async function GET(req: Request) {
   const token = (new URL(req.url).searchParams.get("token") ?? "").toLowerCase();
@@ -17,28 +48,21 @@ export async function GET(req: Request) {
   if (!STOCKS.some((s) => s.address === token)) {
     return Response.json({ error: "Unknown token" }, { status: 400 });
   }
-  try {
-    const rows = await binanceGet<RwaPriceRow[]>("/api/v1/dex/market/rwa/price", {
-      binanceChainId: "56",
-      tokenContractAddresses: token,
-    });
-    const row = rows.find((r) => r.tokenContractAddress.toLowerCase() === token);
-    if (!row) return Response.json({ error: "No price returned for this token" }, { status: 404 });
-    return Response.json({
-      tokenPrice: Number(row.tokenPrice),
-      referencePrice: Number(row.referencePrice),
-      updatedAt: row.tokenPriceUpdatedAt,
-    });
-  } catch (e) {
-    // The signed endpoint can refuse (for example "compliance restriction" for the server's location).
-    // Prices are public data, so fall back to Binance's public endpoint instead of showing dashes.
+  const hit = cache.get(token);
+  if (hit && Date.now() - hit.at < TTL_MS) return Response.json(hit.body);
+
+  let lastError: unknown = null;
+  for (const source of [fromPublic, fromSigned]) {
     try {
-      const data = await binancePublic<unknown>(PUBLIC_PATHS.dynamic, { chainId: 56, contractAddress: token });
-      const p = priceFromDynamic(data);
-      if (p) return Response.json({ tokenPrice: p.tokenPrice, referencePrice: p.referencePrice, updatedAt: Date.now(), source: "binance-public" });
-    } catch {
-      /* fall through to the original error */
+      const body = await source(token);
+      if (body) {
+        cache.set(token, { at: Date.now(), body });
+        return Response.json(body);
+      }
+    } catch (e) {
+      lastError = e;
     }
-    return errorResponse(e);
   }
+  if (lastError) return errorResponse(lastError);
+  return Response.json({ error: "No price returned for this token" }, { status: 404 });
 }
