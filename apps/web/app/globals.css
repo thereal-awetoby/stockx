@@ -288,3 +288,8 @@ main.agent-page { max-width: 1280px; }
 .agent-notes { margin-top: 24px; max-width: 860px; }
 .agent-notes p { margin: 4px 0; }
 @media (max-width: 960px) { .agent-grid { grid-template-columns: 1fr; min-height: 0; } }
+
+.pager { display: flex; justify-content: center; align-items: center; gap: 6px; margin: 22px 0 8px; }
+.pager button { min-width: 38px; height: 38px; padding: 0 10px; background: var(--sheet); color: var(--ink); border: 1px solid var(--line-strong); font-size: 14px; text-align: center; }
+.pager button:hover { border-color: var(--ink); }
+.pager button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }

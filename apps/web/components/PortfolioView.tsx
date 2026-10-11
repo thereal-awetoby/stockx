@@ -39,6 +39,27 @@ export default function PortfolioView() {
     return subscribeTrades(load);
   }, [address, pocketAddr]);
 
+  // One-time sync per address from the explorer API (when the server has a key): fills in older trades.
+  const [syncNote, setSyncNote] = useState<string | null>(null);
+  useEffect(() => {
+    if (!address) return;
+    let alive = true;
+    const owners = pocketAddr ? [address, pocketAddr] : [address];
+    for (const owner of owners) {
+      fetch(`/api/history?address=${owner}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j: { configured?: boolean; trades?: TradeEntry[]; error?: string } | null) => {
+          if (!alive || !j) return;
+          if (j.configured === false) { setSyncNote("not-configured"); return; }
+          if (j.error) { setSyncNote(j.error); return; }
+          const viaAgent = pocketAddr !== null && owner.toLowerCase() === pocketAddr.toLowerCase();
+          for (const t of j.trades ?? []) recordTrade(owner, viaAgent ? { ...t, via: "agent" } : t);
+        })
+        .catch(() => undefined);
+    }
+    return () => { alive = false; };
+  }, [address, pocketAddr]);
+
   async function importTx() {
     const h = hash.trim();
     if (!/^0x[0-9a-fA-F]{64}$/.test(h)) { setImportMsg("Paste the full transaction hash (0x followed by 64 characters)."); return; }
@@ -148,6 +169,11 @@ export default function PortfolioView() {
           <button type="button" className="ghost" disabled={importing || !hash.trim()} onClick={() => void importTx()}>{importing ? "Reading…" : "Add"}</button>
         </div>
         {importMsg && <p className={`small ${importMsg === "Added." ? "pos" : "err"}`} style={{ margin: "6px 0 0" }}>{importMsg}</p>}
+        {syncNote && (
+          <p className="muted small" style={{ marginTop: 10 }}>
+            {syncNote === "not-configured" ? "Automatic BscScan sync is off (no explorer API key on the server)." : `Automatic BscScan sync unavailable: ${syncNote}`}
+          </p>
+        )}
         <p className="muted small" style={{ marginTop: 10 }}>Trades made through stockX in this browser appear automatically. For trades made elsewhere, paste the hash above and it is read from the chain.</p>
       </div>
 

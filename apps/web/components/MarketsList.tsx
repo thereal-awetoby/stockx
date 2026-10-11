@@ -84,10 +84,16 @@ function Row({ s }: { s: Stock }) {
 
 export default function MarketsList() {
   const [cat, setCat] = useState<StockCategory | "all">("all");
-  const [limit, setLimit] = useState(PAGE);
+  const [page, setPage] = useState(1);
   const results = cat === "all" ? ALL : ALL.filter((s) => categoryOf(s.ticker) === cat);
-  const shown = results.slice(0, limit);
-  const pick = (c: StockCategory | "all") => { setCat(c); setLimit(PAGE); };
+  const pages = Math.max(1, Math.ceil(results.length / PAGE));
+  const current = Math.min(page, pages);
+  const shown = results.slice((current - 1) * PAGE, current * PAGE);
+  const pick = (c: StockCategory | "all") => { setCat(c); setPage(1); };
+  const go = (n: number) => { setPage(n); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  // numbers come in groups of three: 1 2 3 ›  then  ‹ 4 5 6 ›
+  const start = Math.floor((current - 1) / 3) * 3 + 1;
+  const numbers = Array.from({ length: Math.min(3, pages - start + 1) }, (_, i) => start + i);
 
   return (
     <>
@@ -113,10 +119,14 @@ export default function MarketsList() {
           </table>
         </section>
       )}
-      {results.length > limit && (
-        <div style={{ textAlign: "center", marginTop: 14 }}>
-          <button type="button" className="ghost" onClick={() => setLimit((n) => n + PAGE)}>Show more ({results.length - limit} left)</button>
-        </div>
+      {pages > 1 && (
+        <nav className="pager" aria-label="Pages">
+          {start > 1 && <button type="button" aria-label="Previous pages" onClick={() => go(start - 1)}>‹</button>}
+          {numbers.map((n) => (
+            <button key={n} type="button" className={n === current ? "on" : ""} aria-current={n === current ? "page" : undefined} onClick={() => go(n)}>{n}</button>
+          ))}
+          {start + 3 <= pages && <button type="button" aria-label="Next pages" onClick={() => go(start + 3)}>›</button>}
+        </nav>
       )}
     </>
   );
