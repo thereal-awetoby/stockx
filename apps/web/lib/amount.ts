@@ -26,3 +26,14 @@ export function formatBalance(value: string | number, dp: number): string {
   const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return cut ? `${grouped}.${cut}` : grouped;
 }
+
+/** Fixed-width display: always exactly `dp` decimals, cut (never rounded up), e.g. 0.00047 or 0.06800. Dust shows as <0.00001. */
+export function formatFixed(value: string | number, dp: number): string {
+  const text = typeof value === "number" ? value.toFixed(Math.min(dp + 4, 20)) : value;
+  if (!/^\d+(\.\d+)?$/.test(text)) return (0).toFixed(dp);
+  const [whole = "0", frac = ""] = text.split(".");
+  const cut = frac.padEnd(dp, "0").slice(0, dp);
+  if (/^0*$/.test(whole) && /^0*$/.test(cut) && Number(text) > 0) return `<${(10 ** -dp).toFixed(dp)}`;
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return dp > 0 ? `${grouped}.${cut}` : grouped;
+}

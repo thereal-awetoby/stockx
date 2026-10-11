@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { createMockProvider, createSwapHelper, type SwapPipeline } from "@stockx/shared";
 import { agentLimitsOff, maxWithdrawable, MIN_SESSION_BNB_GAS, isPipelineFactory, parseAgentInstruction, pocketCopy, railgunEnabled, type MainSigner, type ParseResult, type PocketAsset, type PocketPipelineSource } from "@stockx/shared/pocket";
-import { formatBalance } from "../../lib/amount";
+import { formatBalance, formatFixed } from "../../lib/amount";
 import { KeyBackupDialog } from "./KeyBackupDialog";
 import { useAgentClock } from "./useAgentClock";
 import { usePocket } from "./usePocket";
@@ -182,9 +182,9 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
               </>
             )}
             <div className="tiles">
-              <div className="tile"><span>USDT</span><strong>{pocket.balanceError ? "n/a" : formatBalance(pocket.balances.usdt, 4)}</strong></div>
-              <div className="tile"><span>BNB</span><strong>{pocket.balanceError ? "n/a" : formatBalance(pocket.balances.bnb, 5)}</strong></div>
-              <div className="tile"><span>AAPLB</span><strong>{pocket.aaplbBalanceError ? "n/a" : formatBalance(pocket.aaplbBalance, 6)}</strong></div>
+              <div className="tile"><span>USDT</span><strong>{pocket.balanceError ? "n/a" : formatFixed(pocket.balances.usdt, 5)}</strong></div>
+              <div className="tile"><span>BNB</span><strong>{pocket.balanceError ? "n/a" : formatFixed(pocket.balances.bnb, 5)}</strong></div>
+              <div className="tile"><span>AAPLB</span><strong>{pocket.aaplbBalanceError ? "n/a" : formatFixed(pocket.aaplbBalance, 5)}</strong></div>
             </div>
             {(pocket.balanceError || pocket.aaplbBalanceError) && <p className="err">Some balances are unavailable right now.</p>}
             {lowGas && <p className="warn small" style={{ marginTop: 8 }}>{pocketCopy.smallBalance}</p>}

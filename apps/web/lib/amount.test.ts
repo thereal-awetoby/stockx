@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatBalance, fractionOfBalance } from "./amount";
+import { formatBalance, formatFixed, fractionOfBalance } from "./amount";
 
 const e18 = (s: string) => BigInt(Math.round(Number(s) * 1e6)) * 10n ** 12n;
 
@@ -37,4 +37,16 @@ test("formatBalance cuts to the given decimals with no ellipsis", () => {
   assert.equal(formatBalance("0.000004", 5), "<0.00001");
   assert.equal(formatBalance("0", 5), "0");
   assert.equal(formatBalance("abc", 5), "0");
+});
+
+test("formatFixed: always 5 decimals, cut not rounded, dust marked", () => {
+  assert.equal(formatFixed("0.00047", 5), "0.00047");
+  assert.equal(formatFixed("0.068", 5), "0.06800");
+  assert.equal(formatFixed("0.001277142461874", 5), "0.00127");
+  assert.equal(formatFixed("0.000579999", 5), "0.00057");
+  assert.equal(formatFixed("0", 5), "0.00000");
+  assert.equal(formatFixed("0.000001", 5), "<0.00001");
+  assert.equal(formatFixed("1234.5", 5), "1,234.50000");
+  assert.equal(formatFixed(0.00057149265, 5), "0.00057");
+  assert.equal(formatFixed("", 5), "0.00000");
 });
