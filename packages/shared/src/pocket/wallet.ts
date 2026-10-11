@@ -210,3 +210,55 @@ export async function readPocketAaplbBalance(address: string): Promise<string> {
   const balance = await token.balanceOf(address);
   return formatUnits(balance, TOKENS.AAPLB.decimals);
 }
+
+export type PocketAsset = "USDT" | "BNB" | "AAPLB";
+
+/** BNB kept back when withdrawing "max" BNB, so the transfer itself can still pay gas (30k gas at 1 gwei). */
+export const BNB_WITHDRAW_RESERVE_WEI = 30_000n * 1_000_000_000n;
+
+/** The most that can be withdrawn of an asset, as a decimal string. BNB keeps a small gas reserve. */
+export function maxWithdrawable(asset: PocketAsset, balance: string): string {
+  const decimals = asset === "USDT" ? POCKET_CONFIG.usdtDecimals : asset === "BNB" ? 18 : TOKENS.AAPLB.decimals;
+  const raw = parseUnits(balance || "0", decimals);
+  const usable = asset === "BNB" ? (raw > BNB_WITHDRAW_RESERVE_WEI ? raw - BNB_WITHDRAW_RESERVE_WEI : 0n) : raw;
+  return formatUnits(usable, decimals);
+}
+
+const amountPattern = /^\d+(\.\d{1,18})?$/;
+
+/**
+ * Sends USDT, BNB or AAPLB from the session pocket to the main wallet and returns the hash only after the
+ * transaction is mined successfully. Amounts are decimal STRINGS, so tiny values never turn into "5e-7".
+ */
+export async function withdrawPocketAsset(
+  sessionSigner: SessionSigner,
+  pocketAddress: string,
+  mainAddress: string,
+  asset: PocketAsset,
+  amount: string,
+): Promise<string> {
+  if (!addressPattern.test(mainAddress) || !amountPattern.test(amount) || !(Number(amount) > 0)) {
+    throw new Error("Enter a valid amount to withdraw.");
+  }
+  const signerAddress = await sessionSigner.getAddress();
+  if (signerAddress.toLowerCase() !== pocketAddress.toLowerCase()) {
+    throw new Error("Session signer does not match the pocket address.");
+  }
+  let transaction: { hash: string; wait(): Promise<{ status: number | null } | null> };
+  if (asset === "BNB") {
+    const value = parseUnits(amount, 18);
+    const provider = sessionSigner.provider;
+    if (!provider) throw new Error("Pocket signer has no network connection.");
+    const [balance, fee] = await Promise.all([provider.getBalance(pocketAddress), provider.getFeeData()]);
+    const reserve = (fee.gasPrice ?? 1_000_000_000n) * 21_000n * 2n;
+    if (value + reserve > balance) throw new Error("Not enough BNB. Leave a little in the pocket to pay the gas for this transfer.");
+    transaction = await sessionSigner.sendTransaction({ to: mainAddress, value });
+  } else {
+    const info = asset === "USDT" ? { address: requireUsdtAddress(), decimals: POCKET_CONFIG.usdtDecimals } : TOKENS.AAPLB;
+    const token = new Contract(info.address, TOKEN_ABI, sessionSigner);
+    transaction = await token.transfer(mainAddress, parseUnits(amount, info.decimals));
+  }
+  const receipt = await transaction.wait();
+  if (!receipt || receipt.status !== 1) throw new Error("The withdrawal failed on-chain. Nothing was sent.");
+  return transaction.hash;
+}

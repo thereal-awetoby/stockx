@@ -21,7 +21,8 @@ import {
   setPocketJobStatus,
   unlockPocket,
   verifyPocketBackup,
-  withdrawPocket as sendUsdtToMain,
+  withdrawPocketAsset as sendAssetToMain,
+  type PocketAsset,
   type AgentTickResult,
   type AgentRunLogEntry,
   type Job,
@@ -59,7 +60,7 @@ export interface UsePocketResult {
   revealKey(password: string): Promise<string | null>;
   verifyBackup(privateKey: string): boolean;
   fund(amountUsdt: number): Promise<string | null>;
-  withdraw(password: string, amountUsdt: number): Promise<string | null>;
+  withdraw(password: string, asset: PocketAsset, amount: string): Promise<string | null>;
   startAgent(): Promise<boolean>;
   stopAgent(): Promise<void>;
   runOneTick(password: string, amountUsdt: string): Promise<AgentTickResult>;
@@ -220,15 +221,16 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     return hash;
   }, [exported, getMainSigner, mainAddress, refresh, stored]);
 
-  const withdraw = useCallback(async (password: string, amountUsdt: number) => {
-    if (!stored || !mainAddress || !Number.isFinite(amountUsdt) || amountUsdt <= 0) return null;
+  const withdraw = useCallback(async (password: string, asset: PocketAsset, amount: string) => {
+    if (!stored || !mainAddress) return null;
     const mainSigner = await getMainSigner();
     if ((await mainSigner.getAddress()).toLowerCase() !== mainAddress.toLowerCase()) {
       throw new Error("Main signer does not match connected wallet.");
     }
     const signer = await unlockPocket(stored, password);
-    const hash = await sendUsdtToMain(signer, stored.address, mainAddress, amountUsdt);
+    const hash = await sendAssetToMain(signer, stored.address, mainAddress, asset, amount);
     await refresh(stored);
+    window.setTimeout(() => void refresh(stored).catch(() => undefined), 5_000); // public RPC nodes can lag a block
     return hash;
   }, [getMainSigner, mainAddress, refresh, stored]);
 

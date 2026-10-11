@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { type Hex } from "viem";
 import { usePublicClient } from "wagmi";
+import { useRouter } from "next/navigation";
 import { listStockTokens, TOKENS } from "@stockx/shared";
 import { readPocket } from "@stockx/shared/pocket";
 import Donut from "./Donut";
@@ -20,6 +21,7 @@ const ALL_TOKENS = [
 
 export default function PortfolioView() {
   const { address, isConnected, bnb, balances, cash, heldStocks, stockPrice, stocks, total } = usePortfolio();
+  const router = useRouter();
   const publicClient = usePublicClient({ chainId: 56 });
   const [trades, setTrades] = useState<TradeEntry[]>([]);
   const [pocketAddr, setPocketAddr] = useState<string | null>(null);
@@ -112,8 +114,8 @@ export default function PortfolioView() {
               {heldStocks.map((r) => {
                 const price = stockPrice[r.address];
                 return (
-                  <tr key={r.symbol}>
-                    <td><div className="name"><TokenLogo symbol={r.symbol} name={r.name} /><div><strong>{r.symbol}</strong><div className="muted small">{r.name}</div></div></div></td>
+                  <tr key={r.symbol} className="click" onClick={() => router.push(`/stock/${r.symbol.toLowerCase()}?side=sell`)}>
+                    <td><div className="name"><TokenLogo symbol={r.symbol} name={r.name} /><div><Link href={`/stock/${r.symbol.toLowerCase()}?side=sell`}><strong>{r.symbol}</strong></Link><div className="muted small">{r.name}</div></div></div></td>
                     <td className="num">{price === undefined ? "…" : usd(price)}</td>
                     <td className="num">{fmt(r.qty ?? 0)}</td>
                     <td className="num">{price === undefined ? "…" : usd((r.qty ?? 0) * price)}</td>

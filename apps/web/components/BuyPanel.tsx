@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
-import type { PublicClient, WalletClient } from "viem";
+import { useSearchParams } from "next/navigation";
+import { useAccount, usePublicClient, useReadContract, useWalletClient } from "wagmi";
+import { erc20Abi, type PublicClient, type WalletClient } from "viem";
 import {
   createBinanceProvider,
   createSwapHelper,
@@ -17,6 +18,7 @@ import {
   type Stock,
 } from "@stockx/shared";
 import { createViemExecutor } from "../lib/viem-executor";
+import { formatBalance, fractionOfBalance } from "../lib/amount";
 import { recordTrade } from "../lib/trade-log";
 
 const fmt = (s: string, dp = 6) => Number(s).toLocaleString("en-US", { maximumFractionDigits: dp });
@@ -38,10 +40,22 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
   const publicClient = usePublicClient({ chainId: 56 });
   const { data: walletClient } = useWalletClient();
 
-  const [side, setSide] = useState<Side>("buy");
-  const [amount, setAmount] = useState("5");
+  // Holdings link here with ?side=sell so a held token can be sold in one click.
+  const startSell = useSearchParams().get("side") === "sell";
+  const [side, setSide] = useState<Side>(startSell ? "sell" : "buy");
+  const [amount, setAmount] = useState(startSell ? "0.01" : "5");
   const inSym = side === "buy" ? "USDT" : stock.token;
   const outSym = side === "buy" ? stock.token : "USDT";
+  const inInfo = getTokenInfo(inSym);
+  const balanceRead = useReadContract({
+    address: inInfo?.address as `0x${string}` | undefined,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    chainId: 56,
+    query: { enabled: !!address && !!inInfo, refetchInterval: 15_000 },
+  });
+  const balance = balanceRead.data as bigint | undefined;
   const [view, setView] = useState<QuoteView | null>(null); // read-only quote (no wallet)
   const [quote, setQuote] = useState<Quote | null>(null); // wallet-bound quote
   const [sim, setSim] = useState<SimulationResult | null>(null);
@@ -78,6 +92,13 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
 
   function reset() {
     setView(null); setQuote(null); setSim(null); setStage("idle"); setProgress(null); setTxHash(null); setError(null);
+  }
+
+  /** Fills the amount from the wallet balance. Buys stop at the demo's 50 USDT cap, sells at what is held. */
+  function fill(pct: number) {
+    if (!inInfo || balance === undefined || stage === "sending") return;
+    setAmount(fractionOfBalance(balance, inInfo.decimals, pct, side === "buy" ? 6 : 8, side === "buy" ? 50 : undefined));
+    reset();
   }
 
   function switchSide(next: Side) {
@@ -131,6 +152,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
       }
       setStage("done");
       setProgress(null);
+      void balanceRead.refetch();
     } catch (e) {
       setError((e as Error).message);
       setStage("idle");
@@ -183,7 +205,17 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
       </div>
 
       <div className="ticket-box">
-        <span className="muted small">{side === "buy" ? "Spend" : "Sell"}</span>
+        <div className="ticket-head">
+          <span className="muted small">{side === "buy" ? "Spend" : "Sell"}</span>
+          {isConnected && inInfo && (
+            <span className="ticket-bal small">
+              <span className="muted">Balance {balance === undefined ? "…" : `${formatBalance(formatUnitsStr(balance, inInfo.decimals), side === "buy" ? 4 : 6)} ${inSym}`}</span>
+              {[25, 50, 100].map((p) => (
+                <button key={p} type="button" className="mini" disabled={!balance || stage === "sending"} onClick={() => fill(p)}>{p === 100 ? "Max" : `${p}%`}</button>
+              ))}
+            </span>
+          )}
+        </div>
         <div className="ticket-line">
           <input
             className="ticket-input"

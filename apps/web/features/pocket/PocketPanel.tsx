@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import { createMockProvider, createSwapHelper, type SwapPipeline } from "@stockx/shared";
-import { agentLimitsOff, MIN_SESSION_BNB_GAS, isPipelineFactory, parseAgentInstruction, pocketCopy, railgunEnabled, type MainSigner, type ParseResult, type PocketPipelineSource } from "@stockx/shared/pocket";
+import { agentLimitsOff, maxWithdrawable, MIN_SESSION_BNB_GAS, isPipelineFactory, parseAgentInstruction, pocketCopy, railgunEnabled, type MainSigner, type ParseResult, type PocketAsset, type PocketPipelineSource } from "@stockx/shared/pocket";
+import { formatBalance } from "../../lib/amount";
 import { KeyBackupDialog } from "./KeyBackupDialog";
 import { useAgentClock } from "./useAgentClock";
 import { usePocket } from "./usePocket";
@@ -46,7 +47,9 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   const [password, setPassword] = useState("");
   const backupKey = useRef<HTMLInputElement>(null);
   const [fundAmount, setFundAmount] = useState("5");
-  const [withdrawAmount, setWithdrawAmount] = useState("5");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [wAsset, setWAsset] = useState<PocketAsset>("USDT");
+  const [withdrawn, setWithdrawn] = useState<{ hash: string; amount: string; asset: PocketAsset } | null>(null);
   const [buyAmount, setBuyAmount] = useState("5");
   const [message, setMessage] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
@@ -122,10 +125,19 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
     }
   }
 
+  const assetBalance = (asset: PocketAsset): string => (asset === "USDT" ? pocket.balances.usdt : asset === "BNB" ? pocket.balances.bnb : pocket.aaplbBalance);
+
   async function withdraw(): Promise<void> {
+    const amount = withdrawAmount.trim();
+    setWithdrawn(null);
+    setMessage("");
+    if (!/^\d+(\.\d+)?$/.test(amount) || !(Number(amount) > 0)) { setMessage("Enter an amount to withdraw."); return; }
+    if (Number(amount) > Number(assetBalance(wAsset))) { setMessage(`The pocket only holds ${formatBalance(assetBalance(wAsset), 6)} ${wAsset}.`); return; }
+    setMessage(`Sending ${amount} ${wAsset} to your main wallet. Waiting for it to confirm…`);
     try {
-      const hash = await pocket.withdraw(password, Number(withdrawAmount));
-      setMessage(hash ? `Withdrawal transaction: ${hash}` : "Withdrawal is unavailable.");
+      const hash = await pocket.withdraw(password, wAsset, amount);
+      if (hash) { setWithdrawn({ hash, amount, asset: wAsset }); setMessage(""); setWithdrawAmount(""); }
+      else setMessage("Withdrawal is unavailable.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Withdrawal failed.");
     } finally {
@@ -170,9 +182,9 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
               </>
             )}
             <div className="tiles">
-              <div className="tile"><span>USDT</span><strong>{pocket.balanceError ? "n/a" : pocket.balances.usdt}</strong></div>
-              <div className="tile"><span>BNB</span><strong>{pocket.balanceError ? "n/a" : pocket.balances.bnb}</strong></div>
-              <div className="tile"><span>AAPLB</span><strong>{pocket.aaplbBalanceError ? "n/a" : pocket.aaplbBalance}</strong></div>
+              <div className="tile"><span>USDT</span><strong>{pocket.balanceError ? "n/a" : formatBalance(pocket.balances.usdt, 4)}</strong></div>
+              <div className="tile"><span>BNB</span><strong>{pocket.balanceError ? "n/a" : formatBalance(pocket.balances.bnb, 5)}</strong></div>
+              <div className="tile"><span>AAPLB</span><strong>{pocket.aaplbBalanceError ? "n/a" : formatBalance(pocket.aaplbBalance, 6)}</strong></div>
             </div>
             {(pocket.balanceError || pocket.aaplbBalanceError) && <p className="err">Some balances are unavailable right now.</p>}
             {lowGas && <p className="warn small" style={{ marginTop: 8 }}>{pocketCopy.smallBalance}</p>}
@@ -221,11 +233,29 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
                 </>
               ) : (
                 <>
-                  <label htmlFor="pocket-withdraw-amount">USDT to send back to your main wallet</label>
-                  <input id="pocket-withdraw-amount" inputMode="decimal" value={withdrawAmount} onChange={(event) => setWithdrawAmount(event.target.value)} />
+                  <div className="asset-pick" role="group" aria-label="Asset to withdraw">
+                    {(["USDT", "BNB", "AAPLB"] as PocketAsset[]).map((a) => (
+                      <button key={a} type="button" className={wAsset === a ? "on" : ""} onClick={() => { setWAsset(a); setWithdrawAmount(""); setWithdrawn(null); }}>{a}</button>
+                    ))}
+                  </div>
+                  <label htmlFor="pocket-withdraw-amount">
+                    Amount to send to your main wallet · available {formatBalance(assetBalance(wAsset), wAsset === "BNB" ? 5 : 6)} {wAsset}
+                  </label>
+                  <div className="amount-row">
+                    <input id="pocket-withdraw-amount" inputMode="decimal" value={withdrawAmount} placeholder="0" onChange={(event) => setWithdrawAmount(event.target.value)} />
+                    <button type="button" className="ghost" onClick={() => setWithdrawAmount(maxWithdrawable(wAsset, assetBalance(wAsset)))}>Max</button>
+                  </div>
+                  {wAsset === "BNB" && <p className="muted small hint">Max keeps a tiny amount of BNB back to pay for this transfer.</p>}
                   <label htmlFor="pocket-withdraw-password">Pocket passphrase</label>
                   <input id="pocket-withdraw-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-                  <button type="button" disabled={!mainAddress} onClick={() => void withdraw()}>Withdraw to connected wallet</button>
+                  <button type="button" disabled={!mainAddress || !password} onClick={() => void withdraw()}>Withdraw to connected wallet</button>
+                  {withdrawn && (
+                    <div className="sent-card" role="status">
+                      <strong>Sent {formatBalance(withdrawn.amount, 8)} {withdrawn.asset} to your main wallet.</strong>
+                      <a href={`https://bscscan.com/tx/${withdrawn.hash}`} target="_blank" rel="noreferrer">View on BscScan</a>
+                      <span className="muted small">Your wallet app may not list it under Activity because the pocket sent it. Check your balance or BscScan.</span>
+                    </div>
+                  )}
                 </>
               )}
             </div>

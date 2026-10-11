@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test lib/trade-import.test.ts lib/history.test.ts"
+    "test": "tsx --test lib/*.test.ts"
   },
   "dependencies": {
     "@stockx/shared": "*",

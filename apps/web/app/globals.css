@@ -293,3 +293,18 @@ main.agent-page { max-width: 1280px; }
 .pager button { min-width: 38px; height: 38px; padding: 0 10px; background: var(--sheet); color: var(--ink); border: 1px solid var(--line-strong); font-size: 14px; text-align: center; }
 .pager button:hover { border-color: var(--ink); }
 .pager button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* buy/sell shortcuts, pocket tiles, withdraw */
+.ticket-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ticket-bal { display: flex; align-items: center; gap: 6px; }
+button.mini { padding: 2px 9px; font-size: 12px; font-weight: 500; background: var(--pill); color: var(--ink); border: 1px solid var(--line-strong); }
+button.mini:hover:not(:disabled) { border-color: var(--ink); }
+.tile strong { overflow: visible; text-overflow: clip; white-space: nowrap; font-size: 17px; }
+.asset-pick { display: flex; gap: 6px; margin-top: 14px; }
+.panel .asset-pick button { margin-top: 0; padding: 5px 14px; background: var(--paper); color: var(--ink); border: 1px solid var(--line-strong); }
+.panel .asset-pick button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.amount-row { display: flex; gap: 8px; align-items: stretch; }
+.amount-row input { flex: 1; min-width: 0; }
+.panel .amount-row button { margin-top: 0; }
+.sent-card { display: flex; flex-direction: column; gap: 4px; margin-top: 14px; padding: 12px 14px; border: 1px solid var(--up); background: var(--paper); }
+.sent-card a { text-decoration: underline; font-size: 13px; }
