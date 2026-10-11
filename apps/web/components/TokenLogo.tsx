@@ -2,11 +2,21 @@
 import { useState } from "react";
 import { useOverview } from "../lib/overview";
 
-/** Real token logo from Binance when available, otherwise the first letter. */
+/**
+ * Known logos for tokens that aren't tokenized stocks, so the Binance RWA
+ * lookup (which only resolves our stock-token registry) can never find them.
+ */
+const STATIC_LOGOS: Record<string, string> = {
+  USDT: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x55d398326f99059fF775485246999027B3197955/logo.png",
+  BNB: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png",
+};
+
+/** Real token logo from Binance (or a known static logo) when available, otherwise the first letter. */
 export default function TokenLogo({ symbol, name, size = 28, lookup = true }: { symbol: string; name?: string; size?: number; lookup?: boolean }) {
-  const overview = useOverview(symbol, lookup);
+  const staticUrl = STATIC_LOGOS[symbol.toUpperCase()];
+  const overview = useOverview(symbol, lookup && !staticUrl);
   const [broken, setBroken] = useState(false);
-  const url = overview?.icon;
+  const url = staticUrl ?? overview?.icon;
   if (url && !broken) {
     return (
       // eslint-disable-next-line @next/next/no-img-element

@@ -22,6 +22,22 @@ export function usePortfolio() {
     query: { enabled: !!address, refetchInterval: 20_000 },
   });
   const [stockPrice, setStockPrice] = useState<Record<string, number>>({});
+  const [bnbPrice, setBnbPrice] = useState<number | null>(null);
+
+  // BNB is a real token too (it's just also what gas is paid in), so it gets a live price like everything else.
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const res = await fetch("/api/bnb-price");
+        const json = (await res.json()) as { price?: number };
+        if (alive && json.price) setBnbPrice(json.price);
+      } catch { /* keep last known price */ }
+    };
+    void load();
+    const id = setInterval(load, 30_000);
+    return () => { alive = false; clearInterval(id); };
+  }, []);
 
   const rows = TRACKED.map((t, i) => {
     const r = balances.data?.[i];
@@ -49,5 +65,5 @@ export function usePortfolio() {
   }, [heldKey]);
 
   const stocks = heldStocks.reduce((sum, r) => sum + (r.qty ?? 0) * (stockPrice[r.address] ?? 0), 0);
-  return { address, isConnected, bnb, balances, rows, cash, heldStocks, stockPrice, stocks, total: cash + stocks };
+  return { address, isConnected, bnb, bnbPrice, balances, rows, cash, heldStocks, stockPrice, stocks, total: cash + stocks };
 }

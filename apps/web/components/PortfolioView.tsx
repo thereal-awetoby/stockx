@@ -20,7 +20,7 @@ const ALL_TOKENS = [
 ];
 
 export default function PortfolioView() {
-  const { address, isConnected, bnb, balances, cash, heldStocks, stockPrice, stocks, total } = usePortfolio();
+  const { address, isConnected, bnb, bnbPrice, balances, cash, heldStocks, stockPrice, stocks, total } = usePortfolio();
   const router = useRouter();
   const publicClient = usePublicClient({ chainId: 56 });
   const [trades, setTrades] = useState<TradeEntry[]>([]);
@@ -106,7 +106,7 @@ export default function PortfolioView() {
             <thead><tr><th>Asset</th><th className="num">Price</th><th className="num">Balance</th><th className="num">Value</th></tr></thead>
             <tbody>
               <tr>
-                <td><div className="name"><span className="avatar">U</span><div><strong>USDT</strong><div className="muted small">Tether</div></div></div></td>
+                <td><div className="name"><TokenLogo symbol="USDT" name="Tether" /><div><strong>USDT</strong><div className="muted small">Tether</div></div></div></td>
                 <td className="num">{usd(1)}</td>
                 <td className="num">{balances.isLoading ? "…" : fmt(cash)}</td>
                 <td className="num">{usd(cash)}</td>
@@ -123,10 +123,10 @@ export default function PortfolioView() {
                 );
               })}
               <tr>
-                <td><div className="name"><span className="avatar">B</span><div><strong>BNB</strong><div className="muted small">Gas</div></div></div></td>
-                <td className="num">—</td>
+                <td><div className="name"><TokenLogo symbol="BNB" name="BNB" /><div><strong>BNB</strong><div className="muted small">BNB Smart Chain · also used for gas</div></div></div></td>
+                <td className="num">{bnbPrice === null ? "…" : usd(bnbPrice)}</td>
                 <td className="num">{bnb.error ? <span className="neg">unavailable</span> : bnb.data ? fmt(Number(bnb.data.formatted)) : "…"}</td>
-                <td className="num">—</td>
+                <td className="num">{bnbPrice === null || !bnb.data ? "…" : usd(Number(bnb.data.formatted) * bnbPrice)}</td>
               </tr>
             </tbody>
           </table>
