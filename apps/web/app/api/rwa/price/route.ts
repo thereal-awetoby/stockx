@@ -1,5 +1,6 @@
-import { STOCKS } from "@stockx/shared";
+import { priceFromDynamic, STOCKS } from "@stockx/shared";
 import { binanceGet, errorResponse } from "../../../../lib/binance";
+import { binancePublic, PUBLIC_PATHS } from "../../../../lib/binance-public";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,15 @@ export async function GET(req: Request) {
       updatedAt: row.tokenPriceUpdatedAt,
     });
   } catch (e) {
+    // The signed endpoint can refuse (for example "compliance restriction" for the server's location).
+    // Prices are public data, so fall back to Binance's public endpoint instead of showing dashes.
+    try {
+      const data = await binancePublic<unknown>(PUBLIC_PATHS.dynamic, { chainId: 56, contractAddress: token });
+      const p = priceFromDynamic(data);
+      if (p) return Response.json({ tokenPrice: p.tokenPrice, referencePrice: p.referencePrice, updatedAt: Date.now(), source: "binance-public" });
+    } catch {
+      /* fall through to the original error */
+    }
     return errorResponse(e);
   }
 }

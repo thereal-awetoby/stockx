@@ -63,7 +63,7 @@ function Row({ s }: { s: Stock }) {
         </div>
       </td>
       <td className="num">{cell(snap && usd(snap.onchain))}</td>
-      <td className="num">{cell(snap && usd(snap.reference))}</td>
+      <td className="num">{cell(snap && (snap.reference === null ? "—" : usd(snap.reference)))}</td>
       <td className={`num ${premium !== null && premium < 0 ? "neg" : "pos"}`}>{premium === null ? cell(null) : signedPct(premium)}</td>
       <td className={`num ${change === null ? "" : up ? "pos" : "neg"}`}>{change === null ? "—" : signedPct(change)}</td>
       <td className="chart-cell"><Sparkline values={overview?.spark ?? []} up={up} /></td>

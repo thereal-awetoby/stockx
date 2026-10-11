@@ -2,22 +2,26 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAccount, useConnect, useConnectors, useDisconnect, useSwitchChain } from "wagmi";
 import { bsc } from "../lib/wagmi";
+import SafeImg from "./SafeImg";
 
 const PREFERRED = ["metamask", "rabby", "binance", "okx", "coinbase", "trust", "phantom", "rainbow", "brave", "zerion"];
 const INSTALL = [
-  { name: "MetaMask", url: "https://metamask.io/download" },
-  { name: "Rabby", url: "https://rabby.io" },
-  { name: "Binance Wallet", url: "https://www.binance.com/en/binancewallet" },
-  { name: "OKX Wallet", url: "https://web3.okx.com/download" },
-  { name: "Coinbase Wallet", url: "https://www.coinbase.com/wallet" },
-  { name: "Trust Wallet", url: "https://trustwallet.com/download" },
+  { name: "MetaMask", url: "https://metamask.io/download", domain: "metamask.io" },
+  { name: "Rabby", url: "https://rabby.io", domain: "rabby.io" },
+  { name: "Binance Wallet", url: "https://www.binance.com/en/binancewallet", domain: "binance.com" },
+  { name: "OKX Wallet", url: "https://web3.okx.com/download", domain: "okx.com" },
+  { name: "Coinbase Wallet", url: "https://www.coinbase.com/wallet", domain: "coinbase.com" },
+  { name: "Trust Wallet", url: "https://trustwallet.com/download", domain: "trustwallet.com" },
 ];
 const rank = (name: string) => { const i = PREFERRED.findIndex((p) => name.toLowerCase().includes(p)); return i === -1 ? PREFERRED.length : i; };
 
-function WalletLogo({ name, icon }: { name: string; icon?: string }) {
-  // Installed wallets announce their own logo (EIP-6963); anything without one gets its initial.
-  // eslint-disable-next-line @next/next/no-img-element
-  return icon ? <img className="wallet-logo" src={icon} alt="" width={28} height={28} /> : <span className="wallet-mono" aria-hidden>{name.slice(0, 1)}</span>;
+function WalletLogo({ name, icon, domain }: { name: string; icon?: string; domain?: string }) {
+  // Installed wallets announce their own logo (EIP-6963). Wallets that are not installed get the logo their
+  // own website uses as its icon. If that cannot load either, show the initial.
+  const [failed, setFailed] = useState(false);
+  const src = icon ?? (domain ? `https://www.google.com/s2/favicons?domain=${domain}&sz=64` : undefined);
+  if (src && !failed) return <SafeImg className="wallet-logo" src={src} alt="" width={28} height={28} onGiveUp={() => setFailed(true)} />;
+  return <span className="wallet-mono" aria-hidden>{name.slice(0, 1)}</span>;
 }
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
@@ -114,7 +118,7 @@ export default function ConnectButton() {
               <div className="wallet-title wallet-sub">Don&apos;t have one? Get a wallet</div>
               {missing.map((w) => (
                 <a key={w.name} className="menu-item wallet-item" href={w.url} target="_blank" rel="noreferrer">
-                  <WalletLogo name={w.name} />
+                  <WalletLogo name={w.name} domain={w.domain} />
                   <span>{w.name}</span>
                   <span className="muted small" style={{ marginLeft: "auto" }}>Install ↗</span>
                 </a>

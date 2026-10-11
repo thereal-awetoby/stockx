@@ -32,10 +32,19 @@ const STEP_LABEL: Record<ProgressStep, string> = {
   confirming: "Waiting for the swap to confirm…",
 };
 
+/** Binance refuses some server locations. Say that plainly instead of showing its raw message. */
+function friendlyError(e: unknown): string {
+  const m = e instanceof Error ? e.message : String(e);
+  if (/compliance|not available in your (region|country)|restricted/i.test(m)) {
+    return "Swaps aren't available from this server's location right now (Binance restricts some regions). Prices still load. The deployed app runs in a supported region.";
+  }
+  return m;
+}
+
 type Stage = "idle" | "review" | "sending" | "done";
 type Side = "buy" | "sell";
 
-export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOpen?: boolean }) {
+export default function BuyPanel({ stock }: { stock: Stock }) {
   const { address, isConnected } = useAccount();
   const publicClient = usePublicClient({ chainId: 56 });
   const { data: walletClient } = useWalletClient();
@@ -133,7 +142,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
     } catch (e) {
       if (id !== quoteSeq.current) return;
       setQuote(null); setSim(null); setView(null);
-      setError((e as Error).message);
+      setError(friendlyError(e));
     } finally {
       if (id === quoteSeq.current) setLoading(false);
     }
@@ -154,7 +163,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
       setProgress(null);
       void balanceRead.refetch();
     } catch (e) {
-      setError((e as Error).message);
+      setError(friendlyError(e));
       setStage("idle");
       setProgress(null);
       setQuote(null); // never reuse a quote after a failed or ambiguous send
@@ -276,9 +285,6 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
             <p className="muted small" style={{ margin: "6px 0 0" }}>
               Two wallet prompts: first approve exactly {fmt(amountIn!, 6)} {inSym} (never unlimited), then the swap. The price is re-checked in between.
             </p>
-          )}
-          {marketOpen === false && (
-            <p className="warn small">The US market is closed. The reference price is stale and the premium may be large. This swap still trades on-chain at the on-chain price.</p>
           )}
           <div className="row" style={{ gap: 8, marginTop: 8 }}>
             <button onClick={confirm} disabled={expired} style={{ flex: 1 }}>Confirm {side}</button>

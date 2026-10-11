@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { brandLogoUrl, getStockToken } from "@stockx/shared";
 import { useOverview } from "../lib/overview";
+import SafeImg from "./SafeImg";
 
 /**
  * Known logos for tokens that aren't tokenized stocks, so the Binance RWA
@@ -25,16 +26,14 @@ export default function TokenLogo({ symbol, name, size = 28, lookup = true }: { 
   if (useBrand) {
     return (
       <span className="logo-brand" style={{ width: size, height: size }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={brand!} alt={name ?? symbol} referrerPolicy="no-referrer" onError={() => setBrandFailed(true)} />
+        <SafeImg src={brand!} alt={name ?? symbol} onGiveUp={() => setBrandFailed(true)} />
       </span>
     );
   }
   const url = staticUrl ?? overview?.icon;
   if (url && !broken) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img className="logo-img" src={url} alt={name ?? symbol} width={size} height={size} referrerPolicy="no-referrer" onError={() => setBroken(true)} />
+      <SafeImg className="logo-img" src={url} alt={name ?? symbol} width={size} height={size} onGiveUp={() => setBroken(true)} />
     );
   }
   return <span className="avatar" style={{ width: size, height: size, fontSize: Math.round(size * 0.4) }}>{(name ?? symbol).slice(0, 1)}</span>;

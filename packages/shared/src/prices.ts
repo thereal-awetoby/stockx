@@ -1,8 +1,8 @@
 export interface PriceSnapshot {
     /** Token price on BSC, in USD. */
     onchain: number;
-    /** Real stock reference price, in USD. */
-    reference: number;
+    /** Real stock reference price, in USD. null when the stock has no price right now (e.g. closed market, public fallback). */
+    reference: number | null;
     /** Epoch ms. */
     asOf: number;
     /** "mock" until the real Binance Web3 source is wired in. Show it in the UI. */
@@ -31,8 +31,29 @@ export interface PriceSnapshot {
       async getPrices(token) {
         const res = await fetch(`${baseUrl}/api/rwa/price?token=${encodeURIComponent(token)}`, { cache: "no-store" });
         if (!res.ok) throw new Error(`Prices unavailable (HTTP ${res.status})`);
-        const j = (await res.json()) as { tokenPrice: number; referencePrice: number; updatedAt: number };
-        return { onchain: j.tokenPrice, reference: j.referencePrice, asOf: j.updatedAt, source: "binance-rwa" };
+        const j = (await res.json()) as { tokenPrice: number; referencePrice: number | null; updatedAt: number; source?: string };
+        return { onchain: j.tokenPrice, reference: Number.isFinite(j.referencePrice) && (j.referencePrice ?? 0) > 0 ? j.referencePrice : null, asOf: j.updatedAt, source: j.source ?? "binance-rwa" };
       },
     };
   }
+
+/**
+ * Prices from Binance's PUBLIC "rwa/dynamic" endpoint (no API key, no signature), used when the signed
+ * endpoint is unavailable (for example Binance refuses the server's location). tokenInfo.price is the
+ * on-chain price; stockInfo.price is the US stock price, null outside trading hours. The reference is
+ * returned per token (stock price x shares-per-token) so the premium compares like with like.
+ */
+export function priceFromDynamic(data: unknown): { tokenPrice: number; referencePrice: number | null } | null {
+  const d = data as { tokenInfo?: { price?: unknown; sharesMultiplier?: unknown }; stockInfo?: { price?: unknown } } | null | undefined;
+  const num = (v: unknown): number | null => {
+    if (typeof v !== "string" && typeof v !== "number") return null;
+    if (typeof v === "string" && v.trim() === "") return null;
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
+  const tokenPrice = num(d?.tokenInfo?.price);
+  if (tokenPrice === null) return null;
+  const stock = num(d?.stockInfo?.price);
+  const mult = num(d?.tokenInfo?.sharesMultiplier) ?? 1;
+  return { tokenPrice, referencePrice: stock === null ? null : stock * mult };
+}

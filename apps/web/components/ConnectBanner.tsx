@@ -1,6 +1,7 @@
 "use client";
 import { useState, type CSSProperties } from "react";
 import { brandLogoUrl, getStockToken } from "@stockx/shared";
+import SafeImg from "./SafeImg";
 
 /** What a visitor sees before connecting: one line, one sentence, and drifting company logos. */
 const FEATURED = ["AAPL", "NVDA", "TSLA", "AMZN", "GOOGL", "META", "NFLX", "AMD", "COIN", "ORCL", "PLTR", "HOOD", "ADBE", "INTC", "PYPL", "CRM"];
@@ -38,8 +39,7 @@ function Bubble({ logo, slot }: { logo: string; slot: (typeof SLOTS)[number] }) 
         "--dx": `${slot.dx}px`, "--dy": `${slot.dy}px`, "--o": slot.o,
       } as CSSProperties}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={logo} alt="" referrerPolicy="no-referrer" onError={() => setBroken(true)} />
+      <SafeImg src={logo} alt="" onGiveUp={() => setBroken(true)} />
     </span>
   );
 }
