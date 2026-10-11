@@ -74,8 +74,10 @@ test("resolvePair: live tokens trade against USDT only; everything else is refus
     assert.deepEqual([buy.side, buy.stock.symbol, buy.tokenIn.symbol, buy.tokenOut.symbol], ["buy", "AAPLB", "USDT", "AAPLB"]);
     const sell = resolvePair("AAPLB", "USDT");
     assert.deepEqual([sell.side, sell.tokenIn.symbol, sell.tokenOut.symbol], ["sell", "AAPLB", "USDT"]);
+    const conv = resolvePair("AAPLB", "NVDAB");
+    assert.deepEqual([conv.side, conv.tokenIn.symbol, conv.tokenOut.symbol], ["convert", "AAPLB", "NVDAB"]);
     assert.equal(resolvePair("USDT", "NVDAB").stock.address, getStockToken("NVDAB")!.address);
-    for (const [a, b] of [["USDT", "SQQQB"], ["SQQQB", "USDT"], ["AAPLB", "NVDAB"], ["USDT", "USDT"], ["USDT", "AAPLx"], ["BNB", "AAPLB"]] as const) {
+    for (const [a, b] of [["USDT", "SQQQB"], ["SQQQB", "USDT"], ["AAPLB", "AAPLB"], ["AAPLB", "SQQQB"], ["USDT", "USDT"], ["USDT", "AAPLx"], ["BNB", "AAPLB"]] as const) {
       assert.throws(() => resolvePair(a, b), { code: "UNSUPPORTED_ROUTE" }, `${a}->${b}`);
     }
   });

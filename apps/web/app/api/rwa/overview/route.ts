@@ -7,17 +7,22 @@ const ICON_HOST = "https://bin.bnbstatic.com";
 const META_TTL = 6 * 60 * 60_000;
 const SPARK_TTL = 2 * 60_000;
 const MAX_TOKENS = 12;
-const PARALLEL = 4;
+const PARALLEL = 2;
 
 interface Entry { icon: string | null; changePct: number | null; spark: number[] }
 const metaCache = new Map<string, { t: number; icon: string | null }>();
 const changeCache = new Map<string, { t: number; v: number | null }>();
 const sparkCache = new Map<string, { t: number; changePct: number | null; spark: number[] }>();
 
+/** One quick retry: Binance's public endpoints sometimes fail for a single call under load. */
+async function retry<T>(fn: () => Promise<T>): Promise<T> {
+  try { return await fn(); } catch { await new Promise((r) => setTimeout(r, 400)); return fn(); }
+}
+
 async function icon(address: string): Promise<string | null> {
   const hit = metaCache.get(address);
   if (hit && Date.now() - hit.t < META_TTL) return hit.icon;
-  const meta = await binancePublic<{ icon?: unknown }>(PUBLIC_PATHS.meta, { chainId: 56, contractAddress: address });
+  const meta = await retry(() => binancePublic<{ icon?: unknown }>(PUBLIC_PATHS.meta, { chainId: 56, contractAddress: address }));
   const path = typeof meta?.icon === "string" ? meta.icon : null;
   const url = path && path.startsWith("/") ? `${ICON_HOST}${path}` : null; // only our known image host
   metaCache.set(address, { t: Date.now(), icon: url });
@@ -28,7 +33,7 @@ async function icon(address: string): Promise<string | null> {
 async function officialChange(address: string): Promise<number | null> {
   const hit = changeCache.get(address);
   if (hit && Date.now() - hit.t < SPARK_TTL) return hit.v;
-  const data = await binancePublic<{ tokenInfo?: { priceChangePct24h?: unknown } }>(PUBLIC_PATHS.dynamic, { chainId: 56, contractAddress: address });
+  const data = await retry(() => binancePublic<{ tokenInfo?: { priceChangePct24h?: unknown } }>(PUBLIC_PATHS.dynamic, { chainId: 56, contractAddress: address }));
   const raw = data?.tokenInfo?.priceChangePct24h;
   const v = typeof raw === "string" || typeof raw === "number" ? Number(raw) : NaN;
   const out = Number.isFinite(v) ? v : null;
@@ -39,9 +44,9 @@ async function officialChange(address: string): Promise<number | null> {
 async function spark(address: string): Promise<{ changePct: number | null; spark: number[] }> {
   const hit = sparkCache.get(address);
   if (hit && Date.now() - hit.t < SPARK_TTL) return hit;
-  const data = await binancePublic<{ klineInfos?: unknown }>(PUBLIC_PATHS.kline, {
+  const data = await retry(() => binancePublic<{ klineInfos?: unknown }>(PUBLIC_PATHS.kline, {
     chainId: 56, contractAddress: address, interval: "30m", limit: 48,
-  });
+  }));
   const series = parseKlines(data?.klineInfos, "1D");
   const value = { t: Date.now(), changePct: series ? series.changePct : null, spark: series ? series.points.map((p) => p.c) : [] };
   sparkCache.set(address, value);
@@ -64,5 +69,7 @@ export async function GET(req: Request) {
       out[t.symbol] = { icon: ic.status === "fulfilled" ? ic.value : null, changePct, spark: s.spark };
     }));
   }
-  return Response.json(out, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" } });
+  // Do not let a CDN or the browser keep a response that is missing charts.
+  const complete = tokens.every((t) => (out[t.symbol]?.spark.length ?? 0) > 1);
+  return Response.json(out, { headers: { "Cache-Control": complete ? "public, s-maxage=60, stale-while-revalidate=120" : "no-store" } });
 }

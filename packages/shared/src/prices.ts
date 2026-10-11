@@ -44,7 +44,7 @@ export interface PriceSnapshot {
  * returned per token (stock price x shares-per-token) so the premium compares like with like.
  */
 export function priceFromDynamic(data: unknown): { tokenPrice: number; referencePrice: number | null } | null {
-  const d = data as { tokenInfo?: { price?: unknown; sharesMultiplier?: unknown }; stockInfo?: { price?: unknown } } | null | undefined;
+  const d = data as { tokenInfo?: { price?: unknown; sharesMultiplier?: unknown }; stockInfo?: { price?: unknown; previousClose?: unknown; prevClose?: unknown; closePrice?: unknown; lastClose?: unknown } } | null | undefined;
   const num = (v: unknown): number | null => {
     if (typeof v !== "string" && typeof v !== "number") return null;
     if (typeof v === "string" && v.trim() === "") return null;
@@ -53,7 +53,9 @@ export function priceFromDynamic(data: unknown): { tokenPrice: number; reference
   };
   const tokenPrice = num(d?.tokenInfo?.price);
   if (tokenPrice === null) return null;
-  const stock = num(d?.stockInfo?.price);
+  // Outside US trading hours Binance sends no live stock price. Use its own last close if it provides one.
+  const si = d?.stockInfo;
+  const stock = num(si?.price) ?? num(si?.previousClose) ?? num(si?.prevClose) ?? num(si?.closePrice) ?? num(si?.lastClose);
   const mult = num(d?.tokenInfo?.sharesMultiplier) ?? 1;
   return { tokenPrice, referencePrice: stock === null ? null : stock * mult };
 }

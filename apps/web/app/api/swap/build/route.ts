@@ -11,14 +11,11 @@ import {
   resolvePair,
   SwapError,
   type BuiltSwap,
-  type Side,
 } from "@stockx/shared";
 import { binanceGet, errorResponse } from "../../../../lib/binance";
 
 export const dynamic = "force-dynamic";
 
-/** Demo safety caps. Buy is in USDT, sell is in the stock token. */
-const MAX_IN: Record<Side, number> = { buy: 50, sell: 1 };
 const DEFAULT_SLIPPAGE_BPS = 50; // 0.5%
 const MAX_SLIPPAGE_BPS = 100; // 1%: the route refuses anything looser
 
@@ -50,23 +47,27 @@ export async function GET(req: Request) {
   const wallet = sp.get("wallet") ?? "";
   const slippageBps = sp.get("slippageBps") === null ? DEFAULT_SLIPPAGE_BPS : Number(sp.get("slippageBps"));
 
-  if (side !== "buy" && side !== "sell") return Response.json({ error: "side must be buy or sell" }, { status: 400 });
+  if (side !== "buy" && side !== "sell" && side !== "convert") return Response.json({ error: "side must be buy, sell or convert" }, { status: 400 });
   // Server-side gate: only tokens on the live list can be built, whatever the client sends.
   if (!isLiveSymbol(token)) return Response.json({ error: `${token} is not tradable yet`, code: "TOKEN_NOT_LIVE" }, { status: 400 });
+  const to = (sp.get("to") ?? "").toUpperCase();
+  if (side === "convert" && (!isLiveSymbol(to) || to === token)) {
+    return Response.json({ error: "Pick two different tradable stocks", code: "TOKEN_NOT_LIVE" }, { status: 400 });
+  }
   if (!ADDRESS_RE.test(wallet)) return Response.json({ error: "A valid wallet address is required" }, { status: 400 });
   // Up to 18 decimals: stock tokens have 18, and "sell all" must be able to send the exact balance.
   if (!/^\d+(\.\d{1,18})?$/.test(amount)) {
     return Response.json({ error: "Enter a valid amount" }, { status: 400 });
   }
-  if (Number(amount) <= 0 || Number(amount) > MAX_IN[side]) {
-    return Response.json({ error: `Amount must be more than 0 and at most ${MAX_IN[side]}` }, { status: 400 });
+  if (!(Number(amount) > 0)) {
+    return Response.json({ error: "Amount must be more than 0" }, { status: 400 });
   }
   if (!Number.isInteger(slippageBps) || slippageBps < 0 || slippageBps > MAX_SLIPPAGE_BPS) {
     return Response.json({ error: `slippageBps must be an integer from 0 to ${MAX_SLIPPAGE_BPS}` }, { status: 400 });
   }
 
   try {
-    const pair = side === "buy" ? resolvePair("USDT", token) : resolvePair(token, "USDT");
+    const pair = side === "buy" ? resolvePair("USDT", token) : side === "sell" ? resolvePair(token, "USDT") : resolvePair(token, to);
     const amountIn = parseUnitsStr(amount, pair.tokenIn.decimals);
     const common = {
       binanceChainId: "56",

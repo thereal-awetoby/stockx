@@ -371,3 +371,7 @@ button.mini:hover:not(:disabled) { border-color: var(--ink); }
 .convert-steps li { border: 1px solid var(--line); padding: 10px 12px; opacity: .6; }
 .convert-steps li.now { opacity: 1; border-color: var(--ink); }
 .convert-steps li.done { opacity: 1; }
+.convert-page { display: flex; flex-direction: column; align-items: center; }
+.convert-page .lede { width: 100%; max-width: 460px; text-align: center; border-bottom: 0; }
+.convert-page .lede p { margin: 0 auto; }
+.convert-wrap { width: 100%; max-width: 460px; }

@@ -48,6 +48,14 @@ export async function GET(req: Request) {
   if (!STOCKS.some((s) => s.address === token)) {
     return Response.json({ error: "Unknown token" }, { status: 400 });
   }
+  if (new URL(req.url).searchParams.get("debug") === "1") {
+    // Public Binance data for a listed token, as returned. Lets us see exactly which fields exist.
+    try {
+      return Response.json(await binancePublic<unknown>(PUBLIC_PATHS.dynamic, { chainId: 56, contractAddress: token }));
+    } catch (e) {
+      return errorResponse(e);
+    }
+  }
   const hit = cache.get(token);
   if (hit && Date.now() - hit.at < TTL_MS) return Response.json(hit.body);
 

@@ -5,6 +5,7 @@ export interface Overview { icon: string | null; changePct: number | null; spark
 
 const cache = new Map<string, Overview | "error">();
 const requested = new Set<string>();
+const retried = new Set<string>();
 const listeners = new Set<() => void>();
 let queue: string[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
@@ -21,7 +22,15 @@ async function flush(): Promise<void> {
     try {
       const res = await fetch(`/api/rwa/overview?tokens=${chunk.join(",")}`);
       const json = (await res.json()) as Record<string, Overview>;
-      for (const s of chunk) cache.set(s, res.ok && json[s] ? json[s] : "error");
+      for (const s of chunk) {
+        const entry = res.ok && json[s] ? json[s] : null;
+        cache.set(s, entry ?? "error");
+        // A token that came back without a chart (or failed) is asked for again once, a few seconds later.
+        if ((!entry || entry.spark.length < 2) && !retried.has(s)) {
+          retried.add(s);
+          setTimeout(() => { queue.push(s); if (!timer) timer = setTimeout(() => { timer = null; void flush(); }, 60); }, 6000);
+        }
+      }
     } catch {
       for (const s of chunk) cache.set(s, "error");
     }

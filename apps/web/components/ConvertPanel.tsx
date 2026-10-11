@@ -38,6 +38,7 @@ function friendlyError(e: unknown): string {
 
 /** One leg: quote + simulate on screen, then a wallet confirmation. */
 interface Leg { quote: Quote; sim: SimulationResult }
+type Mode = "direct" | "usdt";
 type Phase = "idle" | "sending1" | "between" | "sending2" | "done";
 
 export default function ConvertPanel() {
@@ -48,11 +49,13 @@ export default function ConvertPanel() {
   const tokens = useMemo(() => STOCKS.filter((s) => s.address).map((s) => s.token), []);
   const [from, setFrom] = useState(tokens.includes("AAPLB") ? "AAPLB" : tokens[0] ?? "");
   const [to, setTo] = useState(tokens.find((t) => t !== "AAPLB") ?? "");
-  const [amount, setAmount] = useState("0.01");
+  const [amount, setAmount] = useState("");
   const [leg1, setLeg1] = useState<Leg | null>(null);
   const [leg2, setLeg2] = useState<Leg | null>(null);
   const [estimate, setEstimate] = useState<string | null>(null); // USDT from leg 1
   const [estimateOut, setEstimateOut] = useState<string | null>(null); // target token, rough
+  const [mode, setMode] = useState<Mode>("direct");
+  const [directFailed, setDirectFailed] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -83,7 +86,7 @@ export default function ConvertPanel() {
     );
   }, [publicClient, walletClient]);
 
-  const amountValid = /^\d+(\.\d{1,18})?$/.test(amount.trim()) && Number(amount) > 0 && Number(amount) <= 1;
+  const amountValid = /^\d+(\.\d{1,18})?$/.test(amount.trim()) && Number(amount) > 0;
   const sameToken = from === to;
   const busy = phase === "sending1" || phase === "sending2";
   const seq = useRef(0);
@@ -95,26 +98,26 @@ export default function ConvertPanel() {
 
   function resetAll() {
     setLeg1(null); setLeg2(null); setEstimate(null); setEstimateOut(null);
-    setPhase("idle"); setProgress(null); setError(null); setHash1(null); setHash2(null); setReceived(null);
+    setPhase("idle"); setProgress(null); setError(null); setHash1(null); setHash2(null); setReceived(null); setMode("direct"); setDirectFailed(false);
   }
 
-  /** Step 1 quote (sell `from` for USDT) plus a read-only estimate of step 2. */
+  /** Quote for the amount on screen: one direct swap, or (opt-in) sell for USDT with a read-only estimate of the buy. */
   async function quoteLeg1() {
     if (!helper || !amountValid || sameToken || !to) return;
     const id = ++seq.current;
     setLoading(true);
     try {
-      const q = await helper.quote({ tokenIn: from, tokenOut: "USDT", amountIn: amount.trim(), spender: "main", receiver: "main" });
+      const q = await helper.quote({ tokenIn: from, tokenOut: mode === "direct" ? to : "USDT", amountIn: amount.trim(), spender: "main", receiver: "main" });
       const s = await helper.simulate(q);
       if (id !== seq.current) return;
       setLeg1({ quote: q, sim: s });
-      setEstimate(q.amountOut);
-      setError(null);
+      setError(null); setDirectFailed(false);
       setNow(Date.now());
-      // Rough second leg, read-only, so the user sees where the money ends up before starting.
+      if (mode === "direct") { setEstimate(null); setEstimateOut(q.amountOut); return; }
+      setEstimate(q.amountOut);
       try {
         const usdtIn = Number(q.amountOut).toFixed(6).replace(/\.?0+$/, "");
-        if (Number(usdtIn) > 0 && Number(usdtIn) <= 50) {
+        if (Number(usdtIn) > 0) {
           const v = await fetchQuoteView(usdtIn, address, to);
           if (id === seq.current) setEstimateOut(v.amountOut);
         }
@@ -123,6 +126,7 @@ export default function ConvertPanel() {
       if (id !== seq.current) return;
       setLeg1(null); setEstimate(null); setEstimateOut(null);
       setError(friendlyError(e));
+      if (mode === "direct") setDirectFailed(true);
     } finally {
       if (id === seq.current) setLoading(false);
     }
@@ -136,7 +140,7 @@ export default function ConvertPanel() {
     const t = setTimeout(() => { void quoteLeg1(); }, 500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [amount, from, to, helper]);
+  }, [amount, from, to, helper, mode]);
 
   const issued1 = leg1?.quote.issuedAt;
   const left1 = issued1 ? Math.max(0, Math.ceil((issued1 + RFQ_TTL_MS - now) / 1000)) : 0;
@@ -161,16 +165,29 @@ export default function ConvertPanel() {
     return { quote: q, sim: s };
   }
 
-  /** Cut to 6 decimals and cap at the demo limit of 50 USDT. */
+  /** USDT amount cut to 6 decimals. */
   function spendFrom(usdtText: string): string {
     const [w = "0", f = ""] = usdtText.split(".");
-    return String(Math.min(50, Number(`${w}.${f.slice(0, 6) || "0"}`)));
+    return f.slice(0, 6) ? `${w}.${f.slice(0, 6)}` : w;
   }
 
   /** One click: sell, then buy with what arrived, with no second click in between. */
   async function convert() {
     if (!helper || !leg1 || !address || !LIVE) return;
     setPhase("sending1"); setError(null); setProgress(`Selling ${from}…`);
+    if (mode === "direct") {
+      setPhase("sending1"); setError(null); setProgress(`Converting ${from} to ${to}…`);
+      try {
+        const res = await helper.execute(leg1.quote, "main");
+        setHash1(res.txHash);
+        if (res.txHash) recordTrade(address, { t: Date.now(), side: "sell", token: from, amountIn: amount.trim(), inSym: from, amountOut: leg1.quote.amountOut, outSym: to, txHash: res.txHash });
+        setPhase("done"); setProgress(null);
+        void balanceRead.refetch();
+      } catch (e) {
+        setError(friendlyError(e)); setPhase("idle"); setProgress(null); setLeg1(null);
+      }
+      return;
+    }
     let sold = false; // once the sell is on-chain it is never repeated
     try {
       const before = await readUsdt();
@@ -226,7 +243,7 @@ export default function ConvertPanel() {
 
   function fill(pct: number) {
     if (!fromInfo || balance === undefined || busy) return;
-    setAmount(fractionOfBalance(balance, fromInfo.decimals, pct, 18, 1));
+    setAmount(fractionOfBalance(balance, fromInfo.decimals, pct, 18));
   }
   function flip() {
     if (busy || phase !== "idle") return;
@@ -236,7 +253,7 @@ export default function ConvertPanel() {
   const canStart = !!helper && !!leg1 && leg1.sim.ok && !expired1 && phase === "idle" && LIVE && !sameToken;
   const statusText = loading ? "Getting the best prices…"
     : sameToken ? "Pick two different stocks."
-    : !amountValid ? "Enter an amount up to 1."
+    : !amountValid ? "Enter an amount."
     : !helper ? "Connect your wallet to see a quote."
     : leg1 ? "Quotes update automatically." : "";
 
@@ -280,10 +297,13 @@ export default function ConvertPanel() {
       </div>
       <p className="muted small ticket-status" role="status">{statusText}</p>
       {error && <p className="err">{error}</p>}
+      {directFailed && phase === "idle" && !loading && (
+        <button type="button" className="ghost" onClick={() => { setMode("usdt"); setDirectFailed(false); setError(null); }}>No direct route. Route through USDT instead (two swaps)</button>
+      )}
 
       {leg1 && phase === "idle" && (
         <>
-          <div className="row"><span className="muted">Route</span><span className="small">{from} → USDT → {to}</span></div>
+          <div className="row"><span className="muted">Route</span><span className="small">{mode === "direct" ? `${from} → ${to} (one swap)` : `${from} → USDT → ${to}`}</span></div>
           <div className="row"><span className="muted">Quote</span><span className="muted">{leg1.sim.ok ? `refreshes in ${left1}s` : `simulation failed: ${leg1.sim.error}`}</span></div>
         </>
       )}
@@ -309,7 +329,10 @@ export default function ConvertPanel() {
         )}
       </div>
       <p className="muted small" style={{ margin: "8px 0 0" }}>
-        Routed through USDT, so your wallet asks you to confirm twice. Each swap is simulated first and the second uses the USDT you actually received. Capped at 1 {from} per convert while live swaps are being tested. Trades are public on-chain.
+        {mode === "direct"
+          ? "One swap straight from stock to stock, simulated first, one wallet confirmation (plus a one-time exact approval if needed)."
+          : "Routed through USDT: two swaps, so your wallet asks you to confirm twice. If the second fails your USDT stays in your wallet."}{" "}
+        Trades are public on-chain.
       </p>
       {isConnected && !LIVE && <p className="warn small">Live swaps are off. Set NEXT_PUBLIC_LIVE_SWAPS=1.</p>}
     </div>

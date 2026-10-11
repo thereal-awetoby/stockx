@@ -7,7 +7,8 @@ import { getTokenInfo, isLiveSymbol } from "./token-registry";
  * importable from anywhere and testable without installing anything.
  */
 
-export type Side = "buy" | "sell";
+/** "convert" = one swap between two stock tokens (no USDT leg). */
+export type Side = "buy" | "sell" | "convert";
 export type Hex = `0x${string}`;
 
 export const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/;
@@ -190,7 +191,7 @@ export interface Pair {
 }
 
 /**
- * USDT <-> a LIVE stock token. A token that is not on the live list (see token-registry.ts)
+ * USDT <-> a LIVE stock token, or one LIVE stock token for another. A token that is not on the live list (see token-registry.ts)
  * is refused here, so the routes, the provider and the agent guard all share one gate.
  * Anything else is refused, never guessed.
  */
@@ -203,6 +204,11 @@ export function resolvePair(tokenIn: string, tokenOut: string): Pair {
   if (tokenOut === "USDT" && isLiveSymbol(tokenIn)) {
     const stock = getTokenInfo(tokenIn)!;
     return { side: "sell", tokenIn: stock, tokenOut: usdt, stock };
+  }
+  if (tokenIn !== tokenOut && isLiveSymbol(tokenIn) && isLiveSymbol(tokenOut)) {
+    const from = getTokenInfo(tokenIn)!;
+    const to = getTokenInfo(tokenOut)!;
+    return { side: "convert", tokenIn: from, tokenOut: to, stock: from };
   }
   throw new SwapError("UNSUPPORTED_ROUTE", `Unsupported route ${tokenIn} -> ${tokenOut}`);
 }

@@ -103,10 +103,10 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
     setView(null); setQuote(null); setSim(null); setStage("idle"); setProgress(null); setTxHash(null); setError(null);
   }
 
-  /** Fills the amount from the wallet balance. Buys stop at the demo's 50 USDT cap, sells at what is held. */
+  /** Fills the amount from the wallet balance. */
   function fill(pct: number) {
     if (!inInfo || balance === undefined || stage === "sending") return;
-    setAmount(fractionOfBalance(balance, inInfo.decimals, pct, side === "buy" ? 6 : 18, side === "buy" ? 50 : undefined));
+    setAmount(fractionOfBalance(balance, inInfo.decimals, pct, side === "buy" ? 6 : 18));
     reset();
   }
 
@@ -307,7 +307,6 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
           {!isConnected ? `Connect wallet to ${side}` : `${side === "buy" ? "Buy" : "Sell"} ${stock.token}`}
         </button>
       </div>
-      {side === "sell" && <p className="muted small" style={{ margin: "8px 0 0" }}>Sells are capped at 1 {stock.token} per swap while live swaps are being tested.</p>}
       {isConnected && !LIVE && (
         <p className="warn small">Live swaps are off. Set NEXT_PUBLIC_LIVE_SWAPS=1 after the dry run in docs/builder-a-handoff.md passes.</p>
       )}
