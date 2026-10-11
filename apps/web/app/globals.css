@@ -308,3 +308,13 @@ button.mini:hover:not(:disabled) { border-color: var(--ink); }
 .panel .amount-row button { margin-top: 0; }
 .sent-card { display: flex; flex-direction: column; gap: 4px; margin-top: 14px; padding: 12px 14px; border: 1px solid var(--up); background: var(--paper); }
 .sent-card a { text-decoration: underline; font-size: 13px; }
+
+/* agent page tidy-up */
+.tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tile strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; }
+.console-err { border-left: 2px solid #ffb4a8; padding: 2px 0 2px 12px; color: #e9dcd6; font-size: 13px; margin: 16px 0 0; }
+.prompt input { font-size: 17px; }
+.panel .seg { margin: 0 0 14px; }
+.panel .asset-pick { margin-top: 0; }
+.agent-notes { border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } .prompt { flex-direction: column; } .prompt input { border-right: 1px solid #4a463e; } .feed li { grid-template-columns: 1fr auto; } .feed-time { grid-column: 1 / -1; } }
