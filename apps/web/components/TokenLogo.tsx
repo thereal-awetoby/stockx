@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { brandLogoUrl, getStockToken } from "@stockx/shared";
 import { useOverview } from "../lib/overview";
 
 /**
@@ -14,8 +15,21 @@ const STATIC_LOGOS: Record<string, string> = {
 /** Real token logo from Binance (or a known static logo) when available, otherwise the first letter. */
 export default function TokenLogo({ symbol, name, size = 28, lookup = true }: { symbol: string; name?: string; size?: number; lookup?: boolean }) {
   const staticUrl = STATIC_LOGOS[symbol.toUpperCase()];
-  const overview = useOverview(symbol, lookup && !staticUrl);
+  // The company's own logo comes first: it has no chain watermark. The token icon is only a fallback.
+  const ticker = getStockToken(symbol)?.ticker;
+  const brand = ticker ? brandLogoUrl(ticker) : null;
+  const [brandFailed, setBrandFailed] = useState(false);
+  const useBrand = !!brand && !brandFailed;
+  const overview = useOverview(symbol, lookup && !staticUrl && !useBrand);
   const [broken, setBroken] = useState(false);
+  if (useBrand) {
+    return (
+      <span className="logo-brand" style={{ width: size, height: size }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={brand!} alt={name ?? symbol} referrerPolicy="no-referrer" onError={() => setBrandFailed(true)} />
+      </span>
+    );
+  }
   const url = staticUrl ?? overview?.icon;
   if (url && !broken) {
     return (

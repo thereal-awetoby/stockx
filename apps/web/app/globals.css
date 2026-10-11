@@ -194,6 +194,8 @@ button.link { background: none; border: 0; padding: 0; color: var(--ink); text-d
 .filters button.on { background: var(--ink); color: var(--sheet); }
 .logo-img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); background: var(--sheet); flex: none; }
 .avatar { flex: none; }
+.logo-brand { display: inline-grid; place-items: center; flex: none; border-radius: 50%; background: #fff; border: 1px solid var(--line); }
+.logo-brand img { width: 60%; height: 60%; object-fit: contain; display: block; }
 .chart-cell { text-align: right; width: 140px; padding-top: 6px; padding-bottom: 6px; }
 .chart-cell svg { display: inline-block; vertical-align: middle; }
 button.addr { background: none; border: 0; padding: 0; color: var(--ink); font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; font-weight: 400; cursor: copy; text-decoration: underline dotted; }
@@ -337,10 +339,10 @@ button.mini:hover:not(:disabled) { border-color: var(--ink); }
 .hero h1 { font-family: var(--serif); font-weight: 400; font-size: 52px; line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 12px; color: #f2efe7; }
 .hero p { color: #cfc9bb; font-size: 19px; margin: 0; }
 .bubbles { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.bubble { position: absolute; border-radius: 50%; overflow: hidden; opacity: var(--o, 1); background: #f2efe7;
+.bubble { position: absolute; display: grid; place-items: center; border-radius: 50%; overflow: hidden; opacity: var(--o, 1); background: #f2efe7;
   border: 1px solid rgba(242, 239, 231, .3); box-shadow: 0 14px 34px rgba(0, 0, 0, .45);
   animation: drift 14s ease-in-out infinite alternate; will-change: transform; }
-.bubble img { display: block; width: 100%; height: 100%; object-fit: cover; animation: pop .7s ease both; }
+.bubble img { display: block; width: 58%; height: 58%; object-fit: contain; animation: pop .7s ease both; }
 @keyframes drift { from { transform: translate(0, 0); } to { transform: translate(var(--dx, 12px), var(--dy, -14px)); } }
 @keyframes pop { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .bubble, .bubble img { animation: none; } }

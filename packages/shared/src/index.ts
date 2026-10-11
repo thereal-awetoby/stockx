@@ -14,6 +14,7 @@ export * from "./stocks";
 export * from "./prices";
 export * from "./kline";
 export * from "./stock-categories";
+export * from "./brand-logos";
 export * from "./rwa-market";
 export * from "./swap-api";
 export * from "./swap-build";

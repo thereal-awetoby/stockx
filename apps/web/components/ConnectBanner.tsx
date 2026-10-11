@@ -1,10 +1,9 @@
 "use client";
 import { useState, type CSSProperties } from "react";
-import { getStockToken } from "@stockx/shared";
-import { useOverview } from "../lib/overview";
+import { brandLogoUrl, getStockToken } from "@stockx/shared";
 
-/** What a visitor sees before connecting: one line, one sentence, and drifting stock logos. */
-const FEATURED = ["AAPL", "NVDA", "TSLA", "MSFT", "AMZN", "GOOGL", "META", "NFLX", "AMD", "COIN", "JPM", "SPY", "QQQ", "ORCL", "PLTR", "HOOD"];
+/** What a visitor sees before connecting: one line, one sentence, and drifting company logos. */
+const FEATURED = ["AAPL", "NVDA", "TSLA", "AMZN", "GOOGL", "META", "NFLX", "AMD", "COIN", "ORCL", "PLTR", "HOOD", "ADBE", "INTC", "PYPL", "CRM"];
 
 // Where each bubble sits (% of the banner), how big it is, and how it drifts. Strongest on the right, faint on the left.
 const SLOTS = [
@@ -26,10 +25,9 @@ const SLOTS = [
   { x: 14, y: 12, size: 30, dur: 17, delay: -6, dx: 8, dy: 10, o: 0.3 },
 ];
 
-function Bubble({ symbol, slot }: { symbol: string; slot: (typeof SLOTS)[number] }) {
-  const overview = useOverview(symbol);
+function Bubble({ logo, slot }: { logo: string; slot: (typeof SLOTS)[number] }) {
   const [broken, setBroken] = useState(false);
-  if (!overview?.icon || broken) return null; // no placeholder letters on the dark banner
+  if (broken) return null; // never show a broken image, and never fall back to a chain-branded icon
   return (
     <span
       className="bubble"
@@ -41,17 +39,20 @@ function Bubble({ symbol, slot }: { symbol: string; slot: (typeof SLOTS)[number]
       } as CSSProperties}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={overview.icon} alt="" referrerPolicy="no-referrer" onError={() => setBroken(true)} />
+      <img src={logo} alt="" referrerPolicy="no-referrer" onError={() => setBroken(true)} />
     </span>
   );
 }
 
 export default function ConnectBanner() {
-  const symbols = FEATURED.map((t) => `${t}B`).filter((s) => !!getStockToken(s));
+  const logos = FEATURED
+    .filter((t) => !!getStockToken(`${t}B`))
+    .map((t) => ({ ticker: t, url: brandLogoUrl(t) }))
+    .filter((l): l is { ticker: string; url: string } => !!l.url);
   return (
     <section className="hero" aria-label="stockX">
       <div className="bubbles">
-        {symbols.slice(0, SLOTS.length).map((s, i) => <Bubble key={s} symbol={s} slot={SLOTS[i]} />)}
+        {logos.slice(0, SLOTS.length).map((l, i) => <Bubble key={l.ticker} logo={l.url} slot={SLOTS[i]} />)}
       </div>
       <div className="hero-copy">
         <h1>Own stocks on-chain.</h1>
