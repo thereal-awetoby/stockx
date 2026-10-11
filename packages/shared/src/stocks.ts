@@ -15,11 +15,11 @@ export interface Stock {
   note?: string;
 }
 
-const bySlug = (x: Stock, y: Stock) =>
-  Number(y.status === "live") - Number(x.status === "live") || x.ticker.localeCompare(y.ticker);
+const byTicker = (x: Stock, y: Stock) => x.ticker.localeCompare(y.ticker);
 
-/** Every registry token. "live" only if it is on the verified/live list; the rest show as "soon". */
+/** Every tradable registry token. Tokens pulled back with DISABLED_SYMBOLS are left out entirely. */
 export const STOCKS: Stock[] = listStockTokens()
+  .filter((t) => isLiveSymbol(t.symbol))
   .map<Stock>((t) => ({
     slug: t.symbol.toLowerCase(),
     ticker: t.ticker,
@@ -28,10 +28,9 @@ export const STOCKS: Stock[] = listStockTokens()
     issuer: "bStocks",
     style: "swap",
     address: t.address,
-    status: isLiveSymbol(t.symbol) ? "live" : "soon",
-    note: isLiveSymbol(t.symbol) ? undefined : "Quotes fine on Binance. Trading opens after a live test.",
+    status: "live",
   }))
-  .sort(bySlug);
+  .sort(byTicker);
 
 export const getStock = (slug: string) => STOCKS.find((s) => s.slug === slug);
 

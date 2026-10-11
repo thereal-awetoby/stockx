@@ -2,6 +2,7 @@ import {
   ADDRESS_RE,
   assertMinReceive,
   assertSafeSwapTx,
+  assertTokenSafety,
   extractSwapAmountOut,
   extractSwapTx,
   isLiveSymbol,
@@ -77,6 +78,7 @@ export async function GET(req: Request) {
     const quotes = await binanceGet<ApiQuote[]>("/api/v1/dex/aggregator/quote", { ...common, userWalletAddress: wallet });
     const best = quotes.find((q) => q.isBest) ?? quotes[0];
     if (!best) return Response.json({ error: "No quote available" }, { status: 404 });
+    assertTokenSafety(best, { from: pair.tokenIn, to: pair.tokenOut });
     if (!ADDRESS_RE.test(best.approveTarget)) {
       return Response.json({ error: "Quote came back without a valid approval target" }, { status: 502 });
     }

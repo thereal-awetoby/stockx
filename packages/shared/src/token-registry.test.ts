@@ -4,19 +4,19 @@ import { createBinanceProvider, type BuildFn, type WalletExecutor } from "./bina
 import { createSwapHelper } from "./swap";
 import { isSupportedStockRoute } from "./pocket/guards";
 import { STOCKS } from "./stocks";
-import { assertSafeSwapTx, minAmountOutFor, resolvePair, type BuiltSwap } from "./swap-build";
+import { assertSafeSwapTx, assertTokenSafety, minAmountOutFor, resolvePair, type BuiltSwap } from "./swap-build";
 import {
   getStockToken,
   getTokenInfo,
   isLiveSymbol,
+  disabledSymbolsFor,
   listLiveStockTokens,
   listStockTokens,
-  liveSymbolsFor,
   VERIFIED_LIVE_SYMBOLS,
 } from "./token-registry";
 import { TOKENS } from "./tokens";
 
-const ENV = "NEXT_PUBLIC_EXTRA_LIVE";
+const ENV = "NEXT_PUBLIC_DISABLED_TOKENS";
 function withExtra<T>(value: string | undefined, fn: () => T): T {
   const prev = process.env[ENV];
   if (value === undefined) delete process.env[ENV]; else process.env[ENV] = value;
@@ -44,26 +44,28 @@ test("AAPLB in the registry is the exact token the app has always traded", () =>
   assert.equal(getTokenInfo("NOPE"), undefined);
 });
 
-test("by default only AAPLB is live; every other registry token is 'soon'", () => {
+test("by default every registry token is live and listed; AAPLB stays the verified one", () => {
   withExtra(undefined, () => {
     assert.deepEqual([...VERIFIED_LIVE_SYMBOLS], ["AAPLB"]);
-    assert.deepEqual(listLiveStockTokens().map((t) => t.symbol), ["AAPLB"]);
-    assert.equal(isLiveSymbol("NVDAB"), false);
-    const live = STOCKS.filter((s) => s.status === "live");
-    assert.deepEqual(live.map((s) => s.token), ["AAPLB"]);
+    assert.equal(listLiveStockTokens().length, 62);
+    assert.equal(isLiveSymbol("NVDAB"), true);
+    assert.equal(isLiveSymbol("AAPLB"), true);
+    assert.equal(isLiveSymbol("SQQQB"), false, "not in the registry");
     assert.equal(STOCKS.length, 62);
-    assert.equal(STOCKS[0]!.token, "AAPLB", "live tokens sort first");
+    assert.ok(STOCKS.every((s) => s.status === "live" && s.note === undefined), "no coming-soon rows");
+    assert.equal(STOCKS[0]!.token, "AAPLB");
   });
 });
 
-test("NEXT_PUBLIC_EXTRA_LIVE adds known symbols only; typos and non-registry symbols enable nothing", () => {
-  assert.deepEqual([...liveSymbolsFor("nvdab, TSLAB")].sort(), ["AAPLB", "NVDAB", "TSLAB"]);
-  assert.deepEqual([...liveSymbolsFor("SQQQB,USDT,AAPLX,,")], ["AAPLB"]);
+test("NEXT_PUBLIC_DISABLED_TOKENS pulls tokens back; typos and non-registry symbols disable nothing", () => {
+  assert.deepEqual([...disabledSymbolsFor("nvdab, TSLAB")].sort(), ["NVDAB", "TSLAB"]);
+  assert.deepEqual([...disabledSymbolsFor("SQQQB,USDT,AAPLx,,")], []);
   withExtra("NVDAB", () => {
-    assert.equal(isLiveSymbol("NVDAB"), true);
-    assert.equal(isLiveSymbol("TSLAB"), false);
+    assert.equal(isLiveSymbol("NVDAB"), false);
+    assert.equal(isLiveSymbol("TSLAB"), true);
+    assert.equal(listLiveStockTokens().length, 61);
   });
-  assert.equal(isLiveSymbol("NVDAB"), false, "restored");
+  assert.equal(isLiveSymbol("NVDAB"), true, "restored");
 });
 
 test("resolvePair: live tokens trade against USDT only; everything else is refused", () => {
@@ -72,12 +74,13 @@ test("resolvePair: live tokens trade against USDT only; everything else is refus
     assert.deepEqual([buy.side, buy.stock.symbol, buy.tokenIn.symbol, buy.tokenOut.symbol], ["buy", "AAPLB", "USDT", "AAPLB"]);
     const sell = resolvePair("AAPLB", "USDT");
     assert.deepEqual([sell.side, sell.tokenIn.symbol, sell.tokenOut.symbol], ["sell", "AAPLB", "USDT"]);
-    for (const [a, b] of [["USDT", "NVDAB"], ["NVDAB", "USDT"], ["USDT", "SQQQB"], ["AAPLB", "NVDAB"], ["USDT", "USDT"], ["USDT", "AAPLx"], ["BNB", "AAPLB"]] as const) {
+    assert.equal(resolvePair("USDT", "NVDAB").stock.address, getStockToken("NVDAB")!.address);
+    for (const [a, b] of [["USDT", "SQQQB"], ["SQQQB", "USDT"], ["AAPLB", "NVDAB"], ["USDT", "USDT"], ["USDT", "AAPLx"], ["BNB", "AAPLB"]] as const) {
       assert.throws(() => resolvePair(a, b), { code: "UNSUPPORTED_ROUTE" }, `${a}->${b}`);
     }
   });
   withExtra("NVDAB", () => {
-    assert.equal(resolvePair("USDT", "NVDAB").stock.address, getStockToken("NVDAB")!.address);
+    assert.throws(() => resolvePair("USDT", "NVDAB"), { code: "UNSUPPORTED_ROUTE" });
   });
 });
 
@@ -85,10 +88,36 @@ test("agent guard route check follows the same live list", () => {
   withExtra(undefined, () => {
     assert.equal(isSupportedStockRoute("buy", "USDT", "AAPLB"), true);
     assert.equal(isSupportedStockRoute("sell", "AAPLB", "USDT"), true);
-    assert.equal(isSupportedStockRoute("buy", "USDT", "NVDAB"), false);
-    assert.equal(isSupportedStockRoute("sell", "NVDAB", "USDT"), false);
+    assert.equal(isSupportedStockRoute("buy", "USDT", "NVDAB"), true);
+    assert.equal(isSupportedStockRoute("buy", "USDT", "SQQQB"), false);
     assert.equal(isSupportedStockRoute("buy", "AAPLB", "USDT"), false);
   });
+  withExtra("NVDAB", () => {
+    assert.equal(isSupportedStockRoute("buy", "USDT", "NVDAB"), false);
+    assert.equal(isSupportedStockRoute("sell", "NVDAB", "USDT"), false);
+  });
+});
+
+const USDT_T = { address: TOKENS.USDT.address, decimals: 18 };
+const NVDA_T = { address: getStockToken("NVDAB")!.address, decimals: 18 };
+const tokenNode = (address: string, extra: Record<string, unknown> = {}) => ({ tokenContractAddress: address, decimal: "18", isHoneyPot: false, taxRate: "0", ...extra });
+const goodNode = () => ({ fromToken: tokenNode(USDT_T.address), toToken: tokenNode(NVDA_T.address) });
+
+test("assertTokenSafety accepts a clean quote and refuses wrong tokens, honeypots, taxes and silence", () => {
+  assertTokenSafety(goodNode(), { from: USDT_T, to: NVDA_T });
+  assertTokenSafety({ fromToken: tokenNode(USDT_T.address.toUpperCase().replace("0X", "0x")), toToken: tokenNode(NVDA_T.address) }, { from: USDT_T, to: NVDA_T });
+  const bad: [string, unknown][] = [
+    ["wrong output token", { ...goodNode(), toToken: tokenNode(TOKENS.AAPLB.address) }],
+    ["wrong input token", { ...goodNode(), fromToken: tokenNode(NVDA_T.address) }],
+    ["wrong decimals", { ...goodNode(), toToken: tokenNode(NVDA_T.address, { decimal: "6" }) }],
+    ["honeypot", { ...goodNode(), toToken: tokenNode(NVDA_T.address, { isHoneyPot: true }) }],
+    ["honeypot as string", { ...goodNode(), toToken: tokenNode(NVDA_T.address, { isHoneyPot: "true" }) }],
+    ["taxed", { ...goodNode(), toToken: tokenNode(NVDA_T.address, { taxRate: "5" }) }],
+    ["missing output", { fromToken: tokenNode(USDT_T.address) }],
+    ["missing everything", {}],
+    ["null", null],
+  ];
+  for (const [name, node] of bad) assert.throws(() => assertTokenSafety(node, { from: USDT_T, to: NVDA_T }), { code: "TOKEN_UNSAFE" }, name);
 });
 
 // ---------- a second token through the real provider ----------
@@ -109,7 +138,7 @@ function builtFor(symbol: string, side: "buy" | "sell"): BuiltSwap {
 }
 
 test("a second live token goes through the provider: build gets the token, approval targets that token", async () => {
-  await withExtra("NVDAB", async () => {
+  await withExtra(undefined, async () => {
     const nvda = getStockToken("NVDAB")!;
     const sent: { to: string }[] = [];
     let allowance = 0n;
@@ -141,8 +170,8 @@ test("a second live token goes through the provider: build gets the token, appro
   });
 });
 
-test("a token that is not live cannot reach the provider at all", async () => {
-  await withExtra(undefined, async () => {
+test("a token that is pulled back cannot reach the provider at all", async () => {
+  await withExtra("NVDAB", async () => {
     const exec = {} as WalletExecutor;
     const h = createSwapHelper(createBinanceProvider({ executor: exec, wallet: "main", build: async () => { throw new Error("must not be called"); } }), { actor: "user" });
     await assert.rejects(h.quote({ tokenIn: "USDT", tokenOut: "NVDAB", amountIn: "5", spender: "main", receiver: "main" }), { code: "UNSUPPORTED_ROUTE" });

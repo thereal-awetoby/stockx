@@ -1,5 +1,5 @@
 import { isAddress, formatUnits, parseUnits } from "viem";
-import { getTokenInfo, isLiveSymbol, TOKENS } from "@stockx/shared";
+import { assertTokenSafety, getTokenInfo, isLiveSymbol, SwapError, TOKENS } from "@stockx/shared";
 import { binanceGet, errorResponse } from "../../../../lib/binance";
 
 export const dynamic = "force-dynamic";
@@ -48,6 +48,7 @@ export async function GET(req: Request) {
     const quotes = await binanceGet<ApiQuote[]>("/api/v1/dex/aggregator/quote", params);
     const best = quotes.find((q) => q.isBest) ?? quotes[0];
     if (!best) return Response.json({ error: "No quote available" }, { status: 404 });
+    assertTokenSafety(best, { from: TOKENS.USDT, to: stock });
     return Response.json({
       quoteId: best.quoteId,
       executionMode: best.executionMode,
@@ -60,6 +61,7 @@ export async function GET(req: Request) {
       quotedAt: Date.now(),
     });
   } catch (e) {
+    if (e instanceof SwapError) return Response.json({ error: e.message, code: e.code }, { status: 502 });
     return errorResponse(e);
   }
 }

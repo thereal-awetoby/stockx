@@ -10,13 +10,11 @@ import Sparkline from "./Sparkline";
 import TokenLogo from "./TokenLogo";
 
 const PAGE = 20;
-// Tradable tokens first, then the rest.
-const ALL: Stock[] = searchStocks("").slice().sort((a, b) => Number(b.status === "live") - Number(a.status === "live"));
+const ALL: Stock[] = searchStocks("");
 const PRESENT = STOCK_CATEGORIES.filter((c) => ALL.some((s) => categoryOf(s.ticker) === c));
 
 function Row({ s }: { s: Stock }) {
   const router = useRouter();
-  const live = s.status === "live";
   const overview = useOverview(s.token);
   const [snap, setSnap] = useState<PriceSnapshot | null>(null);
   const [failed, setFailed] = useState(false);
@@ -33,7 +31,7 @@ function Row({ s }: { s: Stock }) {
   }, []);
 
   useEffect(() => {
-    if (!live || !visible) return;
+    if (!visible) return;
     let alive = true;
     const load = async () => {
       try {
@@ -46,7 +44,7 @@ function Row({ s }: { s: Stock }) {
     void load();
     const t = setInterval(load, 60_000);
     return () => { alive = false; clearInterval(t); };
-  }, [live, visible, s.address, s.token]);
+  }, [visible, s.address, s.token]);
 
   const premium = snap ? calcPremiumPct(snap.onchain, snap.reference) : null;
   const change = overview?.changePct ?? null;
@@ -54,30 +52,21 @@ function Row({ s }: { s: Stock }) {
   const cell = (v: string | null) => v ?? (failed ? "—" : "…");
 
   return (
-    <tr ref={row} className={live ? "click" : "disabled"} onClick={live ? () => router.push(`/stock/${s.slug}`) : undefined}>
+    <tr ref={row} className="click" onClick={() => router.push(`/stock/${s.slug}`)}>
       <td>
         <div className="name">
           <TokenLogo symbol={s.token} name={s.name} />
           <div>
-            {live ? <Link href={`/stock/${s.slug}`}><strong>{s.name}</strong></Link> : <strong>{s.name}</strong>}
+            <Link href={`/stock/${s.slug}`}><strong>{s.name}</strong></Link>
             <div className="muted small">{s.token} · {s.issuer}</div>
           </div>
         </div>
       </td>
-      {live ? (
-        <>
-          <td className="num">{cell(snap && usd(snap.onchain))}</td>
-          <td className="num">{cell(snap && usd(snap.reference))}</td>
-          <td className={`num ${premium !== null && premium < 0 ? "neg" : "pos"}`}>{premium === null ? cell(null) : signedPct(premium)}</td>
-          <td className={`num ${change === null ? "" : up ? "pos" : "neg"}`}>{change === null ? "—" : signedPct(change)}</td>
-          <td className="chart-cell"><Sparkline values={overview?.spark ?? []} up={up} /></td>
-        </>
-      ) : (
-        <>
-          <td colSpan={4} className="muted">{s.note ?? ""}</td>
-          <td className="chart-cell"><span className="badge">Coming soon</span></td>
-        </>
-      )}
+      <td className="num">{cell(snap && usd(snap.onchain))}</td>
+      <td className="num">{cell(snap && usd(snap.reference))}</td>
+      <td className={`num ${premium !== null && premium < 0 ? "neg" : "pos"}`}>{premium === null ? cell(null) : signedPct(premium)}</td>
+      <td className={`num ${change === null ? "" : up ? "pos" : "neg"}`}>{change === null ? "—" : signedPct(change)}</td>
+      <td className="chart-cell"><Sparkline values={overview?.spark ?? []} up={up} /></td>
     </tr>
   );
 }

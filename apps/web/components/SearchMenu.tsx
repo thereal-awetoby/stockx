@@ -47,10 +47,9 @@ export default function SearchMenu() {
             <ul className="results">
               {results.map((s) => (
                 <li key={s.slug}>
-                  <button type="button" className="result" disabled={s.status !== "live"} onClick={() => go(s.slug)}>
+                  <button type="button" className="result" onClick={() => go(s.slug)}>
                     <TokenLogo symbol={s.token} name={s.name} size={24} />
                     <span><strong>{s.name}</strong> <span className="muted small">{s.token}</span></span>
-                    {s.status !== "live" && <span className="badge" style={{ marginLeft: "auto" }}>Coming soon</span>}
                   </button>
                 </li>
               ))}

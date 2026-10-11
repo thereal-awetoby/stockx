@@ -65,7 +65,12 @@ export default function ConnectButton() {
 
   return (
     <div className="wallet" ref={box}>
-      <button type="button" onClick={() => setOpen((o) => !o)} disabled={isPending}>
+      <button
+        type="button"
+        // One installed wallet: connect straight away. Several: let the user pick.
+        onClick={() => (connectors.length === 1 ? connect({ connector: connectors[0]!, chainId: bsc.id }) : setOpen((o) => !o))}
+        disabled={isPending}
+      >
         {isPending ? "Connecting…" : "Connect"}
       </button>
       {open && (

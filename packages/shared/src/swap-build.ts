@@ -206,3 +206,27 @@ export function resolvePair(tokenIn: string, tokenOut: string): Pair {
   }
   throw new SwapError("UNSUPPORTED_ROUTE", `Unsupported route ${tokenIn} -> ${tokenOut}`);
 }
+
+/**
+ * Every trade is checked against what Binance itself reports for the two tokens in the quote. Because all
+ * registry tokens are tradable, this is the safety net: the quote must be for exactly our registry
+ * address and decimals, and honeypot or taxed tokens are refused. If Binance does not say, we do not trade.
+ * `node` is a quote entry or a swap response's `routerResult` (both carry fromToken and toToken).
+ */
+export function assertTokenSafety(
+  node: unknown,
+  expected: { from: { address: string; decimals: number }; to: { address: string; decimals: number } },
+): void {
+  const fail = (m: string): never => { throw new SwapError("TOKEN_UNSAFE", `Trading blocked: ${m}.`); };
+  const n = (typeof node === "object" && node !== null ? node : {}) as Record<string, unknown>;
+  for (const [key, want] of [["fromToken", expected.from], ["toToken", expected.to]] as const) {
+    const t = n[key];
+    if (typeof t !== "object" || t === null) return fail(`Binance did not describe the ${key === "fromToken" ? "input" : "output"} token`);
+    const tok = t as Record<string, unknown>;
+    if (String(tok.tokenContractAddress ?? "").toLowerCase() !== want.address.toLowerCase()) fail(`the quote is for a different ${key === "fromToken" ? "input" : "output"} token`);
+    if (Number(tok.decimal) !== want.decimals) fail(`unexpected decimals for the ${key === "fromToken" ? "input" : "output"} token`);
+    if (tok.isHoneyPot === true || String(tok.isHoneyPot).toLowerCase() === "true") fail("Binance flags this token as a honeypot");
+    const tax = Number(tok.taxRate ?? 0);
+    if (!Number.isFinite(tax) || tax > 0) fail("this token charges a transfer tax");
+  }
+}
