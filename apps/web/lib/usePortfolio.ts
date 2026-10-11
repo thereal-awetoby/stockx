@@ -65,5 +65,6 @@ export function usePortfolio() {
   }, [heldKey]);
 
   const stocks = heldStocks.reduce((sum, r) => sum + (r.qty ?? 0) * (stockPrice[r.address] ?? 0), 0);
-  return { address, isConnected, bnb, bnbPrice, balances, rows, cash, heldStocks, stockPrice, stocks, total: cash + stocks };
+  const bnbValue = bnb.data && bnbPrice ? Number(bnb.data.formatted) * bnbPrice : 0;
+  return { address, isConnected, bnb, bnbPrice, bnbValue, balances, rows, cash, heldStocks, stockPrice, stocks, total: cash + stocks + bnbValue };
 }

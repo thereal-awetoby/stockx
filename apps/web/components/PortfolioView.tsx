@@ -14,13 +14,15 @@ import { readTradesFor, recordTrade, subscribeTrades, type TradeEntry } from "..
 import { usePortfolio } from "../lib/usePortfolio";
 
 const fmt = (n: number, dp = 6) => n.toLocaleString("en-US", { maximumFractionDigits: dp });
+const STOCK_COLORS = ["#1c1915", "#4b4237", "#786a54", "#a68f6b", "#2e2a22", "#5e5240"];
+const CRYPTO_COLORS = ["#F0B90B", "#c9960a", "#8a6a08"]; // BNB's own brand gold, first
 const ALL_TOKENS = [
   { symbol: "USDT", address: TOKENS.USDT.address as string, decimals: TOKENS.USDT.decimals },
   ...listStockTokens().map((t) => ({ symbol: t.symbol, address: t.address as string, decimals: t.decimals })),
 ];
 
 export default function PortfolioView() {
-  const { address, isConnected, bnb, bnbPrice, balances, cash, heldStocks, stockPrice, stocks, total } = usePortfolio();
+  const { address, isConnected, bnb, bnbPrice, bnbValue, balances, cash, heldStocks, stockPrice, stocks, total } = usePortfolio();
   const router = useRouter();
   const publicClient = usePublicClient({ chainId: 56 });
   const [trades, setTrades] = useState<TradeEntry[]>([]);
@@ -98,7 +100,7 @@ export default function PortfolioView() {
         <div className="card">
           <div className="muted small">Total value</div>
           <div className="big-price">{usd(total)}</div>
-          <p className="muted small" style={{ margin: "6px 0 0" }}>USDT plus stock tokens in your connected wallet. BNB is held for gas and is not counted.</p>
+          <p className="muted small" style={{ margin: "6px 0 0" }}>USDT, stock tokens, and BNB in your connected wallet.</p>
         </div>
 
         <section className="sheet sheet-scroll" style={{ marginBottom: 8 }}>
@@ -183,10 +185,46 @@ export default function PortfolioView() {
         <div className="card">
           <h2 className="section-title">Allocation</h2>
           <div className="alloc">
-            <Donut size={150} centre={usd(total)} segments={[{ label: "Cash", value: cash, color: "#c9c0b0" }, { label: "Stocks", value: stocks, color: "#1c1915" }]} />
+            <Donut
+              size={150}
+              centre={usd(total)}
+              segments={[
+                { label: "Cash (USDT)", value: cash, color: "#c9c0b0" },
+                ...heldStocks.map((r, i) => ({
+                  label: r.symbol,
+                  value: (r.qty ?? 0) * (stockPrice[r.address] ?? 0),
+                  color: STOCK_COLORS[i % STOCK_COLORS.length],
+                })),
+                ...(bnbValue > 0 ? [{ label: "BNB", value: bnbValue, color: CRYPTO_COLORS[0] }] : []),
+              ]}
+            />
             <div className="legend">
               <div className="row"><span><span className="dot" style={{ background: "#c9c0b0" }} />Cash (USDT)</span><span>{pct(cash)}%</span></div>
-              <div className="row"><span><span className="dot" style={{ background: "#1c1915" }} />Stocks</span><span>{pct(stocks)}%</span></div>
+
+              {heldStocks.length > 0 && (
+                <>
+                  <div className="row"><span>Stocks</span><span>{pct(stocks)}%</span></div>
+                  {heldStocks.map((r, i) => {
+                    const v = (r.qty ?? 0) * (stockPrice[r.address] ?? 0);
+                    return (
+                      <div className="row muted small" style={{ paddingLeft: 18 }} key={r.symbol}>
+                        <span><span className="dot" style={{ background: STOCK_COLORS[i % STOCK_COLORS.length] }} />{r.symbol} · {r.name}</span>
+                        <span>{pct(v)}%</span>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+
+              {bnbValue > 0 && (
+                <>
+                  <div className="row"><span>Crypto</span><span>{pct(bnbValue)}%</span></div>
+                  <div className="row muted small" style={{ paddingLeft: 18 }}>
+                    <span><span className="dot" style={{ background: CRYPTO_COLORS[0] }} />BNB</span>
+                    <span>{pct(bnbValue)}%</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
