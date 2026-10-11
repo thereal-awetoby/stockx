@@ -318,3 +318,33 @@ button.mini:hover:not(:disabled) { border-color: var(--ink); }
 .panel .asset-pick { margin-top: 0; }
 .agent-notes { border-top: 1px solid var(--line); padding-top: 16px; }
 @media (max-width: 560px) { .tiles { grid-template-columns: 1fr; } .prompt { flex-direction: column; } .prompt input { border-right: 1px solid #4a463e; } .feed li { grid-template-columns: 1fr auto; } .feed-time { grid-column: 1 / -1; } }
+
+/* review box: long addresses wrap inside the card instead of spilling out */
+.row > span:first-child { flex-shrink: 0; }
+.row > span { min-width: 0; }
+.addr-wrap { overflow-wrap: anywhere; text-align: right; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+
+/* connect banner for visitors */
+.hero { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 32px; align-items: center; background: #1b1a17; color: #f2efe7; padding: 36px 40px; margin-bottom: 24px; }
+.hero-kicker { color: #a39d90; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.hero h1 { font-family: var(--serif); font-weight: 400; font-size: 38px; line-height: 1.15; margin: 10px 0 12px; color: #f2efe7; }
+.hero p { color: #cfc9bb; font-size: 16px; margin: 0 0 22px; max-width: 520px; }
+.hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.hero-actions button { background: #f2efe7; color: #1b1a17; border-color: #f2efe7; padding: 12px 24px; font-size: 15px; font-weight: 500; }
+.hero-actions button:hover { background: #fff; }
+.hero-note { color: #a39d90; font-size: 13px; }
+.hero-stats { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.hero-stats li { display: flex; flex-direction: column; gap: 2px; padding: 14px 0; border-bottom: 1px solid #3a372f; }
+.hero-stats li:first-child { padding-top: 0; }
+.hero-stats li:last-child { border-bottom: 0; padding-bottom: 0; }
+.hero-stats strong { font-family: var(--serif); font-weight: 400; font-size: 24px; }
+.hero-stats span { color: #a39d90; font-size: 13px; }
+@media (max-width: 860px) { .hero { grid-template-columns: 1fr; padding: 26px 22px; } .hero h1 { font-size: 30px; } }
+
+/* wallet picker */
+.wallet-list { min-width: 300px; padding: 6px 0; }
+.wallet-title { padding: 10px 16px 6px; font-size: 12px; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+.wallet-sub { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 12px; }
+.wallet-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 10px 16px; }
+.wallet-logo { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; flex: none; }
+.wallet-mono { width: 28px; height: 28px; display: inline-grid; place-items: center; background: var(--ink); color: var(--paper); font-weight: 600; font-size: 13px; flex: none; }

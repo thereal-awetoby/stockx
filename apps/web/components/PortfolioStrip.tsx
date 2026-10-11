@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import ConnectBanner from "./ConnectBanner";
 import Sparkline from "./Sparkline";
 import { usd } from "../lib/format";
 import { usePortfolio } from "../lib/usePortfolio";
@@ -37,7 +38,7 @@ export default function PortfolioStrip() {
   }, [series, heldStocks, cash]);
 
   if (!isConnected) {
-    return <div className="card strip muted">Connect your wallet to see your portfolio value here.</div>;
+    return <ConnectBanner />;
   }
   const up = changePct >= 0;
   return (

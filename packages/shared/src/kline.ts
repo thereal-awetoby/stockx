@@ -9,6 +9,13 @@ export const KLINE_RANGES: Record<KlineRange, { interval: string; limit: number 
   ALL: { interval: "1d", limit: 300 },
 };
 
+const DAY = 86_400_000;
+/**
+ * Binance skips empty candles, so for a thinly traded token "the last 288 five-minute candles" can reach back
+ * days or weeks. Only candles that opened inside the range's real time window are used; ALL has no window.
+ */
+export const KLINE_WINDOW_MS: Record<KlineRange, number | null> = { "1D": DAY, "1W": 7 * DAY, "1M": 30 * DAY, "3M": 90 * DAY, ALL: null };
+
 export interface ChartPoint {
   /** Candle open time, ms. */
   t: number;
@@ -32,13 +39,18 @@ const num = (v: unknown): number => (typeof v === "number" ? v : typeof v === "s
  * Turns Binance's klineInfos ([openTime, open, high, low, close, reserved, closeTime] per candle)
  * into a chart series. Bad candles are dropped. Returns null when fewer than 2 usable candles remain.
  */
-export function parseKlines(raw: unknown, range: KlineRange): ChartSeries | null {
+export function parseKlines(raw: unknown, range: KlineRange, now: number = Date.now()): ChartSeries | null {
   if (!Array.isArray(raw)) return null;
   const candles: { t: number; o: number; h: number; l: number; c: number }[] = [];
   for (const row of raw) {
     if (!Array.isArray(row)) continue;
     const [t, o, h, l, c] = [num(row[0]), num(row[1]), num(row[2]), num(row[3]), num(row[4])];
     if ([t, o, h, l, c].every(Number.isFinite) && c > 0) candles.push({ t, o, h, l, c });
+  }
+  const windowMs = KLINE_WINDOW_MS[range];
+  if (windowMs !== null) {
+    const cutoff = now - windowMs;
+    for (let i = candles.length - 1; i >= 0; i--) if (candles[i]!.t < cutoff) candles.splice(i, 1);
   }
   if (candles.length < 2) return null;
   candles.sort((a, b) => a.t - b.t);

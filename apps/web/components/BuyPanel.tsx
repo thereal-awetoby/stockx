@@ -269,7 +269,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
       {stage === "review" && quote && (
         <div className="card" style={{ marginTop: 8 }}>
           <strong>Review</strong>
-          <div className="row"><span className="muted">Receiver</span><span className="small">{address} (your wallet)</span></div>
+          <div className="row"><span className="muted">Receiver</span><span className="small addr-wrap">{address} (your wallet)</span></div>
           <div className="row"><span className="muted">Pay</span><span>{fmt(amountIn!, 6)} {inSym}</span></div>
           <div className="row"><span className="muted">Get at least</span><span>{fmt(minOut ?? "0")} {outSym}</span></div>
           {sim?.needsApproval && (

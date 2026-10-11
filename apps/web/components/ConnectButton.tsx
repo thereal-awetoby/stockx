@@ -1,7 +1,24 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAccount, useConnect, useConnectors, useDisconnect, useSwitchChain } from "wagmi";
 import { bsc } from "../lib/wagmi";
+
+const PREFERRED = ["metamask", "rabby", "binance", "okx", "coinbase", "trust", "phantom", "rainbow", "brave", "zerion"];
+const INSTALL = [
+  { name: "MetaMask", url: "https://metamask.io/download" },
+  { name: "Rabby", url: "https://rabby.io" },
+  { name: "Binance Wallet", url: "https://www.binance.com/en/binancewallet" },
+  { name: "OKX Wallet", url: "https://web3.okx.com/download" },
+  { name: "Coinbase Wallet", url: "https://www.coinbase.com/wallet" },
+  { name: "Trust Wallet", url: "https://trustwallet.com/download" },
+];
+const rank = (name: string) => { const i = PREFERRED.findIndex((p) => name.toLowerCase().includes(p)); return i === -1 ? PREFERRED.length : i; };
+
+function WalletLogo({ name, icon }: { name: string; icon?: string }) {
+  // Installed wallets announce their own logo (EIP-6963); anything without one gets its initial.
+  // eslint-disable-next-line @next/next/no-img-element
+  return icon ? <img className="wallet-logo" src={icon} alt="" width={28} height={28} /> : <span className="wallet-mono" aria-hidden>{name.slice(0, 1)}</span>;
+}
 
 const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
@@ -14,6 +31,20 @@ export default function ConnectButton() {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const box = useRef<HTMLDivElement>(null);
+
+  // Every wallet the browser announces, best known first. The generic "Injected" entry is hidden when real ones exist.
+  const wallets = useMemo(() => {
+    const named = connectors.filter((c) => c.name.toLowerCase() !== "injected");
+    return [...(named.length ? named : connectors)].sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name));
+  }, [connectors]);
+  const missing = INSTALL.filter((w) => !wallets.some((c) => c.name.toLowerCase().includes(w.name.toLowerCase().split(" ")[0]!)));
+
+  // Lets the home banner open this menu.
+  useEffect(() => {
+    const openMenu = () => setOpen(true);
+    window.addEventListener("stockx:connect", openMenu);
+    return () => window.removeEventListener("stockx:connect", openMenu);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -65,25 +96,32 @@ export default function ConnectButton() {
 
   return (
     <div className="wallet" ref={box}>
-      <button
-        type="button"
-        // One installed wallet: connect straight away. Several: let the user pick.
-        onClick={() => (connectors.length === 1 ? connect({ connector: connectors[0]!, chainId: bsc.id }) : setOpen((o) => !o))}
-        disabled={isPending}
-      >
+      <button type="button" onClick={() => setOpen((o) => !o)} disabled={isPending}>
         {isPending ? "Connecting…" : "Connect"}
       </button>
       {open && (
-        <div className="menu wallet-menu" role="menu">
-          {connectors.length === 0 && (
-            <div className="muted small" style={{ padding: 12 }}>No browser wallet found. Install Binance Wallet or MetaMask.</div>
-          )}
-          {connectors.map((c) => (
-            <button key={c.uid} type="button" className="menu-item" onClick={() => { connect({ connector: c, chainId: bsc.id }); setOpen(false); }}>
-              {c.name}
+        <div className="menu wallet-menu wallet-list" role="menu">
+          <div className="wallet-title">Connect a wallet</div>
+          {wallets.length === 0 && <div className="muted small" style={{ padding: "4px 16px 10px" }}>No browser wallet detected.</div>}
+          {wallets.map((c) => (
+            <button key={c.uid} type="button" className="menu-item wallet-item" onClick={() => { connect({ connector: c, chainId: bsc.id }); setOpen(false); }}>
+              <WalletLogo name={c.name} icon={c.icon} />
+              <span>{c.name}</span>
             </button>
           ))}
-          {error && <div className="err" style={{ padding: "6px 12px" }}>{error.message.slice(0, 120)}</div>}
+          {missing.length > 0 && (
+            <>
+              <div className="wallet-title wallet-sub">Don&apos;t have one? Get a wallet</div>
+              {missing.map((w) => (
+                <a key={w.name} className="menu-item wallet-item" href={w.url} target="_blank" rel="noreferrer">
+                  <WalletLogo name={w.name} />
+                  <span>{w.name}</span>
+                  <span className="muted small" style={{ marginLeft: "auto" }}>Install ↗</span>
+                </a>
+              ))}
+            </>
+          )}
+          {error && <div className="err" style={{ padding: "6px 16px" }}>{error.message.slice(0, 120)}</div>}
         </div>
       )}
     </div>
