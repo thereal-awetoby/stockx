@@ -53,8 +53,12 @@ export async function GET(req: Request) {
   // Server-side gate: only tokens on the live list can be built, whatever the client sends.
   if (!isLiveSymbol(token)) return Response.json({ error: `${token} is not tradable yet`, code: "TOKEN_NOT_LIVE" }, { status: 400 });
   if (!ADDRESS_RE.test(wallet)) return Response.json({ error: "A valid wallet address is required" }, { status: 400 });
-  if (!/^\d+(\.\d{1,6})?$/.test(amount) || Number(amount) <= 0 || Number(amount) > MAX_IN[side]) {
-    return Response.json({ error: `Amount must be between 0 and ${MAX_IN[side]}` }, { status: 400 });
+  // Up to 18 decimals: stock tokens have 18, and "sell all" must be able to send the exact balance.
+  if (!/^\d+(\.\d{1,18})?$/.test(amount)) {
+    return Response.json({ error: "Enter a valid amount" }, { status: 400 });
+  }
+  if (Number(amount) <= 0 || Number(amount) > MAX_IN[side]) {
+    return Response.json({ error: `Amount must be more than 0 and at most ${MAX_IN[side]}` }, { status: 400 });
   }
   if (!Number.isInteger(slippageBps) || slippageBps < 0 || slippageBps > MAX_SLIPPAGE_BPS) {
     return Response.json({ error: `slippageBps must be an integer from 0 to ${MAX_SLIPPAGE_BPS}` }, { status: 400 });

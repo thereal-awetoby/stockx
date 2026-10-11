@@ -97,7 +97,7 @@ export default function BuyPanel({ stock, marketOpen }: { stock: Stock; marketOp
   /** Fills the amount from the wallet balance. Buys stop at the demo's 50 USDT cap, sells at what is held. */
   function fill(pct: number) {
     if (!inInfo || balance === undefined || stage === "sending") return;
-    setAmount(fractionOfBalance(balance, inInfo.decimals, pct, side === "buy" ? 6 : 8, side === "buy" ? 50 : undefined));
+    setAmount(fractionOfBalance(balance, inInfo.decimals, pct, side === "buy" ? 6 : 18, side === "buy" ? 50 : undefined));
     reset();
   }
 
