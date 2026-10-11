@@ -146,38 +146,32 @@ export default function ConvertPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expired1]);
 
-  const issued2 = leg2?.quote.issuedAt;
-  const left2 = issued2 ? Math.max(0, Math.ceil((issued2 + RFQ_TTL_MS - now) / 1000)) : 0;
-  const expired2 = !!leg2 && left2 === 0 && phase === "between";
-
   /** USDT balance of the wallet, read straight from the chain. */
   async function readUsdt(): Promise<bigint> {
     if (!publicClient || !usdt || !address) throw new Error("Wallet not ready.");
     return (await publicClient.readContract({ address: usdt.address as `0x${string}`, abi: erc20Abi, functionName: "balanceOf", args: [address] })) as bigint;
   }
 
-  /** Step 2 quote: buy `to` with exactly the USDT that step 1 delivered. */
-  async function quoteLeg2(usdtAmount: string) {
-    if (!helper) return;
-    setLoading(true);
-    try {
-      const q = await helper.quote({ tokenIn: "USDT", tokenOut: to, amountIn: usdtAmount, spender: "main", receiver: "main" });
-      const s = await helper.simulate(q);
-      setLeg2({ quote: q, sim: s });
-      setError(null);
-      setNow(Date.now());
-    } catch (e) {
-      setLeg2(null);
-      setError(friendlyError(e));
-    } finally {
-      setLoading(false);
-    }
+  /** Second swap quote: buy `to` with exactly the USDT the first swap delivered. Throws on failure. */
+  async function quoteLeg2(usdtAmount: string): Promise<Leg> {
+    if (!helper) throw new Error("Wallet not ready.");
+    const q = await helper.quote({ tokenIn: "USDT", tokenOut: to, amountIn: usdtAmount, spender: "main", receiver: "main" });
+    const s = await helper.simulate(q);
+    if (!s.ok) throw new Error(s.error ?? "Simulation failed.");
+    return { quote: q, sim: s };
   }
 
-  async function runStep1() {
+  /** Cut to 6 decimals and cap at the demo limit of 50 USDT. */
+  function spendFrom(usdtText: string): string {
+    const [w = "0", f = ""] = usdtText.split(".");
+    return String(Math.min(50, Number(`${w}.${f.slice(0, 6) || "0"}`)));
+  }
+
+  /** One click: sell, then buy with what arrived, with no second click in between. */
+  async function convert() {
     if (!helper || !leg1 || !address || !LIVE) return;
-    setPhase("sending1"); setError(null); setProgress("Preparing step 1…");
-    let sold = false; // true once the sell is on-chain, so a later hiccup never restarts step 1
+    setPhase("sending1"); setError(null); setProgress(`Selling ${from}…`);
+    let sold = false; // once the sell is on-chain it is never repeated
     try {
       const before = await readUsdt();
       const res = await helper.execute(leg1.quote, "main");
@@ -188,35 +182,45 @@ export default function ConvertPanel() {
       const usdtText = usdt ? formatUnitsStr(gained, usdt.decimals) : "0";
       if (res.txHash) recordTrade(address, { t: Date.now(), side: "sell", token: from, amountIn: amount.trim(), inSym: from, amountOut: usdtText, outSym: "USDT", txHash: res.txHash });
       void balanceRead.refetch();
-      if (gained <= 0n) throw new Error("Step 1 confirmed but no USDT arrived yet. Check the transaction, then use Refresh step 2.");
+      if (gained <= 0n) throw new Error("The sell confirmed but no USDT arrived yet.");
       setReceived(usdtText);
-      setPhase("between"); setProgress(null);
-      // Step 2 spends what actually arrived, cut to 6 decimals and capped at the demo limit of 50 USDT.
-      const [w = "0", f = ""] = usdtText.split(".");
-      const spend = Math.min(50, Number(`${w}.${f.slice(0, 6) || "0"}`));
-      if (spend > 0) await quoteLeg2(String(spend));
-    } catch (e) {
-      setError(friendlyError(e));
-      // If the sell went through but we could not move on, stay on step 2 so nothing is lost or repeated.
-      setPhase(sold ? "between" : "idle");
-      setProgress(null);
-      setLeg1(null);
-    }
-  }
-
-  async function runStep2() {
-    if (!helper || !leg2 || !address || !LIVE) return;
-    setPhase("sending2"); setError(null); setProgress("Preparing step 2…");
-    try {
-      const res = await helper.execute(leg2.quote, "main");
-      setHash2(res.txHash);
-      if (res.txHash) recordTrade(address, { t: Date.now(), side: "buy", token: to, amountIn: leg2.quote.request.amountIn, inSym: "USDT", amountOut: leg2.quote.amountOut, outSym: to, txHash: res.txHash });
+      setPhase("sending2"); setProgress(`Buying ${to}…`);
+      const spend = spendFrom(usdtText);
+      const l2 = await quoteLeg2(spend);
+      setLeg2(l2);
+      const res2 = await helper.execute(l2.quote, "main");
+      setHash2(res2.txHash);
+      if (res2.txHash) recordTrade(address, { t: Date.now(), side: "buy", token: to, amountIn: spend, inSym: "USDT", amountOut: l2.quote.amountOut, outSym: to, txHash: res2.txHash });
       setPhase("done"); setProgress(null);
       void balanceRead.refetch();
     } catch (e) {
-      setError(friendlyError(e));
-      setPhase("between"); setProgress(null);
-      setLeg2(null); // never reuse a quote after a failed or ambiguous send
+      const msg = friendlyError(e);
+      setProgress(null);
+      setLeg1(null); setLeg2(null);
+      if (sold) {
+        setPhase("between");
+        setError(`${msg} Your ${from} was sold and the USDT is safe in your wallet. Use Finish to buy ${to}.`);
+      } else {
+        setPhase("idle");
+        setError(msg);
+      }
+    }
+  }
+
+  /** Only after a failure in the middle: buy the target with the USDT that arrived. */
+  async function finish() {
+    if (!helper || !address || !received) return;
+    setPhase("sending2"); setError(null); setProgress(`Buying ${to}…`);
+    try {
+      const spend = spendFrom(received);
+      const l2 = await quoteLeg2(spend);
+      const res2 = await helper.execute(l2.quote, "main");
+      setHash2(res2.txHash);
+      if (res2.txHash) recordTrade(address, { t: Date.now(), side: "buy", token: to, amountIn: spend, inSym: "USDT", amountOut: l2.quote.amountOut, outSym: to, txHash: res2.txHash });
+      setPhase("done"); setProgress(null);
+      void balanceRead.refetch();
+    } catch (e) {
+      setError(friendlyError(e)); setPhase("between"); setProgress(null);
     }
   }
 
@@ -230,7 +234,6 @@ export default function ConvertPanel() {
   }
 
   const canStart = !!helper && !!leg1 && leg1.sim.ok && !expired1 && phase === "idle" && LIVE && !sameToken;
-  const canStep2 = !!leg2 && leg2.sim.ok && !expired2 && phase === "between" && LIVE;
   const statusText = loading ? "Getting the best prices…"
     : sameToken ? "Pick two different stocks."
     : !amountValid ? "Enter an amount up to 1."
@@ -278,45 +281,35 @@ export default function ConvertPanel() {
       <p className="muted small ticket-status" role="status">{statusText}</p>
       {error && <p className="err">{error}</p>}
 
-      <ol className="convert-steps">
-        <li className={phase === "idle" ? "now" : "done"}>
-          <strong>Step 1 · Sell {from} for USDT</strong>
-          <div className="muted small">
-            {leg1 ? `You get about ${fmt(estimate ?? "0")} USDT · ${leg1.sim.ok ? "simulation passed" : `simulation failed: ${leg1.sim.error}`}${phase === "idle" ? ` · refreshes in ${left1}s` : ""}` : "Waiting for a quote."}
-          </div>
-          {hash1 && <div className="small"><a href={`https://bscscan.com/tx/${hash1}`} target="_blank" rel="noreferrer">View step 1 transaction</a>{received ? ` · received ${fmt(received)} USDT` : ""}</div>}
-        </li>
-        <li className={phase === "between" || phase === "sending2" ? "now" : phase === "done" ? "done" : ""}>
-          <strong>Step 2 · Buy {to} with that USDT</strong>
-          <div className="muted small">
-            {phase === "idle" || phase === "sending1" ? (estimateOut ? `About ${fmt(estimateOut)} ${to}, quoted for real once step 1 lands.` : "Quoted for real once step 1 lands, using the USDT you actually received.")
-              : leg2 ? `You get about ${fmt(leg2.quote.amountOut)} ${to} · ${leg2.sim.ok ? "simulation passed" : `simulation failed: ${leg2.sim.error}`}${phase === "between" ? ` · refreshes in ${left2}s` : ""}`
-              : "Getting a quote…"}
-          </div>
-          {hash2 && <div className="small"><a href={`https://bscscan.com/tx/${hash2}`} target="_blank" rel="noreferrer">View step 2 transaction</a></div>}
-        </li>
-      </ol>
-
-      {busy && <p className="muted small">{progress}</p>}
-      {phase === "done" && <p className="pos small">Converted. Both steps are public on-chain and saved in Portfolio.</p>}
-      {phase === "between" && received && !leg2 && !loading && (
-        <button type="button" className="ghost" onClick={() => void quoteLeg2(String(Math.min(50, Number(received))))}>Refresh step 2</button>
+      {leg1 && phase === "idle" && (
+        <>
+          <div className="row"><span className="muted">Route</span><span className="small">{from} → USDT → {to}</span></div>
+          <div className="row"><span className="muted">Quote</span><span className="muted">{leg1.sim.ok ? `refreshes in ${left1}s` : `simulation failed: ${leg1.sim.error}`}</span></div>
+        </>
       )}
-      {expired2 && !loading && <button type="button" className="ghost" onClick={() => void quoteLeg2(leg2!.quote.request.amountIn)}>Quote expired. Refresh step 2</button>}
+      {busy && <p className="muted small">{progress}</p>}
+      {(hash1 || hash2) && (
+        <p className="small">
+          {hash1 && <a href={`https://bscscan.com/tx/${hash1}`} target="_blank" rel="noreferrer">Sell transaction</a>}
+          {hash1 && hash2 && " · "}
+          {hash2 && <a href={`https://bscscan.com/tx/${hash2}`} target="_blank" rel="noreferrer">Buy transaction</a>}
+        </p>
+      )}
+      {phase === "done" && <p className="pos small">Converted. Both trades are public on-chain and saved in Portfolio.</p>}
 
       <div className="row" style={{ gap: 8, marginTop: 8 }}>
-        {phase === "idle" || phase === "sending1" ? (
-          <button disabled={!canStart} onClick={() => void runStep1()} style={{ flex: 1 }}>
-            {!isConnected ? "Connect wallet to convert" : `Step 1: sell ${from}`}
-          </button>
-        ) : phase === "done" ? (
+        {phase === "done" ? (
           <button className="ghost" onClick={resetAll} style={{ flex: 1 }}>Convert again</button>
+        ) : phase === "between" ? (
+          <button onClick={() => void finish()} style={{ flex: 1 }}>Finish: buy {to}</button>
         ) : (
-          <button disabled={!canStep2} onClick={() => void runStep2()} style={{ flex: 1 }}>Step 2: buy {to}</button>
+          <button disabled={!canStart || busy} onClick={() => void convert()} style={{ flex: 1 }}>
+            {!isConnected ? "Connect wallet to convert" : busy ? "Converting…" : `Convert ${from} to ${to}`}
+          </button>
         )}
       </div>
       <p className="muted small" style={{ margin: "8px 0 0" }}>
-        Two separate swaps through USDT, each simulated first, each needing your wallet. The second starts only after the first confirms, and uses the USDT you actually received. If step 2 fails, your USDT stays in your wallet. Capped at 1 {from} per convert while live swaps are being tested. Both trades are public on-chain.
+        Routed through USDT, so your wallet asks you to confirm twice. Each swap is simulated first and the second uses the USDT you actually received. Capped at 1 {from} per convert while live swaps are being tested. Trades are public on-chain.
       </p>
       {isConnected && !LIVE && <p className="warn small">Live swaps are off. Set NEXT_PUBLIC_LIVE_SWAPS=1.</p>}
     </div>
