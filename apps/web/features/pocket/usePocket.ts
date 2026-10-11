@@ -1,8 +1,9 @@
 "use client";
 
 import { recordTrade } from "../../lib/trade-log";
+import { readTransfers, recordTransfer, type TransferEntry } from "../../lib/transfer-log";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { SwapError, TOKENS, getRwaMarket } from "@stockx/shared";
+import { SwapError } from "@stockx/shared";
 import {
   createPocket as createStoredPocket,
   exportPocketKey as decryptPocketKey,
@@ -52,6 +53,8 @@ export interface UsePocketResult {
   job: Job | null;
   activity: SessionTradeRecord[];
   runLog: AgentRunLogEntry[];
+  /** Fund and withdraw transfers made from this browser, newest first. */
+  transfers: TransferEntry[];
   armed: boolean;
   status: PocketStatus;
   createPocket(password: string): Promise<Pocket | null>;
@@ -109,6 +112,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
   const [job, setJob] = useState<Job | null>(null);
   const [activity, setActivity] = useState<SessionTradeRecord[]>([]);
   const [runLog, setRunLog] = useState<AgentRunLogEntry[]>([]);
+  const [transfers, setTransfers] = useState<TransferEntry[]>([]);
   const [armed, setArmed] = useState(false);
   const armedRef = useRef(false);
   const tickGate = useRef(createTickGate());
@@ -144,6 +148,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
       const existing = readPocket(localStorage);
       if (!existing) throw new Error("Pocket record missing.");
       setStored(existing);
+      setTransfers(readTransfers(existing.address));
       setExported(pocketBackupVerified(localStorage, existing.address));
       setStatus("ready");
       void refresh(existing).catch((error) => {
@@ -218,6 +223,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     const signer = await getMainSigner();
     if ((await signer.getAddress()).toLowerCase() !== mainAddress.toLowerCase()) throw new Error("Main signer does not match connected wallet.");
     const hash = await sendUsdtToPocket(signer, stored.address, amountUsdt, localStorage);
+    if (hash) setTransfers(recordTransfer(stored.address, { t: Date.now(), kind: "fund", asset: "USDT", amount: String(amountUsdt), txHash: hash }));
     await refresh(stored);
     return hash;
   }, [exported, getMainSigner, mainAddress, refresh, stored]);
@@ -230,6 +236,8 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     }
     const signer = await unlockPocket(stored, password);
     const hash = await sendAssetToMain(signer, stored.address, mainAddress, asset, amount);
+    // sendAssetToMain only returns after the receipt shows success, so this is a confirmed transfer.
+    if (hash) setTransfers(recordTransfer(stored.address, { t: Date.now(), kind: "withdraw", asset, amount, txHash: hash }));
     await refresh(stored);
     window.setTimeout(() => void refresh(stored).catch(() => undefined), 5_000); // public RPC nodes can lag a block
     return hash;
@@ -266,7 +274,6 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
         locks: browserJobLock(),
         balances: await readPocketBalances(stored.address),
         amountUsdt,
-        isMarketOpen: async () => (await getRwaMarket(TOKENS.AAPLB.address)).open,
         canExecute: () => armedRef.current,
       });
     } catch (error) {
@@ -333,6 +340,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     job,
     activity,
     runLog,
+    transfers,
     armed,
     status,
     createPocket: create,

@@ -42,7 +42,7 @@ export const isPocketConfigReady = POCKET_CONFIG.aaplbAddress !== null &&
 /**
  * Spending limits are OFF by default: no one-run-per-UTC-day rule, no $5 per-trade max, no $25 job cap.
  * Set NEXT_PUBLIC_AGENT_LIMITS=on to bring them back. Read at call time so tests can switch it.
- * Always enforced regardless: session wallet only, kill switch, market-open check on buys,
+ * Always enforced regardless: session wallet only, kill switch,
  * BNB gas floor, and the swap provider's slippage checks.
  */
 export function agentLimitsOff(): boolean {

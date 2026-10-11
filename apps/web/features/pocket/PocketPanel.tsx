@@ -177,6 +177,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
     : pipeline || executor ? "Swap pipeline connected" : "Mock pipeline";
   const feed = [
     ...pocket.activity.map((t, i) => ({ k: `a-${t.txHash}-${i}`, time: t.timestamp, text: t.side === "buy" ? `Bought ${t.amountUsdt} USDT of ${t.token}` : `Sold ${t.amountToken ?? ""} ${t.token} for USDT`, hash: t.txHash, bad: false })),
+    ...pocket.transfers.map((x, i) => ({ k: `t-${x.txHash}-${i}`, time: x.t, text: x.kind === "withdraw" ? `Withdrew ${x.amount} ${x.asset} to your main wallet` : `Funded the pocket with ${x.amount} ${x.asset}`, hash: x.txHash, bad: false })),
     ...pocket.runLog.map((e, i) => ({ k: `r-${e.timestamp}-${i}`, time: e.timestamp, text: `${e.message}${e.errorCode ? ` · ${e.errorCode}` : ""}`, hash: "", bad: Boolean(e.errorCode) })),
   ].sort((x, y) => y.time - x.time);
 

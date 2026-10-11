@@ -6,7 +6,7 @@ import { MAX_AGENT_TRADE_USDT } from "./guards";
  * It can only ever produce what the agent already supports: a USDT -> AAPLB buy (now or daily), or a one-off
  * AAPLB -> USDT sell of the pocket's own tokens (all of them, or a stated amount).
  * Anything else is refused with a reason. The result is a PROPOSAL; the user still has to confirm,
- * and every pocket guard (session-only, market open, gas floor, kill switch) still applies after.
+ * and every pocket guard (session-only, gas floor, kill switch) still applies after.
  */
 export type AgentIntent =
   | { action: "buy"; amountUsdt: string; when: "now" }
