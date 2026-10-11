@@ -27,7 +27,10 @@ export interface RunAgentTickInput {
   storage: PocketJobStorage;
   locks: PocketJobLock;
   balances: PocketBalances;
+  /** Buy: USDT to spend. Sell: AAPLB to sell (same field, so one validation path). */
   amountUsdt: string;
+  /** Defaults to "buy". A sell is a single "now" trade from the pocket and never touches the job spend cap. */
+  side?: TradeSide;
   isMarketOpen?: () => boolean | Promise<boolean>;
   canExecute?: () => boolean | Promise<boolean>;
   config?: PocketConfig;
@@ -49,14 +52,39 @@ export async function runAgentTick(input: RunAgentTickInput): Promise<AgentTickR
     return { status: "rejected", reason: "invalid_trade_amount" };
   }
   const amountUsdt = Number(input.amountUsdt);
-  if (!agentLimitsOff() && amountUsdt > 5) return { status: "rejected", reason: "max_trade_exceeded" };
+  const side: TradeSide = input.side ?? "buy";
+  if (side === "buy" && !agentLimitsOff() && amountUsdt > 5) return { status: "rejected", reason: "max_trade_exceeded" };
 
-  const side: TradeSide = "buy";
   const utcDay = new Date().toISOString().slice(0, 10);
   let reservation: Extract<Awaited<ReturnType<typeof reservePocketJobSpend>>, { status: "reserved" }> | null = null;
   let executionMayHaveStarted = false;
 
   try {
+    if (side === "sell") {
+      // Exiting a position is never blocked by market hours (only buys wait for the market). Everything
+      // else is the same as a buy: session signer only, gas floor, guard, quote, simulation, kill switch.
+      const bnb = Number(balances.bnb);
+      if (!Number.isFinite(bnb) || bnb < MIN_SESSION_BNB_GAS) return { status: "skipped", reason: "insufficient_bnb_for_gas", job };
+      executionMayHaveStarted = true;
+      const sold = await executeGuardedTrade({
+        mainAddress, sessionAddress: pocket.address, spender: pocket.address, receiver: pocket.address, job,
+        side: "sell", tokenIn: "AAPLB", tokenOut: "USDT", amountIn: input.amountUsdt, amountUsdt,
+        sessionConfigured: true, capUsdt: job.capUsdt, spentUsdt: job.spentUsdt, reservedUsdt: job.reservedUsdt,
+      }, helper, signer, config, input.canExecute);
+      if (sold.status === "executed") {
+        const record: SessionTradeRecord = {
+          jobId: job.id, side: "sell", token: "AAPLB", amountUsdt: 0, amountToken: input.amountUsdt,
+          txHash: sold.txHash, timestamp: Date.now(), source: "agent-session",
+        };
+        return { status: "executed", job, record };
+      }
+      if (sold.status === "execution_unknown") {
+        return { status: "execution_unknown", job, ...(sold.errorCode ? { errorCode: sold.errorCode } : {}) };
+      }
+      return sold.status === "rejected"
+        ? { status: "rejected", reason: sold.reason, ...(sold.errorCode ? { errorCode: sold.errorCode } : {}) }
+        : { status: "failed", reason: sold.reason, job, ...(sold.errorCode ? { errorCode: sold.errorCode } : {}) };
+    }
     if (input.isMarketOpen && !(await input.isMarketOpen())) {
       return { status: "skipped", reason: "market_closed", job };
     }

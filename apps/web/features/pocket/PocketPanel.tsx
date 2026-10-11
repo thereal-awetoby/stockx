@@ -10,7 +10,13 @@ import { usePocket } from "./usePocket";
 
 const mockPipeline = createSwapHelper(createMockProvider(), { actor: "agent" });
 
-const SUGGESTIONS = ["Buy $2 of AAPLB now", "Buy $1 of AAPLB every day at 3pm UTC"];
+const SUGGESTIONS = ["Buy $2 of AAPLB now", "Buy $1 of AAPLB every day at 3pm UTC", "Sell all my AAPLB"];
+
+/** One readable line for a tick result, including WHY when it was refused or skipped. */
+function resultMessage(result: { status: string; reason?: string; errorCode?: string }): string {
+  const why = [result.reason, result.errorCode].filter(Boolean).join(" · ");
+  return why ? `${result.status}: ${why}` : result.status;
+}
 
 /** The address IS the control: click it to copy. No separate button. */
 function AddressChip({ label, address }: { label: string; address: string }) {
@@ -61,8 +67,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
 
   useAgentClock(pocket.job?.status === "active" && pocket.armed, () => {
     void pocket.runOneTick(password, buyAmount).then((result) => {
-      const errorCode = "errorCode" in result ? result.errorCode : undefined;
-      setMessage(errorCode ? `${result.status}: ${errorCode}` : result.status);
+      setMessage(resultMessage(result));
     });
   }, schedule.hourUtc, schedule.minuteUtc);
 
@@ -84,6 +89,19 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
       setMessage("Enter your pocket passphrase below, then confirm again.");
       return;
     }
+    if (intent.action === "sell") {
+      const started = await pocket.startAgent();
+      if (!started) {
+        setMessage("Couldn't arm the agent. Check the pocket and the swap pipeline.");
+        return;
+      }
+      setProposal(null);
+      setInstruction("");
+      const sold = await pocket.runOneTick(password, intent.all ? "all" : intent.amount, "sell");
+      setPassword("");
+      setMessage(resultMessage(sold));
+      return;
+    }
     setBuyAmount(intent.amountUsdt);
     if (intent.when === "daily") setSchedule({ hourUtc: intent.hourUtc, minuteUtc: intent.minuteUtc });
     const armed = await pocket.startAgent();
@@ -99,8 +117,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
     }
     const result = await pocket.runOneTick(password, intent.amountUsdt);
     setPassword("");
-    const errorCode = "errorCode" in result ? result.errorCode : undefined;
-    setMessage(errorCode ? `${result.status}: ${errorCode}` : result.status);
+    setMessage(resultMessage(result));
   }
 
   async function create(): Promise<void> {
@@ -148,8 +165,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   async function runOneTick(): Promise<void> {
     const result = await pocket.runOneTick(password, buyAmount);
     setPassword("");
-    const errorCode = "errorCode" in result ? result.errorCode : undefined;
-    setMessage(errorCode ? `${result.status}: ${errorCode}` : result.status);
+    setMessage(resultMessage(result));
   }
 
   const armed = pocket.armed && pocket.job?.status === "active";
@@ -157,10 +173,10 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
   const mm = String(schedule.minuteUtc).padStart(2, "0");
   const lowGas = Number(pocket.balances.bnb) < MIN_SESSION_BNB_GAS;
   const pipelineLine = pipeline && isPipelineFactory(pipeline)
-    ? (agentLimitsOff() ? "Live · real funds · buy-only · limits off" : "Live · real funds · buy-only · max $5 per trade")
+    ? (agentLimitsOff() ? "Live · real funds · buys and sells AAPLB · limits off" : "Live · real funds · buys and sells AAPLB · max $5 per buy")
     : pipeline || executor ? "Swap pipeline connected" : "Mock pipeline";
   const feed = [
-    ...pocket.activity.map((t, i) => ({ k: `a-${t.txHash}-${i}`, time: t.timestamp, text: `${t.side === "buy" ? "Bought" : "Sold"} ${t.amountUsdt} USDT of ${t.token}`, hash: t.txHash, bad: false })),
+    ...pocket.activity.map((t, i) => ({ k: `a-${t.txHash}-${i}`, time: t.timestamp, text: t.side === "buy" ? `Bought ${t.amountUsdt} USDT of ${t.token}` : `Sold ${t.amountToken ?? ""} ${t.token} for USDT`, hash: t.txHash, bad: false })),
     ...pocket.runLog.map((e, i) => ({ k: `r-${e.timestamp}-${i}`, time: e.timestamp, text: `${e.message}${e.errorCode ? ` · ${e.errorCode}` : ""}`, hash: "", bad: Boolean(e.errorCode) })),
   ].sort((x, y) => y.time - x.time);
 
@@ -299,7 +315,7 @@ export function PocketPanel({ mainAddress, getMainSigner, pipeline, executor }: 
               <div className="proposal" role="group" aria-label="Agent instruction to confirm">
                 <strong>{proposal.summary}</strong>
                 {proposal.notes.map((note) => <span key={note} className="console-meta">{note}</span>)}
-                <span className="console-meta">Real funds · session pocket only · buy-only. Nothing happens until you confirm.</span>
+                <span className="console-meta">Real funds · session pocket only. Nothing happens until you confirm.</span>
                 <div className="proposal-actions">
                   <button type="button" onClick={() => void confirmProposal()}>Confirm</button>
                   <button type="button" className="ghost-dark" onClick={() => setProposal(null)}>Cancel</button>

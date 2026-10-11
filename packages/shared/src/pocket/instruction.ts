@@ -3,13 +3,16 @@ import { MAX_AGENT_TRADE_USDT } from "./guards";
 
 /**
  * Plain-English agent instructions, parsed by plain rules (no AI call, nothing guessed).
- * It can only ever produce what the agent already supports: a USDT -> AAPLB buy, now or daily.
+ * It can only ever produce what the agent already supports: a USDT -> AAPLB buy (now or daily), or a one-off
+ * AAPLB -> USDT sell of the pocket's own tokens (all of them, or a stated amount).
  * Anything else is refused with a reason. The result is a PROPOSAL; the user still has to confirm,
  * and every pocket guard (session-only, market open, gas floor, kill switch) still applies after.
  */
 export type AgentIntent =
   | { action: "buy"; amountUsdt: string; when: "now" }
-  | { action: "buy"; amountUsdt: string; when: "daily"; hourUtc: number; minuteUtc: number };
+  | { action: "buy"; amountUsdt: string; when: "daily"; hourUtc: number; minuteUtc: number }
+  | { action: "sell"; all: true; when: "now" }
+  | { action: "sell"; all: false; amount: string; when: "now" };
 
 export type ParseResult =
   | { ok: true; intent: AgentIntent; summary: string; notes: string[] }
@@ -42,6 +45,27 @@ function parseDailyTime(text: string): { hourUtc: number; minuteUtc: number } | 
   return { hourUtc: hour, minuteUtc: minute };
 }
 
+/** "sell all my AAPLB" or "sell 0.001 AAPLB". One-off, now, from the pocket's own balance. */
+function parseSell(text: string): ParseResult {
+  if (/\b(every|daily|each|weekly|hourly|monthly|per)\b/.test(text)) return refuse("Selling only runs once, right now. Try: sell all my AAPLB.");
+  if (/\$|\b(usdt|usd|dollars?|bucks)\b/.test(text)) {
+    return refuse("Sell by token amount or sell everything, not by dollar value. Try: sell 0.001 AAPLB, or sell all my AAPLB.");
+  }
+  const all = /\b(all|everything|entire|whole|full|max)\b/.test(text);
+  const numbers = text.match(/\d+(?:\.\d+)?/g) ?? [];
+  const notes = ["Sells from the pocket only. Your main wallet is never touched.", "The proceeds stay in the pocket as USDT."];
+  if (all) {
+    if (numbers.length > 0) return refuse("Say either 'all' or an amount, not both.");
+    return { ok: true, intent: { action: "sell", all: true, when: "now" }, summary: "Sell all the AAPLB in the pocket for USDT, once, right now.", notes };
+  }
+  if (numbers.length === 0) return refuse("How much? Say 'sell all my AAPLB' or an amount like 'sell 0.001 AAPLB'.");
+  if (numbers.length > 1) return refuse(`I found more than one amount (${numbers.join(", ")}). Give one amount per instruction.`);
+  const amount = numbers[0]!;
+  if (!/^\d+(?:\.\d{1,18})?$/.test(amount)) return refuse("An AAPLB amount can have at most 18 decimals.");
+  if (!(Number(amount) > 0)) return refuse("The amount must be above zero.");
+  return { ok: true, intent: { action: "sell", all: false, amount, when: "now" }, summary: `Sell ${amount} AAPLB from the pocket for USDT, once, right now.`, notes };
+}
+
 export function parseAgentInstruction(input: string): ParseResult {
   const original = input.trim();
   if (!original) return refuse("Type what you want, for example: buy $2 of AAPLB now.");
@@ -51,15 +75,16 @@ export function parseAgentInstruction(input: string): ParseResult {
   if (/\b(withdraw|send|transfer|move|main wallet|my wallet|private key|passphrase|approve)\b/.test(text)) {
     return refuse("The agent can't move funds or touch your main wallet. It only buys inside the pocket. Use Fund and Withdraw yourself.");
   }
-  if (/\b(sell|take[- ]?profit|stop[- ]?loss|short|leverage|margin|close)\b/.test(text)) {
-    return refuse("Selling and take-profit aren't active in this build. The agent only buys AAPLB. You can sell from the stock page with your main wallet.");
+  if (/\b(take[- ]?profit|stop[- ]?loss|short|leverage|margin|close)\b/.test(text)) {
+    return refuse("Take-profit, stop-loss and leverage aren't supported. The agent can buy AAPLB, or sell what the pocket holds right now (for example: sell all my AAPLB).");
   }
   const otherTickers = (original.match(/\b[A-Z]{2,6}\b/g) ?? []).filter((t) => !IGNORED_CAPS.has(t));
   if (otherTickers.length > 0 || /\b(nvda|tsla|nvidia|tesla|bitcoin|btc|eth|bnb)\b/.test(text)) {
     return refuse("Only AAPLB (Apple) is live. Other stocks and coins aren't supported yet.");
   }
+  if (/\bsell\b/.test(text)) return parseSell(text);
   if (!/\b(buy|purchase|get|accumulate|dca)\b/.test(text)) {
-    return refuse("Say what to do. For example: buy $2 of AAPLB now, or buy $2 of AAPLB every day.");
+    return refuse("Say what to do. For example: buy $2 of AAPLB now, sell all my AAPLB, or buy $2 of AAPLB every day.");
   }
 
   // "...and stop after $20" is a cap, not a second buy amount. Strip it, and say it is ignored.

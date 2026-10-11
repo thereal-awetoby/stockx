@@ -63,7 +63,8 @@ export interface UsePocketResult {
   withdraw(password: string, asset: PocketAsset, amount: string): Promise<string | null>;
   startAgent(): Promise<boolean>;
   stopAgent(): Promise<void>;
-  runOneTick(password: string, amountUsdt: string): Promise<AgentTickResult>;
+  /** side "sell": `amount` is AAPLB to sell, or "all" (read fresh from the chain at tick time). */
+  runOneTick(password: string, amount: string, side?: "buy" | "sell"): Promise<AgentTickResult>;
 }
 
 function browserJobLock() {
@@ -234,7 +235,7 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     return hash;
   }, [getMainSigner, mainAddress, refresh, stored]);
 
-  const runOneTick = useCallback(async (password: string, amountUsdt: string): Promise<AgentTickResult> => {
+  const runOneTick = useCallback(async (password: string, amountArg: string, side: "buy" | "sell" = "buy"): Promise<AgentTickResult> => {
     let result: AgentTickResult;
     const gate = tickGate.current.begin();
     if (!gate.ok) {
@@ -252,7 +253,10 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     } else {
     try {
       const signer = await unlockPocket(stored, password);
+      // "Sell all" sells what the chain says the pocket holds right now, not a stale number on screen.
+      const amountUsdt = side === "sell" && amountArg === "all" ? await readPocketAaplbBalance(stored.address) : amountArg;
       result = await runPocketAgentTick({
+        side,
         pocket: { address: stored.address, exported },
         job,
         helper: resolvePocketPipeline(pipeline, signer),
@@ -278,9 +282,11 @@ export function usePocket({ mainAddress, getMainSigner, pipeline = null }: UsePo
     if (result.status === "executed") {
       setActivity((records) => [result.record, ...records]);
       if (stored) {
+        const sold = result.record.side === "sell";
         recordTrade(stored.address, {
           t: result.record.timestamp, side: result.record.side, token: result.record.token,
-          amountIn: String(result.record.amountUsdt), inSym: "USDT", amountOut: "", outSym: result.record.token,
+          amountIn: sold ? (result.record.amountToken ?? "") : String(result.record.amountUsdt),
+          inSym: sold ? result.record.token : "USDT", amountOut: "", outSym: sold ? "USDT" : result.record.token,
           txHash: result.record.txHash, via: "agent",
         });
       }

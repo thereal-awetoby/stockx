@@ -36,10 +36,32 @@ test("refuses anything that moves funds or touches main", () => {
   no("send $5 to 0x123", /can't move funds/);
 });
 
-test("refuses sell, take-profit and leverage", () => {
-  no("sell my AAPLB now", /Selling/);
-  no("buy $2 of AAPLB and take profit at 10%", /take-profit/);
-  no("buy $2 of AAPLB with 5x leverage", /Selling/);
+test("refuses take-profit, stop-loss and leverage", () => {
+  no("buy $2 of AAPLB and take profit at 10%", /take-profit/i);
+  no("buy $2 of AAPLB with 5x leverage", /leverage/i);
+  no("sell my AAPLB with a stop loss", /stop-loss/i);
+  no("short AAPLB", /leverage/i);
+});
+
+test("sell all or a stated amount, once, now, from the pocket", () => {
+  for (const s of ["sell all my aaplb holdings", "Sell everything", "sell all my AAPLB", "sell my entire AAPLB position now"]) {
+    assert.deepEqual(ok(s).intent, { action: "sell", all: true, when: "now" }, s);
+  }
+  assert.deepEqual(ok("sell 0.001 AAPLB").intent, { action: "sell", all: false, amount: "0.001", when: "now" });
+  assert.deepEqual(ok("sell 0.00133113 aaplb now").intent, { action: "sell", all: false, amount: "0.00133113", when: "now" });
+  assert.ok(ok("sell all my AAPLB").notes.some((n) => /main wallet is never touched/.test(n)));
+});
+
+test("sell refuses vague, repeated, dollar-valued or contradictory instructions", () => {
+  no("sell AAPLB", /How much/);
+  no("sell all my AAPLB every day", /only runs once/);
+  no("sell $2 of AAPLB", /token amount/);
+  no("sell all 0.5 AAPLB", /either 'all' or an amount/);
+  no("sell 0.1 and 0.2 AAPLB", /more than one amount/);
+  no("sell 0 AAPLB", /above zero/);
+  no("sell 0.1234567890123456789 AAPLB", /18 decimals/);
+  no("sell all my NVDA", /Only AAPLB/);
+  no("sell everything and withdraw to my wallet", /can't move funds/);
 });
 
 test("refuses other assets", () => {

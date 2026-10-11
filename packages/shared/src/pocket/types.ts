@@ -29,7 +29,10 @@ export interface SessionTradeRecord {
   jobId: string;
   side: TradeSide;
   token: "AAPLB";
+  /** USDT spent on a buy. 0 for a sell (see amountToken). */
   amountUsdt: number;
+  /** AAPLB sold, as a decimal string. Only set on a sell. */
+  amountToken?: string;
   txHash: string;
   timestamp: number;
   source: "agent-session";
