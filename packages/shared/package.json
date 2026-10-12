@@ -8,7 +8,7 @@
     "./pocket": "./src/pocket/index.ts"
   },
   "scripts": {
-    "test": "npm run test:pocket && npm run test:core && npm run test:provider && npm run test:registry && npm run test:kline && npm run test:categories && npm run test:brands",
+    "test": "npm run test:pocket && npm run test:core && npm run test:provider && npm run test:registry && npm run test:kline && npm run test:categories && npm run test:brands && npm run test:dex",
     "test:pocket": "tsx --test src/pocket/*.test.ts",
     "test:core": "vitest run src/swap.test.ts src/market-hours.test.ts",
     "typecheck": "tsc --noEmit",
@@ -16,7 +16,8 @@
     "test:registry": "tsx --test src/token-registry.test.ts",
     "test:kline": "tsx --test src/kline.test.ts",
     "test:categories": "tsx --test src/stock-categories.test.ts",
-    "test:brands": "tsx --test src/brand-logos.test.ts"
+    "test:brands": "tsx --test src/brand-logos.test.ts",
+    "test:dex": "tsx --test src/dex-provider.test.ts"
   },
   "dependencies": {
     "ethers": "^6.17.0"
