@@ -378,3 +378,38 @@ button.mini:hover:not(:disabled) { border-color: var(--ink); }
 .tokensel-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--sheet); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 0; padding: 6px 10px; font-weight: 600; }
 .tokensel-btn:hover:not(:disabled) { background: var(--pill); }
 .tokensel-pop { right: 0; left: auto; top: 44px; width: min(380px, 86vw); }
+
+/* token picker: holdings first, balances on the right */
+.tokensel .results { max-height: 380px; overflow-y: auto; }
+.result-list { list-style: none; margin: 0; padding: 0; }
+.result-group { padding: 8px 14px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--paper); border-bottom: 1px solid var(--line); position: sticky; top: 0; }
+.result-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result-bal { color: var(--ink); font-variant-numeric: tabular-nums; flex: none; }
+
+/* ---- mobile: nothing may be wider than the screen ---- */
+html, body { overflow-x: clip; max-width: 100%; }
+.asset > * { min-width: 0; }
+.card, .sheet, .panel, .chart-card { min-width: 0; max-width: 100%; }
+img, svg { max-width: 100%; }
+.filters { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-left: -2px; }
+.filters::-webkit-scrollbar { display: none; }
+.filters button { flex: none; white-space: nowrap; }
+@media (max-width: 860px) {
+  .asset { grid-template-columns: minmax(0, 1fr); }
+  /* menus and search open under the header across the full width instead of off the screen edge */
+  .header .dd { position: static; }
+  .header .search-pop, .header .nav .dd-menu { position: absolute; left: 12px; right: 12px; top: 100%; width: auto; min-width: 0; }
+  .header .nav .dd-menu { margin-top: 0; }
+  .header .wallet-menu { max-width: calc(100vw - 24px); }
+  .strip-chart { max-width: 100%; }
+  .chart-head { gap: 8px; }
+  h1 { font-size: 26px; }
+  .tabs { flex-wrap: wrap; }
+}
+@media (max-width: 560px) {
+  .stat-grid .row, .row { flex-wrap: wrap; }
+  .addr-wrap { text-align: left; }
+  .ticket-input, .ticket-out { font-size: 22px; }
+  .pager { flex-wrap: wrap; }
+  .hero { padding: 32px 18px; }
+}

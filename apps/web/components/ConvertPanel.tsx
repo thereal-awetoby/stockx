@@ -274,7 +274,7 @@ export default function ConvertPanel() {
         <div className="ticket-line">
           <input className="ticket-input" inputMode="decimal" value={amount} disabled={busy || phase !== "idle"}
             onChange={(e) => setAmount(e.target.value)} placeholder="0" aria-label={`${from} amount`} />
-          <TokenSelect value={from} onChange={setFrom} disabled={busy || phase !== "idle"} label="From token" />
+          <TokenSelect value={from} exclude={to} onChange={setFrom} disabled={busy || phase !== "idle"} label="From token" />
         </div>
       </div>
       <button type="button" className="ticket-arrow flipbtn" onClick={flip} disabled={busy || phase !== "idle"} aria-label="Swap direction">↓↑</button>
@@ -282,7 +282,7 @@ export default function ConvertPanel() {
         <span className="muted small">To (about)</span>
         <div className="ticket-line">
           <span className="ticket-out">{estimateOut ? fmt(estimateOut) : "0"}</span>
-          <TokenSelect value={to} onChange={setTo} disabled={busy || phase !== "idle"} label="To token" />
+          <TokenSelect value={to} exclude={from} onChange={setTo} disabled={busy || phase !== "idle"} label="To token" />
         </div>
       </div>
       <p className="muted small ticket-status" role="status">{statusText}</p>

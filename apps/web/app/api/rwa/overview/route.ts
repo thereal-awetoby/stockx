@@ -73,11 +73,12 @@ export async function GET(req: Request) {
   const out: Record<string, Entry> = {};
   for (let i = 0; i < tokens.length; i += PARALLEL) {
     await Promise.all(tokens.slice(i, i + PARALLEL).map(async (t) => {
-      const [ic, sp, ch] = await Promise.allSettled([icon(t.address), spark(t.address), officialChange(t.address)]);
+      const [sp, ch] = await Promise.allSettled([spark(t.address), officialChange(t.address)]);
       const s = sp.status === "fulfilled" ? sp.value : { changePct: null, spark: [] as number[] };
       // Prefer Binance's reported 24h change; fall back to the real last-24h candles; never to stale ones.
       const changePct = ch.status === "fulfilled" && ch.value !== null ? ch.value : s.changePct;
-      out[t.symbol] = { icon: ic.status === "fulfilled" ? ic.value : null, changePct, spark: s.spark };
+      // Binance token icons carry a Binance mark, so logos come from /api/logo instead and the icon is never sent.
+      out[t.symbol] = { icon: null, changePct, spark: s.spark };
     }));
   }
   // Do not let a CDN or the browser keep a response that is missing charts.
