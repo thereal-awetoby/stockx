@@ -41,6 +41,9 @@ const STEP_LABEL: Record<ProgressStep, string> = {
 /** Binance refuses some server locations. Say that plainly instead of showing its raw message. */
 function friendlyError(e: unknown, chain: { native: string; name: string } = { native: "BNB", name: "BNB Chain" }): string {
   const m = e instanceof Error ? e.message : String(e);
+  if (/execution reverted/i.test(m)) {
+    return "The swap would fail if sent right now, so nothing was sent. Usually the balance is too low (check you still hold the amount after fees) or the price moved. Get a new quote.";
+  }
   if (/insufficient funds|exceeds the balance of the account|gas \* gas fee/i.test(m)) {
     return `Not enough ${chain.native} on ${chain.name} to pay the network fee. Add some ${chain.native} first (on the Bridge page you can turn USDT into ${chain.native} for gas).`;
   }
@@ -88,7 +91,10 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
   const balance = balanceRead.data as bigint | undefined;
   // Every transaction needs the chain's own coin for gas. Say so before the wallet fails with a long error.
   const nativeRead = useBalance({ address, chainId: chain.id, query: { enabled: !!address, refetchInterval: 15_000 } });
-  const noGas = isConnected && nativeRead.data !== undefined && nativeRead.data.value === 0n;
+  // A full swap on Ethereum (approval + swap) needs about 0.0005 ETH. With less, some wallets quietly pay the fee in the
+  // token you are spending (that took a whole $0.96 USDC once), so block the trade instead.
+  const minGas = chain.key === "ethereum" ? 600_000_000_000_000n : 1n;
+  const noGas = isConnected && nativeRead.data !== undefined && nativeRead.data.value < minGas;
   const [view, setView] = useState<QuoteView | null>(null); // read-only quote (no wallet)
   const [quote, setQuote] = useState<Quote | null>(null); // wallet-bound quote
   const [sim, setSim] = useState<SimulationResult | null>(null);
@@ -293,7 +299,7 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
       <p className="muted small ticket-status" role="status">{statusText}</p>
       {noGas && (
         <p className="warn small">
-          You have no {chain.native} on {chain.name}, so a transaction can't be paid for.{" "}
+          You need about {chain.key === "ethereum" ? "0.0006" : "a little"} {chain.native} on {chain.name} to pay the network fee{nativeRead.data ? ` (you have ${Number(nativeRead.data.formatted).toFixed(5)})` : ""}. With less, your wallet may charge the fee in your {cashSym} instead.{" "}
           <Link href="/tools/bridge"><u>Bridge some</u></Link> (choose “{chain.native} for gas”) or send {chain.native} to your wallet.
         </p>
       )}

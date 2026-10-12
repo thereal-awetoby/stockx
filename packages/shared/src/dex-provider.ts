@@ -181,6 +181,13 @@ export function createDexProvider(opts: DexProviderOptions): SwapProvider {
           progress("approval-confirmed", { txHash: approveHash });
         }
 
+        // A wallet can take its network fee in this very token (some wallets do when the chain's own coin is
+        // missing), so the balance must be checked again after the approval, before the swap.
+        const left = await executor.tokenBalance(tokenIn.address);
+        if (left < amountIn) {
+          throw new SwapError("INSUFFICIENT_BALANCE", `Your ${tokenIn.symbol} balance dropped to ${formatUnitsStr(left, tokenIn.decimals)} after the approval, below the ${formatUnitsStr(amountIn, tokenIn.decimals)} needed. Your wallet may have taken a network fee in ${tokenIn.symbol}. Nothing was swapped.`);
+        }
+
         // 2. Re-quote and rebuild: never send the old transaction.
         progress("rebuilding");
         const fresh = await build({ chain, tokenIn, tokenOut, amountIn, wallet: executor.address, slippageBps: confirmed.slippageBps });
