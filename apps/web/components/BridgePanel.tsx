@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useAccount, useChainId, usePublicClient, useReadContract, useSwitchChain, useWalletClient } from "wagmi";
+import { useAccount, useBalance, useChainId, usePublicClient, useReadContract, useSwitchChain, useWalletClient } from "wagmi";
 import { erc20Abi, type PublicClient, type WalletClient } from "viem";
 import {
   bridgeSource,
@@ -17,6 +17,7 @@ import {
 } from "@stockx/shared";
 import { createViemExecutor } from "../lib/viem-executor";
 import { formatBalance, fractionOfBalance } from "../lib/amount";
+import { recordTrade } from "../lib/trade-log";
 
 const LIVE = process.env.NEXT_PUBLIC_LIVE_SWAPS === "1";
 const QUOTE_TTL_S = 60;
@@ -64,6 +65,8 @@ export default function BridgePanel() {
     query: { enabled: !!address, refetchInterval: 15_000 },
   });
   const balance = balanceRead.data as bigint | undefined;
+  const nativeRead = useBalance({ address, chainId: fromChain.id, query: { enabled: !!address, refetchInterval: 15_000 } });
+  const noGas = isConnected && nativeRead.data !== undefined && nativeRead.data.value === 0n;
   const wrongChain = isConnected && walletChainId !== fromChain.id;
   const amountValid = /^\d+(\.\d{1,18})?$/.test(amount.trim()) && Number(amount) > 0;
 
@@ -152,16 +155,21 @@ export default function BridgePanel() {
         onProgress: (step, d) => { setProgress(STEP_LABEL[step]); if (d?.txHash && step === "sent") setTxHash(d.txHash); },
       });
       setTxHash(res.txHash);
+      if (address) {
+        const d = describeBridge(quote, src, dst);
+        recordTrade(address, { t: Date.now(), side: "bridge", token: `${src.symbol} → ${dst.symbol}`, amountIn: d.send, inSym: src.symbol, amountOut: d.receiveMin, outSym: dst.symbol, txHash: res.txHash, chain: from });
+      }
       setStage("sent"); setProgress(null); setQuote(null);
       void balanceRead.refetch();
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const m = e instanceof Error ? e.message : String(e);
+      setError(/insufficient funds|exceeds the balance of the account|gas \* gas fee/i.test(m) ? `Not enough ${fromChain.native} on ${fromChain.name} to pay the network fee. Add some ${fromChain.native} first.` : m);
       setStage("idle"); setProgress(null); setQuote(null); // never reuse a quote after a failed or unclear send
     }
   }
 
   const view = quote ? describeBridge(quote, src, dst) : null;
-  const canBridge = !!quote && !!request && !wrongChain && !expired && stage === "idle" && LIVE && (balance === undefined || balance >= request.fromAmount);
+  const canBridge = !!quote && !!request && !wrongChain && !noGas && !expired && stage === "idle" && LIVE && (balance === undefined || balance >= request.fromAmount);
   const done = track?.status === "DONE";
   const failed = track?.status === "FAILED";
 
@@ -211,6 +219,7 @@ export default function BridgePanel() {
           : wrongChain ? `Switch your wallet to ${fromChain.name}.`
           : quote ? "The quote refreshes automatically." : ""}
       </p>
+      {noGas && <p className="warn small">You have no {fromChain.native} on {fromChain.name} to pay the network fee for this bridge.</p>}
       {error && <p className="err">{error}</p>}
 
       {quote && view && (

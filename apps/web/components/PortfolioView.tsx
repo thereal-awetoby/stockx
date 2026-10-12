@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { type Hex } from "viem";
 import { usePublicClient } from "wagmi";
 import { useRouter } from "next/navigation";
-import { listStockTokens, TOKENS } from "@stockx/shared";
+import { CHAINS, listStockTokens, STOCKS, TOKENS } from "@stockx/shared";
 import { readPocket } from "@stockx/shared/pocket";
 import Donut from "./Donut";
 import TokenLogo from "./TokenLogo";
@@ -22,7 +22,7 @@ const ALL_TOKENS = [
 ];
 
 export default function PortfolioView() {
-  const { address, isConnected, bnb, bnbPrice, bnbValue, balances, cash, heldStocks, stockPrice, stocks, total } = usePortfolio();
+  const { address, isConnected, bnb, bnbPrice, bnbValue, balances, cash, heldStocks, stockPrice, stocks, total, ethNative, ethPrice, ethValue, ethUsdc, ethHeld, ethStockPrice, ethStocks } = usePortfolio();
   const router = useRouter();
   const publicClient = usePublicClient({ chainId: 56 });
   const [trades, setTrades] = useState<TradeEntry[]>([]);
@@ -100,7 +100,7 @@ export default function PortfolioView() {
         <div className="card">
           <div className="muted small">Total value</div>
           <div className="big-price">{usd(total)}</div>
-          <p className="muted small" style={{ margin: "6px 0 0" }}>USDT, stock tokens, and BNB in your connected wallet.</p>
+          <p className="muted small" style={{ margin: "6px 0 0" }}>Your connected wallet on BNB Chain and Ethereum: cash, stock tokens, BNB and ETH. Ethereum stock prices follow the same company on BNB Chain.</p>
         </div>
 
         <section className="sheet sheet-scroll" style={{ marginBottom: 8 }}>
@@ -108,7 +108,7 @@ export default function PortfolioView() {
             <thead><tr><th>Asset</th><th className="num">Price</th><th className="num">Balance</th><th className="num">Value</th></tr></thead>
             <tbody>
               <tr>
-                <td><div className="name"><TokenLogo symbol="USDT" name="Tether" /><div><strong>USDT</strong><div className="muted small">Tether</div></div></div></td>
+                <td><div className="name"><TokenLogo symbol="USDT" name="Tether" /><div><strong>USDT</strong><div className="muted small">Tether · BNB Chain</div></div></div></td>
                 <td className="num">{usd(1)}</td>
                 <td className="num">{balances.isLoading ? "…" : fmt(cash)}</td>
                 <td className="num">{usd(cash)}</td>
@@ -130,11 +130,38 @@ export default function PortfolioView() {
                 <td className="num">{bnb.error ? <span className="neg">unavailable</span> : bnb.data ? fmt(Number(bnb.data.formatted)) : "…"}</td>
                 <td className="num">{bnbPrice === null || !bnb.data ? "…" : usd(Number(bnb.data.formatted) * bnbPrice)}</td>
               </tr>
+              {ethUsdc > 0 && (
+                <tr>
+                  <td><div className="name"><TokenLogo symbol="USDC" name="USD Coin" /><div><strong>USDC</strong><div className="muted small">USD Coin · Ethereum</div></div></div></td>
+                  <td className="num">{usd(1)}</td>
+                  <td className="num">{fmt(ethUsdc)}</td>
+                  <td className="num">{usd(ethUsdc)}</td>
+                </tr>
+              )}
+              {ethHeld.map((r) => {
+                const price = ethStockPrice[r.ticker];
+                const slug = STOCKS.find((x) => x.ticker === r.ticker)?.slug;
+                const href = slug ? `/stock/${slug}?side=sell&chain=ethereum` : null;
+                return (
+                  <tr key={r.symbol} className={href ? "click" : undefined} onClick={href ? () => router.push(href) : undefined}>
+                    <td><div className="name"><TokenLogo symbol={r.symbol} name={r.name} /><div>{href ? <Link href={href}><strong>{r.symbol}</strong></Link> : <strong>{r.symbol}</strong>}<div className="muted small">{r.name} · Ethereum</div></div></div></td>
+                    <td className="num">{price === undefined ? "…" : usd(price)}</td>
+                    <td className="num">{fmt(r.qty ?? 0)}</td>
+                    <td className="num">{price === undefined ? "…" : usd((r.qty ?? 0) * price)}</td>
+                  </tr>
+                );
+              })}
+              <tr>
+                <td><div className="name"><TokenLogo symbol="ETH" name="Ethereum" /><div><strong>ETH</strong><div className="muted small">Ethereum · also used for gas</div></div></div></td>
+                <td className="num">{ethPrice === null ? "…" : usd(ethPrice)}</td>
+                <td className="num">{ethNative.error ? <span className="neg">unavailable</span> : ethNative.data ? fmt(Number(ethNative.data.formatted)) : "…"}</td>
+                <td className="num">{ethPrice === null || !ethNative.data ? "…" : usd(Number(ethNative.data.formatted) * ethPrice)}</td>
+              </tr>
             </tbody>
           </table>
         </section>
         {balances.error && <p className="err">Could not read token balances right now.</p>}
-        {!balances.isLoading && heldStocks.length === 0 && (
+        {!balances.isLoading && heldStocks.length === 0 && ethHeld.length === 0 && (
           <p className="muted small" style={{ margin: "0 0 16px" }}>No stock tokens yet. Buy one on <Link href="/markets"><u>Explore</u></Link>.</p>
         )}
 
@@ -150,12 +177,13 @@ export default function PortfolioView() {
                   <tr key={x.txHash}>
                     <td>{new Date(x.t).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}</td>
                     <td>
-                      <span className="badge">{x.side === "buy" ? "Buy" : "Sell"} {x.token}</span>
+                      <span className="badge">{x.side === "bridge" ? "Bridge" : x.side === "buy" ? "Buy" : "Sell"} {x.token}</span>
+                      {x.chain === "ethereum" && x.side !== "bridge" && <span className="badge" style={{ marginLeft: 6 }}>Ethereum</span>}
                       {x.via === "agent" && <span className="badge" style={{ marginLeft: 6 }}>Agent</span>}
                     </td>
                     <td className="num">{fmt(Number(x.amountIn))} {x.inSym}</td>
                     <td className="num">{x.amountOut ? `${fmt(Number(x.amountOut))} ${x.outSym}` : "—"}</td>
-                    <td className="num"><a href={`https://bscscan.com/tx/${x.txHash}`} target="_blank" rel="noreferrer">View</a></td>
+                    <td className="num"><a href={`${CHAINS[x.chain ?? "bsc"].explorer}/tx/${x.txHash}`} target="_blank" rel="noreferrer">View</a></td>
                   </tr>
                 ))}
               </tbody>
@@ -190,6 +218,9 @@ export default function PortfolioView() {
               centre={usd(total)}
               segments={[
                 { label: "Cash (USDT)", value: cash, color: "#c9c0b0" },
+                ...(ethUsdc > 0 ? [{ label: "Cash (USDC)", value: ethUsdc, color: "#ddd6c8" }] : []),
+                ...ethHeld.map((r, i) => ({ label: `${r.symbol} (Ethereum)`, value: (r.qty ?? 0) * (ethStockPrice[r.ticker] ?? 0), color: STOCK_COLORS[(heldStocks.length + i) % STOCK_COLORS.length] })),
+                ...(ethValue > 0 ? [{ label: "ETH", value: ethValue, color: "#627EEA" }] : []),
                 ...heldStocks.map((r, i) => ({
                   label: r.symbol,
                   value: (r.qty ?? 0) * (stockPrice[r.address] ?? 0),
@@ -200,6 +231,9 @@ export default function PortfolioView() {
             />
             <div className="legend">
               <div className="row"><span><span className="dot" style={{ background: "#c9c0b0" }} />Cash (USDT)</span><span>{pct(cash)}%</span></div>
+              {ethUsdc > 0 && <div className="row"><span><span className="dot" style={{ background: "#ddd6c8" }} />Cash (USDC, Ethereum)</span><span>{pct(ethUsdc)}%</span></div>}
+              {ethStocks > 0 && <div className="row"><span>Ethereum stocks</span><span>{pct(ethStocks)}%</span></div>}
+              {ethValue > 0 && <div className="row"><span><span className="dot" style={{ background: "#627EEA" }} />ETH</span><span>{pct(ethValue)}%</span></div>}
 
               {heldStocks.length > 0 && (
                 <>

@@ -1,7 +1,7 @@
 /** Trades made through stockX (wallet and agent) in THIS browser. Shown on Portfolio. */
 export interface TradeEntry {
   t: number;
-  side: "buy" | "sell";
+  side: "buy" | "sell" | "bridge";
   token: string;
   amountIn: string;
   inSym: string;
@@ -10,13 +10,15 @@ export interface TradeEntry {
   outSym: string;
   txHash: string;
   via?: "agent";
+  /** Which chain the transaction is on. Missing means BNB Chain. */
+  chain?: "bsc" | "ethereum";
 }
 
 const EVENT = "stockx:trades";
 const key = (address: string) => `stockx.trades.v1.${address.toLowerCase()}`;
 const isEntry = (v: unknown): v is TradeEntry => {
   const e = v as Partial<TradeEntry> | null;
-  return !!e && typeof e.t === "number" && (e.side === "buy" || e.side === "sell") && typeof e.txHash === "string" &&
+  return !!e && typeof e.t === "number" && (e.side === "buy" || e.side === "sell" || e.side === "bridge") && typeof e.txHash === "string" &&
     typeof e.token === "string" && typeof e.amountIn === "string" && typeof e.amountOut === "string" &&
     typeof e.inSym === "string" && typeof e.outSym === "string";
 };

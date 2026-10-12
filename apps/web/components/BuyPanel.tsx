@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useAccount, useChainId, usePublicClient, useReadContract, useSwitchChain, useWalletClient } from "wagmi";
+import { useAccount, useBalance, useChainId, usePublicClient, useReadContract, useSwitchChain, useWalletClient } from "wagmi";
 import { erc20Abi, type PublicClient, type WalletClient } from "viem";
 import {
   CHAINS,
@@ -38,8 +39,11 @@ const STEP_LABEL: Record<ProgressStep, string> = {
 };
 
 /** Binance refuses some server locations. Say that plainly instead of showing its raw message. */
-function friendlyError(e: unknown): string {
+function friendlyError(e: unknown, chain: { native: string; name: string } = { native: "BNB", name: "BNB Chain" }): string {
   const m = e instanceof Error ? e.message : String(e);
+  if (/insufficient funds|exceeds the balance of the account|gas \* gas fee/i.test(m)) {
+    return `Not enough ${chain.native} on ${chain.name} to pay the network fee. Add some ${chain.native} first (on the Bridge page you can turn USDT into ${chain.native} for gas).`;
+  }
   if (/compliance|not available in your (region|country)|restricted/i.test(m)) {
     return "Swaps aren't available from this server's location right now (Binance restricts some regions). Prices still load. The deployed app runs in a supported region.";
   }
@@ -53,7 +57,7 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
   const { address, isConnected } = useAccount();
   // Ethereum is offered when this company has a tradable Ethereum token with a clean route.
   const ethToken = useMemo(() => ethTokenForTicker(stock.ticker), [stock.ticker]);
-  const [chainKey, setChainKey] = useState<ChainKey>("bsc");
+  const [chainKey, setChainKey] = useState<ChainKey>(useSearchParams().get("chain") === "ethereum" ? "ethereum" : "bsc");
   const chain = CHAINS[chainKey];
   const onEth = chainKey === "ethereum" && !!ethToken;
   const stockSym = onEth ? ethToken!.symbol : stock.token;
@@ -82,6 +86,9 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
     query: { enabled: !!address && !!inInfo, refetchInterval: 15_000 },
   });
   const balance = balanceRead.data as bigint | undefined;
+  // Every transaction needs the chain's own coin for gas. Say so before the wallet fails with a long error.
+  const nativeRead = useBalance({ address, chainId: chain.id, query: { enabled: !!address, refetchInterval: 15_000 } });
+  const noGas = isConnected && nativeRead.data !== undefined && nativeRead.data.value === 0n;
   const [view, setView] = useState<QuoteView | null>(null); // read-only quote (no wallet)
   const [quote, setQuote] = useState<Quote | null>(null); // wallet-bound quote
   const [sim, setSim] = useState<SimulationResult | null>(null);
@@ -164,7 +171,7 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
     } catch (e) {
       if (id !== quoteSeq.current) return;
       setQuote(null); setSim(null); setView(null);
-      setError(friendlyError(e));
+      setError(friendlyError(e, chain));
     } finally {
       if (id === quoteSeq.current) setLoading(false);
     }
@@ -179,13 +186,13 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
       const res = await helper.execute(quote, "main");
       setTxHash(res.txHash);
       if (address && res.txHash) {
-        recordTrade(address, { t: Date.now(), side, token: stockSym, amountIn: amountIn ?? "", inSym, amountOut: amountOut ?? "", outSym, txHash: res.txHash });
+        recordTrade(address, { t: Date.now(), side, token: stockSym, amountIn: amountIn ?? "", inSym, amountOut: amountOut ?? "", outSym, txHash: res.txHash, chain: chainKey });
       }
       setStage("done");
       setProgress(null);
       void balanceRead.refetch();
     } catch (e) {
-      setError(friendlyError(e));
+      setError(friendlyError(e, chain));
       setStage("idle");
       setProgress(null);
       setQuote(null); // never reuse a quote after a failed or ambiguous send
@@ -212,7 +219,7 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
     amountIn && amountOut && Number(amountOut) > 0 && Number(amountIn) > 0
       ? side === "buy" ? Number(amountIn) / Number(amountOut) : Number(amountOut) / Number(amountIn)
       : null;
-  const canBuy = !!helper && !wrongChain && !!quote && sim?.ok === true && !expired && stage === "idle" && LIVE;
+  const canBuy = !!helper && !wrongChain && !noGas && !!quote && sim?.ok === true && !expired && stage === "idle" && LIVE;
   const amountValid = Number.isFinite(Number(amount)) && Number(amount) > 0;
 
   // Quote automatically shortly after the amount, side or wallet changes.
@@ -284,6 +291,12 @@ export default function BuyPanel({ stock }: { stock: Stock }) {
         </div>
       </div>
       <p className="muted small ticket-status" role="status">{statusText}</p>
+      {noGas && (
+        <p className="warn small">
+          You have no {chain.native} on {chain.name}, so a transaction can't be paid for.{" "}
+          <Link href="/tools/bridge"><u>Bridge some</u></Link> (choose “{chain.native} for gas”) or send {chain.native} to your wallet.
+        </p>
+      )}
       {error && <p className="err">{error}</p>}
       {!anyQuote && !!error && amountValid && stage === "idle" && !loading && (
         <button type="button" className="ghost" onClick={() => void runQuote(false)}>Try again</button>

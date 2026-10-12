@@ -6,6 +6,8 @@ import SafeImg from "./SafeImg";
 /** Logos for tokens that are not tokenized stocks. */
 const STATIC_LOGOS: Record<string, string> = {
   USDT: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x55d398326f99059fF775485246999027B3197955/logo.png",
+  USDC: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+  ETH: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
   BNB: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png",
 };
 
@@ -15,7 +17,7 @@ const STATIC_LOGOS: Record<string, string> = {
  */
 export default function TokenLogo({ symbol, name, size = 28 }: { symbol: string; name?: string; size?: number; lookup?: boolean }) {
   const staticUrl = STATIC_LOGOS[symbol.toUpperCase()];
-  const ticker = getStockToken(symbol)?.ticker;
+  const ticker = getStockToken(symbol)?.ticker ?? (/on$/.test(symbol) ? symbol.slice(0, -2) : undefined); // Ethereum Ondo tokens: AAPLon -> AAPL
   const brand = ticker ? brandLogoUrl(ticker) : null;
   const [failed, setFailed] = useState(false);
 
