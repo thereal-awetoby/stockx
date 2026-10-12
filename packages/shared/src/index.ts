@@ -23,3 +23,4 @@ export * from "./rwa-market";
 export * from "./swap-api";
 export * from "./swap-build";
 export * from "./binance-provider";
+export * from "./bridge";
