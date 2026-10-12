@@ -1,4 +1,5 @@
-// Dry run, nothing on-chain. Which stablecoin will Binance quote Ethereum Ondo tokens against?
+// Dry run, nothing on-chain. Quotes Ethereum Ondo tokens against USDC (the only allowed pay token found).
+// Binance rejects orders under 5 USD, and 5 USDC is just under $5, so this asks for 6.
 // Run from the repo root:
 //   node --env-file=apps/web/.env.local scripts/rwa-quote-probe.mjs
 // Needs OC_API_KEY / OC_SECRET_KEY in apps/web/.env.local. Uses docs/rwa-registry-1.json if present.
@@ -26,7 +27,7 @@ const STABLES = [
 let targets = [{ symbol: "AAPLon", address: "0x14c3abf95cb9c93a8b82c1cdcb76d72cb87b2d4c" }];
 try {
   const reg = JSON.parse(fs.readFileSync(new URL("../docs/rwa-registry-1.json", import.meta.url), "utf8"));
-  const more = reg.tokens.filter((t) => t.symbol !== "AAPLon").slice(0, 2).map((t) => ({ symbol: t.symbol, address: t.address }));
+  const more = reg.tokens.filter((t) => t.symbol !== "AAPLon").slice(0, 4).map((t) => ({ symbol: t.symbol, address: t.address }));
   targets = targets.concat(more);
 } catch { /* registry file optional */ }
 
@@ -44,15 +45,17 @@ async function quote(from, to, amount) {
 }
 
 const works = new Set();
+const AMOUNT = 6;
 for (const t of targets) {
-  for (const s of STABLES) {
+  for (const s of STABLES.filter((x) => x.name === "USDC")) {
     let line;
     try {
-      const j = await quote(s.address, t.address, units(5, s.decimals));
+      const j = await quote(s.address, t.address, units(AMOUNT, s.decimals));
       if (j.code === 0 && j.data?.[0]) {
         const q = j.data[0];
         works.add(s.name);
-        line = `OK   mode=${q.executionMode} impact=${q.priceImpactPercent}% honeypot=${q.toToken?.isHoneyPot} tax=${q.toToken?.taxRate} approveTarget=${q.approveTarget}`;
+        const route = (q.dexRouterList || []).map((r) => r.dexProtocol?.dexName).join(">");
+        line = `OK   mode=${q.executionMode} out=${q.toTokenAmount} (dec ${q.toToken?.decimal}) impact=${q.priceImpactPercent}% honeypot=${q.toToken?.isHoneyPot} tax=${q.toToken?.taxRate} gas=${q.estimateGasFee} route=${route} spender=${q.approveTarget}`;
       } else {
         line = `ERR  ${j.code} ${String(j.msg).slice(0, 110)}`;
       }
@@ -63,4 +66,4 @@ for (const t of targets) {
     await sleep(400);
   }
 }
-console.log("\nSTABLES THAT QUOTE:", works.size ? [...works].join(", ") : "none");
+console.log("\nUSDC QUOTES OK:", works.size ? "yes" : "no");
