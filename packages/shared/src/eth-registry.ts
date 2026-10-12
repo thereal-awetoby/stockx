@@ -19,3 +19,7 @@ export const getEthTradableToken = (symbol: string): EthStockToken | undefined =
   const t = bySymbol.get(symbol);
   return t && t.clean ? t : undefined;
 };
+
+/** The tradable Ethereum token for a stock ticker ("AAPL" finds "AAPLon"), if one has a clean route. */
+export const ethTokenForTicker = (ticker: string): EthStockToken | undefined =>
+  listEthStockTokens().find((t) => t.symbol.replace(/on$/, "") === ticker.toUpperCase());
