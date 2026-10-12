@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { Stock } from "@stockx/shared";
 
 interface Info {
@@ -67,15 +67,19 @@ export default function StockInfo({ stock }: { stock: Stock }) {
       <section className="card">
         <h2 className="section-title">Statistics</h2>
         <div className="stat-grid">
-          <div className="row"><span className="muted">24h change</span><span className={change === null ? "" : change >= 0 ? "pos" : "neg"}>{change === null ? "—" : `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`}</span></div>
-          <div className="row"><span className="muted">Holders</span><span>{plain(info?.holders ?? null, 0)}</span></div>
-          <div className="row"><span className="muted">On-chain market cap</span><span>{compact(info?.marketCap ?? null)}</span></div>
-          <div className="row"><span className="muted">Circulating supply</span><span>{compact(info?.circulatingSupply ?? null)}</span></div>
-          <div className="row"><span className="muted">52-week high</span><span>{money(info?.high52w ?? null)}</span></div>
-          <div className="row"><span className="muted">52-week low</span><span>{money(info?.low52w ?? null)}</span></div>
-          <div className="row"><span className="muted">P/E ratio</span><span>{plain(info?.pe ?? null)}</span></div>
-          <div className="row"><span className="muted">Dividend yield</span><span>{info?.dividendYield ? `${plain(info.dividendYield)}%` : "—"}</span></div>
-          <div className="row"><span className="muted">Shares per token</span><span>{plain(info?.sharesMultiplier ?? null, 4)}</span></div>
+          {([
+            ["24h change", change === null ? null : <span key="c" className={change >= 0 ? "pos" : "neg"}>{`${change >= 0 ? "+" : ""}${change.toFixed(2)}%`}</span>],
+            ["Holders", n(info?.holders ?? null) === null ? null : plain(info?.holders ?? null, 0)],
+            ["On-chain market cap", n(info?.marketCap ?? null) === null ? null : compact(info?.marketCap ?? null)],
+            ["Circulating supply", n(info?.circulatingSupply ?? null) === null ? null : compact(info?.circulatingSupply ?? null)],
+            ["52-week high", n(info?.high52w ?? null) === null ? null : money(info?.high52w ?? null)],
+            ["52-week low", n(info?.low52w ?? null) === null ? null : money(info?.low52w ?? null)],
+            ["P/E ratio", n(info?.pe ?? null) === null ? null : plain(info?.pe ?? null)],
+            ["Dividend yield", n(info?.dividendYield ?? null) === null ? null : `${plain(info?.dividendYield ?? null)}%`],
+            ["Shares per token", n(info?.sharesMultiplier ?? null) === null ? null : plain(info?.sharesMultiplier ?? null, 4)],
+          ] as [string, ReactNode][]).filter(([, v]) => v !== null).map(([label, v]) => (
+            <div className="row" key={label}><span className="muted">{label}</span><span>{v}</span></div>
+          ))}
         </div>
         <p className="muted small" style={{ margin: "8px 0 0" }}>One token is about {plain(info?.sharesMultiplier ?? null, 4)} shares, not exactly one. Source: Binance Web3.</p>
       </section>

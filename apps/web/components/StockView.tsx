@@ -67,7 +67,7 @@ export default function StockView({ stock }: { stock: Stock }) {
         {snap?.source === "mock" && <p className="warn small">Mock prices for UI development. Not real.</p>}
         {snap && snap.source !== "mock" && (
           <p className="muted small" style={{ margin: "8px 0 0" }}>
-            Source: Binance Web3 RWA data · updated {new Date(snap.asOf).toLocaleTimeString()}
+            Source: Binance Web3 RWA data{snap.source.includes("close") ? " · stock price is the last US close" : ""} · updated {new Date(snap.asOf).toLocaleTimeString()}
           </p>
         )}
         {priceError && <p className="err">Live prices unavailable: {priceError}</p>}

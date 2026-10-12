@@ -375,3 +375,6 @@ button.mini:hover:not(:disabled) { border-color: var(--ink); }
 .convert-page .lede { width: 100%; max-width: 460px; text-align: center; border-bottom: 0; }
 .convert-page .lede p { margin: 0 auto; }
 .convert-wrap { width: 100%; max-width: 460px; }
+.tokensel-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--sheet); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 0; padding: 6px 10px; font-weight: 600; }
+.tokensel-btn:hover:not(:disabled) { background: var(--pill); }
+.tokensel-pop { right: 0; left: auto; top: 44px; width: min(380px, 86vw); }

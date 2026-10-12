@@ -17,7 +17,7 @@ import {
 import { createViemExecutor } from "../lib/viem-executor";
 import { formatBalance, fractionOfBalance } from "../lib/amount";
 import { recordTrade } from "../lib/trade-log";
-import TokenLogo from "./TokenLogo";
+import TokenSelect from "./TokenSelect";
 
 const LIVE = process.env.NEXT_PUBLIC_LIVE_SWAPS === "1";
 const fmt = (s: string, dp = 6) => Number(s).toLocaleString("en-US", { maximumFractionDigits: dp });
@@ -274,12 +274,7 @@ export default function ConvertPanel() {
         <div className="ticket-line">
           <input className="ticket-input" inputMode="decimal" value={amount} disabled={busy || phase !== "idle"}
             onChange={(e) => setAmount(e.target.value)} placeholder="0" aria-label={`${from} amount`} />
-          <span className="convert-pick">
-            <TokenLogo symbol={from} size={22} />
-            <select value={from} disabled={busy || phase !== "idle"} onChange={(e) => setFrom(e.target.value)} aria-label="From token">
-              {tokens.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </span>
+          <TokenSelect value={from} onChange={setFrom} disabled={busy || phase !== "idle"} label="From token" />
         </div>
       </div>
       <button type="button" className="ticket-arrow flipbtn" onClick={flip} disabled={busy || phase !== "idle"} aria-label="Swap direction">↓↑</button>
@@ -287,12 +282,7 @@ export default function ConvertPanel() {
         <span className="muted small">To (about)</span>
         <div className="ticket-line">
           <span className="ticket-out">{estimateOut ? fmt(estimateOut) : "0"}</span>
-          <span className="convert-pick">
-            <TokenLogo symbol={to} size={22} />
-            <select value={to} disabled={busy || phase !== "idle"} onChange={(e) => setTo(e.target.value)} aria-label="To token">
-              {tokens.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </span>
+          <TokenSelect value={to} onChange={setTo} disabled={busy || phase !== "idle"} label="To token" />
         </div>
       </div>
       <p className="muted small ticket-status" role="status">{statusText}</p>

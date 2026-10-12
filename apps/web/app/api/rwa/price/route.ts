@@ -1,6 +1,7 @@
-import { priceFromDynamic, STOCKS } from "@stockx/shared";
+import { priceFromDynamic, sharesMultiplierOf, STOCKS } from "@stockx/shared";
 import { binanceGet, errorResponse } from "../../../../lib/binance";
 import { binancePublic, PUBLIC_PATHS } from "../../../../lib/binance-public";
+import { lastStockPrice } from "../../../../lib/stock-quote";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,17 @@ const TTL_MS = 10_000;
 async function fromPublic(token: string): Promise<PriceBody | null> {
   const data = await binancePublic<unknown>(PUBLIC_PATHS.dynamic, { chainId: 56, contractAddress: token });
   const p = priceFromDynamic(data);
-  return p ? { tokenPrice: p.tokenPrice, referencePrice: p.referencePrice, updatedAt: Date.now(), source: "binance-public" } : null;
+  if (!p) return null;
+  if (p.referencePrice !== null) return { tokenPrice: p.tokenPrice, referencePrice: p.referencePrice, updatedAt: Date.now(), source: "binance-public" };
+  // No live stock price from Binance (US market closed): use the stock's last close, scaled to one token.
+  const ticker = STOCKS.find((s) => s.address === token)?.ticker;
+  const last = ticker ? await lastStockPrice(ticker) : null;
+  return {
+    tokenPrice: p.tokenPrice,
+    referencePrice: last === null ? null : last * sharesMultiplierOf(data),
+    updatedAt: Date.now(),
+    source: last === null ? "binance-public" : "binance-public+close",
+  };
 }
 
 /** Signed endpoint: may refuse (compliance/region) or return no row. Both count as "no answer". */

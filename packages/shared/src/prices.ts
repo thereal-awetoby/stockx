@@ -59,3 +59,9 @@ export function priceFromDynamic(data: unknown): { tokenPrice: number; reference
   const mult = num(d?.tokenInfo?.sharesMultiplier) ?? 1;
   return { tokenPrice, referencePrice: stock === null ? null : stock * mult };
 }
+
+/** Shares per token from a "rwa/dynamic" payload (1 when absent). */
+export function sharesMultiplierOf(data: unknown): number {
+  const m = Number((data as { tokenInfo?: { sharesMultiplier?: unknown } } | null | undefined)?.tokenInfo?.sharesMultiplier);
+  return Number.isFinite(m) && m > 0 ? m : 1;
+}

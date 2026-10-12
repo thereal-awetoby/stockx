@@ -1,4 +1,4 @@
-import { getStockToken, parseKlines } from "@stockx/shared";
+import { getStockToken, KLINE_RANGES, parseKlines, type KlineRange } from "@stockx/shared";
 import { binancePublic, PUBLIC_PATHS } from "../../../../lib/binance-public";
 
 export const dynamic = "force-dynamic";
@@ -44,10 +44,21 @@ async function officialChange(address: string): Promise<number | null> {
 async function spark(address: string): Promise<{ changePct: number | null; spark: number[] }> {
   const hit = sparkCache.get(address);
   if (hit && Date.now() - hit.t < SPARK_TTL) return hit;
-  const data = await retry(() => binancePublic<{ klineInfos?: unknown }>(PUBLIC_PATHS.kline, {
-    chainId: 56, contractAddress: address, interval: "30m", limit: 48,
-  }));
-  const series = parseKlines(data?.klineInfos, "1D");
+  // A thinly traded token may have no candles in the last 24h. Widen the window (a week, then a month) so
+  // every row still gets a real chart instead of a dash.
+  let series = null as ReturnType<typeof parseKlines>;
+  const attempts: { interval: string; limit: number; range: KlineRange }[] = [
+    { interval: "30m", limit: 48, range: "1D" },
+    { interval: KLINE_RANGES["1W"].interval, limit: KLINE_RANGES["1W"].limit, range: "1W" },
+    { interval: KLINE_RANGES["1M"].interval, limit: KLINE_RANGES["1M"].limit, range: "1M" },
+  ];
+  for (const a of attempts) {
+    try {
+      const data = await retry(() => binancePublic<{ klineInfos?: unknown }>(PUBLIC_PATHS.kline, { chainId: 56, contractAddress: address, interval: a.interval, limit: a.limit }));
+      series = parseKlines(data?.klineInfos, a.range);
+    } catch { series = null; }
+    if (series) break;
+  }
   const value = { t: Date.now(), changePct: series ? series.changePct : null, spark: series ? series.points.map((p) => p.c) : [] };
   sparkCache.set(address, value);
   return value;
